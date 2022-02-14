@@ -3,7 +3,11 @@ import { createRouter, createWebHashHistory, RouteRecordRaw  } from 'vue-router'
 // 路由配置
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/:pathMatch(.*)*',
+    path:'/login',
+    component: () => import('../views/Login/index.vue'),
+  },
+  {
+    path: '/',
     component: () => import('../layout/index.vue'),
     redirect:'home',
     children: [
@@ -24,7 +28,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/Cesium/index.vue'),
       },
     ],
-  }
+  },
 ]
 
 const router = createRouter({

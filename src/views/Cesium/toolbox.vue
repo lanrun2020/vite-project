@@ -1,40 +1,56 @@
 <template>
-  <div class="toolbox" :style="{right:toolActive?'-1px':'-302px'}">
-    <span class="switchbox" @click="toolboxChange">
-      <i class=" switchicon" :class="{'el-icon-d-arrow-right':toolActive,'el-icon-d-arrow-left':!toolActive}"></i>
+  <div class="toolbox" :style="{ right: toolActive ? '-1px' : '-302px' }">
+    <span class="switchbox" @click="toolActive = !toolActive">
+      <el-icon class="switchicon">
+        <d-arrow-right v-if="toolActive" />
+        <d-arrow-left v-else />
+      </el-icon>
     </span>
-    <div class="tool-box-content"  >
-     <toolitem v-for="item in toolList" :key="item.key" :activeIndex='activeIndex' :value="item.value" :label="item.title" @toolChecked='toolChecked'></toolitem>
+    <div class="tool-box-content">
+      <toolitem
+        v-for="item in toolList"
+        :key="item.key"
+        :activeIndex="activeIndex"
+        :value="item.value"
+        :label="item.title" 
+        @toolChecked="toolChecked"
+      ></toolitem>
     </div>
   </div>
 </template>
 
-<script setup='props, { emit }' lang="ts">
-import component from './toolitem.vue'
-import Toolitem from './toolitem.vue'
-let toolActive:boolean = true
-let activeIndex:number = -1 
-const props = defineProps<{
-    toolList:Array<any>
-  }>()
-const emit = defineEmits(['toolChecked'])
-const components = {Toolitem}
-const toolboxChange = () => {
-  toolActive = !toolActive
-}
-const toolChecked = (active:boolean, value:number) => {
-  if (active) {
-    activeIndex = value
-  } else {
-    activeIndex = -1
-  }
-  emit('toolChecked', active, value)
-}
+<script setup lang="ts">
+import { ref, watch } from "vue";
+import Toolitem from "./toolitem.vue";
+import { DArrowRight, DArrowLeft } from "@element-plus/icons-vue";
 
+let toolActive = ref(true);
+let activeIndex = ref(-1);
+
+//props带默认值的写法
+const props =withDefaults(defineProps<{
+  toolList?: Array<any>;
+}>(),{toolList:()=>[]});
+
+const emit = defineEmits(["toolChecked"]);
+
+//监听
+watch(activeIndex,()=>{
+  console.log('activeIndex change')
+})
+
+const toolChecked = (active: boolean, value: any) => {
+  if (active) {
+    activeIndex.value = value;
+  } else {
+    activeIndex.value = -1;
+  }
+  emit("toolChecked", active, value);
+};
 </script>
 
 <style lang='scss' scoped>
-.toolbox{
+.toolbox {
   position: absolute;
   width: 300px;
   top: 18vh;
@@ -46,7 +62,7 @@ const toolChecked = (active:boolean, value:number) => {
   background-color: rgba(0, 0, 0, 0.25);
   transition: right 0.15s linear;
 }
-.switchbox{
+.switchbox {
   position: absolute;
   display: inline-block;
   padding: 10px 1px;
@@ -56,20 +72,16 @@ const toolChecked = (active:boolean, value:number) => {
   top: 50%;
   transform: translateX(-100%) translateY(-50%);
   cursor: pointer;
-  color: rgb(0, 195, 255,0.6);
+  color: rgb(0, 195, 255, 0.6);
 }
-.switchicon{
+.switchicon {
   font-size: 32px;
   font-weight: bold;
 }
-.switchbox:hover{
+.switchbox:hover {
   color: rgb(0, 195, 255);
 }
-.tool-box-content{
+.tool-box-content {
   display: flex;
 }
 </style>
-
-function emit(arg0: string, active: boolean, value: number) {
-  throw new Error('Function not implemented.')
-}

@@ -113,7 +113,7 @@ let startPoint:any = {}
 let endPoint:any = {}
 let pointNum:number = 0
 initPolylineTrailLinkMaterialProperty()
-const components = { Toolbox }
+
 onMounted(()=>{
   initCesium()
 })

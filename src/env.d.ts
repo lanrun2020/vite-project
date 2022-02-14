@@ -7,5 +7,5 @@ declare module '*.vue' {
   export default component
 }
 declare interface Window {
-  Cesium: any
+  Cesium: any,
 }
