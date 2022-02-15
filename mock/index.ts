@@ -31,7 +31,9 @@ const XHR2RequestWrap = (response: any) => {
   }
 }
 //重写mock的send方法
-Mock.XHR.prototype.proxy_send = Mock.XHR.prototype.send
+// @ts-ignore
+Mock.XHR.prototype.proxy_send = Mock.XHR.prototype.send 
+// @ts-ignore
 Mock.XHR.prototype.send = function() {
   if (this.custom.xhr) {
     this.custom.xhr.withCredentials = this.withCredentials || false
