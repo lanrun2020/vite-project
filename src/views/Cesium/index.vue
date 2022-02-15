@@ -8,8 +8,8 @@
 
 <script setup lang="ts">
 import { initPolylineTrailLinkMaterialProperty } from './flowLine'
-import bluePng from '../../assets/blue.png'
-import greenPng from '../../assets/green.png'
+import bluePng from '@/assets/blue.png'
+import greenPng from '@/assets/green.png'
 import Toolbox from './toolbox.vue'
 import { onMounted } from '@vue/runtime-core'
 const Cesium = window.Cesium

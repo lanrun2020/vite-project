@@ -1,11 +1,11 @@
 import axios from 'axios'
-import store from '../store'
+import store from '../store/index'
 const http = axios.create()
 //请求拦截
 http.interceptors.request.use(
   (config:any) => {
-    const { baseUrl } = store.getters
-    config = { ...config, baseUrl, timeout:300000 }
+    const { baseURL } = store.getters
+    config = { ...config, baseURL, timeout:300000 }
     return config
   },
   (error:Error)=>{
@@ -23,4 +23,5 @@ http.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
 export default http

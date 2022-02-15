@@ -8,10 +8,13 @@
   <h1>count:{{count}}</h1>
   <h1>nested.count:{{nested.count.value}}</h1>
   <el-button @click="count++">count++</el-button>
-  <el-button @click="$router.push('/login')">登录</el-button>
+  <el-button @click="$router.push('/login')">登录页</el-button>
+  <el-button @click="test">测试</el-button>
+  
 </template>
 
 <script setup lang="ts">
+import { fetchTest } from "@/apis/an-system";
 import { reactive, ref } from "@vue/reactivity";
 import { computed, provide, watch } from "@vue/runtime-core";
 import myMarker from './myMarker.vue'
@@ -26,8 +29,8 @@ import myMarker from './myMarker.vue'
   const nested2 =reactive({
     count
   })
-  console.log(nested.count.value);
-  console.log(nested2.count);
+  // console.log(nested.count.value);
+  // console.log(nested2.count);
   
 // reactive会返回一个响应式的对象状态
   const state = reactive({count:0})
@@ -41,4 +44,9 @@ import myMarker from './myMarker.vue'
   provide('num1',num1)
   provide('num2',num2)
   provide('sum',sum)
+
+  const test =async () => {
+    const res = await fetchTest()
+    console.log(res);
+  }
 </script>

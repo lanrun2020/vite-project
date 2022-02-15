@@ -2,7 +2,7 @@ import redimg from '../../assets/redLine.png'
 const Cesium = window.Cesium
 
 export function initPolylineTrailLinkMaterialProperty () {
-  function PolylineTrailLinkMaterialProperty (this: any, color:any, duration:any, U:any) {
+  function PolylineTrailLinkMaterialProperty (this: any, color:object, duration:number, U?:object) {
     this._definitionChanged = new Cesium.Event()
     this._color = U
     this._colorSubscription = U
@@ -27,7 +27,7 @@ export function initPolylineTrailLinkMaterialProperty () {
   PolylineTrailLinkMaterialProperty.prototype.getType = function () {
     return 'PolylineTrailLink'
   }
-  PolylineTrailLinkMaterialProperty.prototype.getValue = function (time:any, result:any) {
+  PolylineTrailLinkMaterialProperty.prototype.getValue = function (time:object, result:any) {
     if (!Cesium.defined(result)) {
       result = {}
     }

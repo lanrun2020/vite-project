@@ -1,6 +1,6 @@
-export default[
+export default [
   {
-    url:'/login',
+    url:'/api/login',
     type:'post',
     response:{
       code:0,

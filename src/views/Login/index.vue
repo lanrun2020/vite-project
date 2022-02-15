@@ -15,8 +15,9 @@
 </template>
 
 <script setup lang='ts'>
-import { fetchLogin } from "../../apis/an-system";
+import { fetchLogin } from "@/apis/an-system";
 import { reactive, ref } from "vue";
+import router from "@/router/index";
 const paramsForm = ref(null)
 const params = reactive({
   username: "",
@@ -24,14 +25,14 @@ const params = reactive({
 });
 
 
-const validatePass = (rule: any, value: any, callback: any) => {
+const validatePass = (rule: object, value: string, callback: Function) => {
   if (value === '') {
     callback(new Error('请输入密码'))
   } else {
     callback()
   }
 }
-const validateUserName = (rule: any, value: any, callback: any) => {
+const validateUserName = (rule: object, value: string, callback: Function) => {
   if (value === '') {
     callback(new Error('请输入用户名'))
   } else {
@@ -44,12 +45,12 @@ const rules = reactive({
   username: [{ required: true, validator: validateUserName, trigger: 'blur' }],
 })
 
-const login = (form:any) => {
-  form.validate(async (valid:any)=>{
+const login = (formEl:any) => {
+  formEl.validate(async (valid:boolean)=>{
     if(valid){
       const res = await fetchLogin(params)
       console.log(res);
-      
+      router.push('/home')
     }
   })
 }
@@ -65,6 +66,6 @@ const login = (form:any) => {
     position: absolute;
     top:50%;
     right: 50%;
-    transform: translateX(50%);
+    transform: translateX(50%) translateY(-50%);
   }
 </style>
