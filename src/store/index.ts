@@ -1,7 +1,8 @@
 import Vuex from 'vuex'
-import settings from './modules/setting'
+import settings from '@/store/modules/setting'
+import app from '@/store/modules/app'
 export default new Vuex.Store({
-    modules:{settings},
+    modules:{settings, app},
 })
 // export default createStore({
 //     state: {

@@ -1,3 +1,4 @@
+import store from '@/store'
 import { createRouter, createWebHashHistory, RouteRecordRaw  } from 'vue-router'
 
 // 路由配置
@@ -35,5 +36,8 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes,
 })
-
+router.beforeEach((to, from, next) => {
+  store.commit('CLEAR_CANCEL')
+  next()
+})
 export default router

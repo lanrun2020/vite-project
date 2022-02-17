@@ -7,3 +7,9 @@ export function fetchLogin(params:any){
 export function fetchTest(){
   return http.post('/test')
 }
+export function fetchHome(){
+  return http.post('/home')
+}
+export function fetchCesium(){
+  return http.post('/cesium')
+}

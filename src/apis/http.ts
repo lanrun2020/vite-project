@@ -6,6 +6,12 @@ http.interceptors.request.use(
   (config:any) => {
     const { baseURL } = store.getters
     config = { ...config, baseURL, timeout:300000 }
+
+    config.cancelToken = new axios.CancelToken((cancel:Function)=>{
+      store.commit('PUSH_CANCEL',{
+        cancelToken:cancel,
+      })
+    })
     return config
   },
   (error:Error)=>{

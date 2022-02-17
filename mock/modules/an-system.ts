@@ -7,5 +7,32 @@ export default [
       message:'请求成功',
       data:'sdefjfsdofkdjfeskdsfrfavgfvblavjfvjsddsokfsdfjsodfcodskfcsdlfsflccfsdfe0fefi9s',
     }
+  },
+  {
+    url:'/api/test',
+    type:'post',
+    response:{
+      code:0,
+      message:'请求成功',
+      data:'测试请求',
+    }
+  },
+  {
+    url:'/api/home',
+    type:'post',
+    response:{
+      code:0,
+      message:'请求成功',
+      data:'home页面请求',
+    }
+  },
+  {
+    url:'/api/cesium',
+    type:'post',
+    response:{
+      code:0,
+      message:'请求成功',
+      data:'cesium页面请求',
+    }
   }
 ]

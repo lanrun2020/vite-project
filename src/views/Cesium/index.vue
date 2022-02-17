@@ -12,6 +12,7 @@ import bluePng from '@/assets/blue.png'
 import greenPng from '@/assets/green.png'
 import Toolbox from './toolbox.vue'
 import { onMounted } from '@vue/runtime-core'
+import { fetchCesium } from '@/apis/an-system'
 const Cesium = window.Cesium
 let viewer:any
 let toolList :Array<any> = [
@@ -114,7 +115,9 @@ let endPoint:any = {}
 let pointNum:number = 0
 initPolylineTrailLinkMaterialProperty()
 
-onMounted(()=>{
+onMounted(async ()=>{
+  let res = await fetchCesium()
+  console.log(res);
   initCesium()
 })
  const toolChecked = (activeVal:any, valueVal:any) => {

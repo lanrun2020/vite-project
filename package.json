@@ -10,10 +10,12 @@
     "upload": "npm run build && node upload.ts"
   },
   "dependencies": {
+    "@types/three": "^0.137.0",
     "axios": "^0.26.0",
     "element-plus": "^2.0.1",
     "mockjs": "^1.1.0",
     "sass": "^1.49.7",
+    "three": "^0.137.5",
     "vue": "^3.2.25",
     "vue-router": "^4.0.12",
     "vuex": "^4.0.2",
