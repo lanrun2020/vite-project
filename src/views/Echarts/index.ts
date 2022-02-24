@@ -36,7 +36,7 @@ export default function ThreeJs2(dom: Element) {
  const setCube = () => {
     if (scene) {
       const geometry = new THREE.BoxGeometry(1,1,1); //创建一个立方体几何对象Geometry
-      const material2 = new THREE.MeshBasicMaterial({ color: 0xfff }); //材质对象Material
+      const material2 = new THREE.MeshBasicMaterial({ color: 0xfff,transparent:true, opacity:0.8  }); //材质对象Material
       const texture = new THREE.TextureLoader().load(
         "/src/assets/dalishi.jpg"
       ); //首先，获取到纹理
