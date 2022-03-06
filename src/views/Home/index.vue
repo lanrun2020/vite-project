@@ -10,18 +10,27 @@
   <el-button @click="count++">count++</el-button>
   <el-button @click="$router.push('/login')">登录页</el-button>
   <el-button @click="test">测试</el-button>
+  <el-button @click="test2">测试2</el-button>
+  <el-button @click="test3">测试3</el-button>
+
 </template>
 
 <script setup lang="ts">
 import { fetchTest,fetchHome } from "@/apis/an-system";
-import { reactive, ref } from "@vue/reactivity";
+import { reactive, ref, toRef } from "@vue/reactivity";
 import { computed, onMounted, provide, watch } from "@vue/runtime-core";
+import { toRefs } from "vue";
 import myMarker from "./myMarker.vue";
 // ref会返回一个可变的响应式对象,只包含一个名为 value 的 property
 const num1 = ref(0);
 const num2 = ref(0);
 const count = ref(0);
+const obj = {name:'jack',age:20}
+const newObj = ref(obj.age)
+const newObj2 = toRef(obj,'age')
+const newObj3 = toRefs(obj)
 
+const num3 = ref(num1.value)
 const nested = {
   count,
 };
@@ -54,5 +63,14 @@ onMounted(async ()=>{
 const test = async () => {
   const res = await fetchTest();
   console.log(res);
+};
+const test2 = async () => {
+  console.log(num3.value)
+};
+const test3 = async () => {
+  // newObj.value = 25
+  // newObj2.value = 25
+  newObj3.age.value = 26
+  console.log(obj);
 };
 </script>
