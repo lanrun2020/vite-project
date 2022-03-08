@@ -128,7 +128,7 @@ const initCesium = () => {
   if (viewer) {
     viewer.destroy()
   }
-
+  Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2NTY0Mjk2ZS1kNzI5LTRiOGEtYjZjNy00YWQ3N2MwOWMwMWYiLCJpZCI6ODQ5ODQsImlhdCI6MTY0NjcxMTIwNn0.Xl93l2YDxc1lqLA0UZGcw6lg4jAAwmxVPc8vk6n-AJ8'
   viewer = new Cesium.Viewer('cesiumContainer', {
     animation: false, // 是否显示动画控件
     baseLayerPicker: false, // 是否显示图层选择控件
@@ -326,7 +326,7 @@ const createFlyLine = (start:any, end:any) => {
   // })
   // 终点与飞行线
   // cities.forEach((city) => {
-  let material = new Cesium.PolylineTrailLinkMaterialProperty(Cesium.Color.RED, 3000)
+  let material = new Cesium.PolylineTrailLinkMaterialProperty(Cesium.Color.GREEN, 3000)
   const endPoint = Cesium.Cartesian3.fromDegrees(end.longitude, end.latitude, 0)
   // viewer.entities.add({
   //   position: endPoint,

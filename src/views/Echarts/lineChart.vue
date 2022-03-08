@@ -34,9 +34,11 @@ const animate = () => {
   }
   requestAnimationFrame(animate); //每帧都会执行（正常情况下是60次/秒）
   //PerspectiveCamera (透视摄像机) 参数1.视野角度（FOV） 2.长宽比（aspect ratio） 3.近截面（near） 4.远截面（far）
-  camera = new THREE.PerspectiveCamera(75, domWidth.value / domHeight.value, 0.1, 1000);
+  camera = new THREE.PerspectiveCamera(75, domWidth.value / domHeight.value, 1, 1000);
   //轨道控制 镜头的移动
   camera.position.z = 5; //相机距离屏幕距离
+  camera.position.x = 1;
+  camera.position.y = 1;
   // controls.update();
   renderer.render(scene, camera);//渲染场景
 };
