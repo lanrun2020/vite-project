@@ -144,8 +144,12 @@ const initCesium = () => {
     // })
   })
   viewer.scene.screenSpaceCameraController.enableTit = false
-  viewer.camera.setView({
-    destination: Cesium.Cartesian3.fromDegrees(102, 34, 10000000)
+  // viewer.camera.setView({
+  //   destination: Cesium.Cartesian3.fromDegrees(102, 34, 10000000)
+  // })
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(102, 34, 10000000),
+    duration:1.6,
   })
 
   let scene = viewer.scene
@@ -246,6 +250,16 @@ const drawCesium = () => {
   //     })
   //   }
   // })
+  //雷达模型
+  const modelConf = {
+      id:'model1',
+      position: Cesium.Cartesian3.fromDegrees(104, 32, 0),
+      model: {
+        uri:`/model/radar_static.gltf`,
+        scale:100,
+      },
+    }
+    viewer.entities.add(modelConf)
   // 点
   viewer.entities.add({
     position: Cesium.Cartesian3.fromDegrees(118, 30),
@@ -359,7 +373,7 @@ const generateCurve = (startPoint:any, endPoint:any) => {
     times: [0.0, 0.5, 1], // 曲线变化参数，严格递增，times.length必须等于points.length,最后一个值,与下面的evaluate()的参数相关（参数区间在0~1）
     points: [startPoint, midPoint, endPoint] // 控制点,points.length必须 ≥ 2
   })
-  let curvePoints = []
+  let curvePoints:Array<any> = []
   for (let i = 0, len = 200; i <= len; i++) {
     curvePoints.push(spline.evaluate(i / len)) // 传时间参数，返回曲线上给定时间点的新实例,时间段划分越多，曲线越平滑
   }
@@ -453,7 +467,7 @@ const addEllipse = (position:any, startR:number, maxR:number, speed:number) => {
 }
 // 根据两个点 开始角度、夹角度 求取立面的扇形
 const computeCirclularFlight = (x1:number, y1:number, x2:number, y2:number, fx:number, angle:number) => {
-  const positionArr = []
+  const positionArr:Array<any> =[]
   positionArr.push(x1)
   positionArr.push(y1)
   positionArr.push(0)

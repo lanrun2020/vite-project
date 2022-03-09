@@ -8,6 +8,14 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Login/index.vue'),
   },
   {
+    path:'/orbit',
+    component: () => import('../views/Three/Orbit.vue'),
+  },
+  {
+    path:'/terrain',
+    component: () => import('../views/Three/Terrain.vue'),
+  },
+  {
     path: '/',
     component: () => import('../layout/index.vue'),
     redirect:'home',
