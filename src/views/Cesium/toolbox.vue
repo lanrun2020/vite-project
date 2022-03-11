@@ -9,7 +9,7 @@
     <div class="tool-box-content">
       <toolitem
         v-for="item in toolList"
-        :key="item.key"
+        :key="item.value"
         :activeIndex="activeIndex"
         :value="item.value"
         :label="item.title" 
@@ -29,7 +29,7 @@ let activeIndex = ref(-1);
 
 //props带默认值的写法
 const props =withDefaults(defineProps<{
-  toolList?: Array<any>;
+  toolList?: Array<{value:number,title:string}>;
 }>(),{toolList:()=>[]});
 
 const emit = defineEmits(["toolChecked"]);

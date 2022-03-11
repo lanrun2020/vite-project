@@ -16,6 +16,10 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Three/Terrain.vue'),
   },
   {
+    path:'/exportTable',
+    component: () => import('../views/Table/exportTable.vue'),
+  },
+  {
     path: '/',
     component: () => import('../layout/index.vue'),
     redirect:'home',

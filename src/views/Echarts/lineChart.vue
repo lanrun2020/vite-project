@@ -31,7 +31,7 @@ onMounted(() => {
 });
 const animate = () => {
   // scene.rotation.x += 0.01;
-  scene.rotation.z -= 0.01;
+  // scene.rotation.z -= 0.01;
   dom = document.getElementById("demo2");
   if (dom) {
     domWidth.value = dom.offsetWidth;
@@ -42,6 +42,26 @@ const animate = () => {
   renderer.render(scene, camera);//渲染场景
   requestAnimationFrame(animate); //每帧都会执行（正常情况下是60次/秒）
 };
+const addMesh = () => {
+  const geometry2 = new THREE.CylinderGeometry( 0, 4, 40, 6, 1 );
+  const material2 = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
+  for ( let i = 0; i < 500; i ++ ) {
+    const mesh = new THREE.Mesh( geometry2, material2 );
+    mesh.position.x = Math.random() * 1600 - 800;
+    mesh.position.y = Math.random() * 1600 - 800;
+    mesh.position.z = Math.random() * 1600 - 800;
+    mesh.updateMatrix();
+    mesh.matrixAutoUpdate = false;
+    scene.add( mesh );
+    const timer = setInterval(()=>{
+      mesh.position.y +=10
+      if(mesh.position.y > 800){
+        mesh.position.y = -800
+      }
+      mesh.updateMatrix();
+    },20)
+  }
+  }
 const init = () => {
   dom = document.getElementById("demo2");
   if (dom) {
@@ -50,22 +70,7 @@ const init = () => {
     renderer.setSize(domWidth.value, domHeight.value);
     dom.appendChild(renderer.domElement);
   }
-  const geometry2 = new THREE.CylinderGeometry( 0, 10, 30, 4, 1 );
-  const material2 = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
-
-  for ( let i = 0; i < 500; i ++ ) {
-
-    const mesh = new THREE.Mesh( geometry2, material2 );
-    mesh.position.x = Math.random() * 1600 - 800;
-    mesh.position.y = Math.random() * 1600 - 800;
-    mesh.position.z = Math.random() * 1600 - 800;
-    mesh.updateMatrix();
-    mesh.matrixAutoUpdate = false;
-    scene.add( mesh );
-    // setTimeout(()=>{
-    //   scene.remove(mesh)
-    // },3000)
-  }
+  addMesh()
   // var light = new THREE.AmbientLight( 0x00ff00 ); // soft white light
   const dirLight1 = new THREE.DirectionalLight( 0xffffff );
   dirLight1.position.set( 1, 1, 1 );
@@ -93,6 +98,7 @@ const init = () => {
   scene.add(cube);
   animate();
 };
+
 </script>
 <style>
 #demo2 {

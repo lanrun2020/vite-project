@@ -7,7 +7,8 @@
 </template>
 
 <script setup lang="ts">
-import { initPolylineTrailLinkMaterialProperty } from './flowLine'
+// import { initPolylineTrailLinkMaterialProperty } from './flowLine'
+import './flowLime2'
 import bluePng from '@/assets/blue.png'
 import greenPng from '@/assets/green.png'
 import Toolbox from './toolbox.vue'
@@ -15,7 +16,7 @@ import { onMounted } from '@vue/runtime-core'
 import { fetchCesium } from '@/apis/an-system'
 const Cesium = window.Cesium
 let viewer:any
-let toolList :Array<any> = [
+let toolList :Array<{title:string,value:number}> = [
         {
           title: '迁徙线',
           value: 0
@@ -29,7 +30,7 @@ let toolList :Array<any> = [
           value: 2
         }
 ]
-let points:Array<any> = [
+let points:Array<{name:string,lat:number,lng:number}> = [
     {
       name: 'point1（110,30）',
       lat: 30,
@@ -46,8 +47,7 @@ let points:Array<any> = [
       lng: 110
     }
 ]
-let point:Array<any> = []
-let balls:Array<any> = [
+let balls:Array<{value:number,lat:number,lng:number}> = [
   {
     value: 0.5524,
     lat: 32,
@@ -65,7 +65,7 @@ let balls:Array<any> = [
   }
 ]
 let ball:Array<any> = []
-let flyLine:any =  {
+let flyLine:object =  {
   center: {
     lon: 110,
     lat: 32,
@@ -113,7 +113,7 @@ let flyPoints:Array<any> = []
 let startPoint:any = {}
 let endPoint:any = {}
 let pointNum:number = 0
-initPolylineTrailLinkMaterialProperty()
+// initPolylineTrailLinkMaterialProperty()
 
 onMounted(async ()=>{
   let res = await fetchCesium()
@@ -274,7 +274,7 @@ const drawCesium = () => {
     polyline: {
       positions: Cesium.Cartesian3.fromDegreesArrayHeights([118, 30, 0, 110, 32, 0]),
       width: 8,
-      material: new Cesium.PolylineTrailLinkMaterialProperty(Cesium.Color.BLUE, 5000)
+      material: new Cesium.PolylineTrailLinkMaterialProperty(Cesium.Color.BLUE, 3000,3)
     }
   })
   // 圆柱
@@ -340,7 +340,7 @@ const createFlyLine = (start:any, end:any) => {
   // })
   // 终点与飞行线
   // cities.forEach((city) => {
-  let material = new Cesium.PolylineTrailLinkMaterialProperty(Cesium.Color.GREEN, 3000)
+  let material = new Cesium.PolylineTrailLinkMaterialProperty(Cesium.Color.BLUE,1000,20)
   const endPoint = Cesium.Cartesian3.fromDegrees(end.longitude, end.latitude, 0)
   // viewer.entities.add({
   //   position: endPoint,
@@ -425,13 +425,13 @@ const fireadd  = (lng:number, lat:number, height:number, color:any, emitter:any)
   // }, 3000)
 }
 // 创建扩散圆组
-const addEllipses = (position:any, maxr = 60000, speed = 200, n = 3) => {
+const addEllipses = (position:{lng:number,lat:number}, maxr = 60000, speed = 200, n = 3) => {
   for (let i = 0; i < n; i++) {
     addEllipse(position, (i / n) * maxr, maxr, speed)
   }
 }
 // 创建扩散圆
-const addEllipse = (position:any, startR:number, maxR:number, speed:number) => {
+const addEllipse = (position:{lng:number,lat:number}, startR:number, maxR:number, speed:number) => {
   viewer.entities.add({
     position: Cesium.Cartesian3.fromDegrees(position.lng, position.lat),
     ellipse: {
@@ -467,7 +467,7 @@ const addEllipse = (position:any, startR:number, maxR:number, speed:number) => {
 }
 // 根据两个点 开始角度、夹角度 求取立面的扇形
 const computeCirclularFlight = (x1:number, y1:number, x2:number, y2:number, fx:number, angle:number) => {
-  const positionArr:Array<any> =[]
+  const positionArr:Array<number> =[]
   positionArr.push(x1)
   positionArr.push(y1)
   positionArr.push(0)
