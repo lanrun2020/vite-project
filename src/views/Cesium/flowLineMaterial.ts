@@ -7,14 +7,11 @@ export default class PolylineTrailLinkMaterialProperty {
   private _colorSubscription: object | undefined
   duration: number
   private _time: number
-  private _d: number
   constructor(color: object, duration: number,d:number, U?: object) {
     this._definitionChanged = new Cesium.Event()
-    this._color = U
     this._colorSubscription = U
     this._color = color
     this.duration = duration
-    this._d = d
     this._time = (new Date()).getTime()
     this.conbineProp()
     this.init()
@@ -28,7 +25,8 @@ export default class PolylineTrailLinkMaterialProperty {
     }
     result.color = this._color
     result.image = Cesium.Material.PolylineTrailLinkImage
-    result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._d
+    result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration
+    
     return result
   }
   equals(other) {

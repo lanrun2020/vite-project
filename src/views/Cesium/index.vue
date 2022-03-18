@@ -8,128 +8,137 @@
 
 <script setup lang="ts">
 // import { initPolylineTrailLinkMaterialProperty } from './flowLine'
-import './flowLime2'
-import bluePng from '@/assets/blue.png'
-import greenPng from '@/assets/green.png'
-import Toolbox from './toolbox.vue'
-import { onMounted } from '@vue/runtime-core'
-import { fetchCesium } from '@/apis/an-system'
-const Cesium = window.Cesium
-let viewer:any
-let toolList :Array<{title:string,value:number}> = [
-        {
-          title: '迁徙线',
-          value: 0
-        },
-        {
-          title: '扩散扫描',
-          value: 1
-        },
-        {
-          title: '旋转扫描',
-          value: 2
-        }
-]
-let points:Array<{name:string,lat:number,lng:number}> = [
-    {
-      name: 'point1（110,30）',
-      lat: 30,
-      lng: 110
-    },
-    {
-      name: 'point2（118,30）',
-      lat: 30,
-      lng: 118
-    },
-    {
-      name: 'point3（110,32）',
-      lat: 32,
-      lng: 110
-    }
-]
-let balls:Array<{value:number,lat:number,lng:number}> = [
+import "./flowLineMaterial";
+import bluePng from "@/assets/blue.png";
+import greenPng from "@/assets/green.png";
+import Toolbox from "./toolbox.vue";
+import { onMounted, reactive } from "@vue/runtime-core";
+import { fetchCesium } from "@/apis/an-system";
+import { addPolygon } from "./polygon";
+import { log } from "console";
+const Cesium = window.Cesium;
+let viewer: any;
+let toolList: Array<{ title: string; value: number }> = [
+  {
+    title: "迁徙线",
+    value: 0,
+  },
+  {
+    title: "扩散扫描",
+    value: 1,
+  },
+  {
+    title: "旋转扫描",
+    value: 2,
+  },
+  {
+    title: "多边形",
+    value: 3,
+  },
+];
+let points: Array<{ name: string; lat: number; lng: number }> = [
+  {
+    name: "point1（110,30）",
+    lat: 30,
+    lng: 110,
+  },
+  {
+    name: "point2（118,30）",
+    lat: 30,
+    lng: 118,
+  },
+  {
+    name: "point3（110,32）",
+    lat: 32,
+    lng: 110,
+  },
+];
+let balls: Array<{ value: number; lat: number; lng: number }> = [
   {
     value: 0.5524,
     lat: 32,
-    lng: 115
+    lng: 115,
   },
   {
     value: 0.1634,
     lat: 28,
-    lng: 115
+    lng: 115,
   },
   {
     value: 0.8212,
     lat: 32,
-    lng: 112
-  }
-]
-let ball:Array<any> = []
-let flyLine:object =  {
+    lng: 112,
+  },
+];
+let ball: Array<any> = [];
+let flyLine: object = {
   center: {
     lon: 110,
     lat: 32,
     size: 1,
-    color: Cesium.Color.GREEN
+    color: Cesium.Color.GREEN,
   },
   points: [
     {
       lon: 112,
       lat: 28,
-      color: Cesium.Color.BLUE
+      color: Cesium.Color.BLUE,
     },
     {
       lon: 145,
       lat: 26,
-      color: Cesium.Color.BLUE
+      color: Cesium.Color.BLUE,
     },
     {
       lon: 113,
       lat: 31,
-      color: Cesium.Color.BLUE
+      color: Cesium.Color.BLUE,
     },
     {
       lon: 118,
       lat: 30,
-      color: Cesium.Color.GREEN
+      color: Cesium.Color.GREEN,
     },
     {
       lon: 118,
       lat: 32,
-      color: Cesium.Color.BLUE
-    }
+      color: Cesium.Color.BLUE,
+    },
   ],
   options: {
     polyline: {
       width: 2,
-      material: [Cesium.Color.GREEN, 3000]
-    }
-  }
-}
-let active:boolean = false
-let value:number = 0
-let flyStatus:boolean = false
-let flyPoints:Array<any> = []
-let startPoint:any = {}
-let endPoint:any = {}
-let pointNum:number = 0
+      material: [Cesium.Color.GREEN, 3000],
+    },
+  },
+};
+let arr2: Array<number> = reactive([]);
+let polygonPoints: Array<{ lat: number, lng: number }> = reactive([]);
+let active: boolean = false;
+let value: number = 0;
+let flyStatus: boolean = false;
+let flyPoints: Array<any> = [];
+let startPoint: any = {};
+let endPoint: any = {};
+let pointNum: number = 0;
 // initPolylineTrailLinkMaterialProperty()
-
-onMounted(async ()=>{
-  let res = await fetchCesium()
+let primitiveArr: Array<object> = []
+onMounted(async () => {
+  let res = await fetchCesium();
   console.log(res);
-  initCesium()
-})
- const toolChecked = (activeVal:any, valueVal:any) => {
-  active = activeVal
-  value = valueVal
-}
+  initCesium();
+});
+const toolChecked = (activeVal: any, valueVal: any) => {
+  active = activeVal;
+  value = valueVal;
+};
 const initCesium = () => {
   if (viewer) {
-    viewer.destroy()
+    viewer.destroy();
   }
-  Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2NTY0Mjk2ZS1kNzI5LTRiOGEtYjZjNy00YWQ3N2MwOWMwMWYiLCJpZCI6ODQ5ODQsImlhdCI6MTY0NjcxMTIwNn0.Xl93l2YDxc1lqLA0UZGcw6lg4jAAwmxVPc8vk6n-AJ8'
-  viewer = new Cesium.Viewer('cesiumContainer', {
+  Cesium.Ion.defaultAccessToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2NTY0Mjk2ZS1kNzI5LTRiOGEtYjZjNy00YWQ3N2MwOWMwMWYiLCJpZCI6ODQ5ODQsImlhdCI6MTY0NjcxMTIwNn0.Xl93l2YDxc1lqLA0UZGcw6lg4jAAwmxVPc8vk6n-AJ8";
+  viewer = new Cesium.Viewer("cesiumContainer", {
     animation: false, // 是否显示动画控件
     baseLayerPicker: false, // 是否显示图层选择控件
     geocoder: false, // 是否显示地名查找控件
@@ -138,72 +147,223 @@ const initCesium = () => {
     navigationHelpButton: false, // 是否显示帮助信息控件
     infoBox: false, // 是否显示点击要素之后显示的信息
     fullscreenButton: false, // 是否显示全屏按钮
-    selectionIndicator: false // 是否显示选中指示器
+    selectionIndicator: false, // 是否显示选中指示器
     // imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
     //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
     // })
-  })
-  viewer.scene.screenSpaceCameraController.enableTit = false
+  });
+  viewer.scene.screenSpaceCameraController.enableTit = false;
   // viewer.camera.setView({
   //   destination: Cesium.Cartesian3.fromDegrees(102, 34, 10000000)
   // })
   viewer.camera.flyTo({
     destination: Cesium.Cartesian3.fromDegrees(102, 34, 10000000),
-    duration:1.6,
-  })
+    duration: 1.6,
+  });
 
-  let scene = viewer.scene
-  let ellipsoid = scene.globe.ellipsoid
-  let cartesian = null
-  let handler = new Cesium.ScreenSpaceEventHandler(scene.canvas)
-  handler.setInputAction((event:any) => {
-    cartesian = viewer.camera.pickEllipsoid(event.position, ellipsoid)
+  let scene = viewer.scene;
+  let ellipsoid = scene.globe.ellipsoid;
+  let cartesian = null;
+  let handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+  handler.setInputAction((event: any) => {
+    cartesian = viewer.camera.pickEllipsoid(event.position, ellipsoid);
     if (cartesian) {
-      let cartographic = ellipsoid.cartesianToCartographic(cartesian)
-      let longitude = Cesium.Math.toDegrees(cartographic.longitude)
-      let latitude = Cesium.Math.toDegrees(cartographic.latitude)
+      let cartographic = ellipsoid.cartesianToCartographic(cartesian);
+      let longitude = Cesium.Math.toDegrees(cartographic.longitude);
+      let latitude = Cesium.Math.toDegrees(cartographic.latitude);
       if (active) {
         switch (value) {
-          case 0:addFlyLine(longitude, latitude); break// 增加迁徙线
-          case 1:addEllipses({lng: longitude, lat: latitude}, 80000, 150, 3); break// 扩散扫描
-          case 2:addScanEllipse(longitude, latitude); break
+          case 0:
+            addFlyLine(longitude, latitude);
+            break; // 增加迁徙线
+          case 1:
+            addEllipses({ lng: longitude, lat: latitude }, 80000, 150, 3);
+            break; // 扩散扫描效果
+          case 2:
+            addScanEllipse(longitude, latitude);
+            break; //旋转扫描效果
+          case 3:
+            addPolygon2(longitude, latitude);
+            break; //绘制多边形
         }
       }
     }
-  }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+  }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-  drawCesium()
-}
+  drawCesium();
+};
 // 经纬度 转 屏幕坐标
-const pointsTurnToScreen = (lng:number, lat:number) => {
-  let pos = Cesium.Cartesian3.fromDegrees(lng, lat) // 经纬度 转 笛卡尔世界坐标
-  return Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, pos) // 笛卡尔世界坐标 转 屏幕坐标
+const pointsTurnToScreen = (lng: number, lat: number) => {
+  let pos = Cesium.Cartesian3.fromDegrees(lng, lat); // 经纬度 转 笛卡尔世界坐标
+  return Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, pos); // 笛卡尔世界坐标 转 屏幕坐标
+};
+const addPolygon2 = (longitude: number, latitude: number) => {
+  if (arr2.length <= 4) {
+    arr2.push(longitude, latitude);
+    polygonPoints.push({ lng: longitude, lat: latitude })
+  } else {
+    // let res = polygonFilter({ lat: latitude, lng: longitude }, polygonPoints)
+    let s = polygonFilter2({ lat: latitude, lng: longitude }, polygonPoints)
+    // let s3 = polygonFilter3({ lat: latitude, lng: longitude },polygonPoints)
+    // let s4 = polygonFilter4({ lat: latitude, lng: longitude },polygonPoints)
+    if (s) {
+      arr2.push(longitude, latitude);
+      polygonPoints.push({ lng: longitude, lat: latitude })
+    }
+  }
+  let primitive = new Cesium.Primitive({
+    geometryInstances: new Cesium.GeometryInstance({
+      geometry: new Cesium.PolygonGeometry({
+        polygonHierarchy: new Cesium.PolygonHierarchy(
+          Cesium.Cartesian3.fromDegreesArray(arr2)
+        )
+      }),
+    }),
+    appearance: new Cesium.EllipsoidSurfaceAppearance({
+      material: Cesium.Material.fromType("Stripe"),
+    }),
+  })
+  if (arr2.length > 4) {
+    if (primitiveArr.length > 0) {
+      viewer.scene.primitives.remove(primitiveArr[0])
+      primitiveArr = []
+    }
+    primitiveArr.push(primitive)
+    viewer.scene.primitives.add(
+      primitive
+    );
+  }
+};
+const polygonFilter2 = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //首尾相连边
+  let length = polygonPoints.length
+  let p1 = polygonPoints[0]
+  let p3 = polygonPoints[1]
+  let p2 = polygonPoints[length - 1]
+  let p4 = polygonPoints[length - 2]  
+  // 2,4  1,2,  1,3
+  let c2 = checkPoint.lat - (checkPoint.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) + p2.lat
+  let c1 = p4.lat - (p4.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) + p2.lat
+  
+  let c3 = p2.lat - (p2.lng - p3.lng) * (p3.lat - p1.lat) / (p3.lng - p1.lng) + p3.lat
+  let c4 = checkPoint.lat - (checkPoint.lng - p3.lng) * (p3.lat - p1.lat) / (p3.lng - p1.lng) + p3.lat
+
+  let c5 = checkPoint.lat - (checkPoint.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) + p4.lat
+  let c6 = p1.lat - (p1.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) + p4.lat
+debugger
+  let r1, r2, r3
+  if (c5 <= 0) {
+    r1 = c6 <= 0 ? true : false
+  } else {
+    r1 = c6 >= 0 ? true : false
+  }
+  if (c3 <= 0) {
+    r2 = c4 <= 0 ? true : false
+  } else {
+    r2 = c4 >= 0 ? true : false
+  }
+  if (c1 <= 0) {
+    r3 = c2 >= 0 ? true : false
+  } else {
+    r3 = c2 <= 0 ? true : false
+  }
+  return r1 && r2 && r3
 }
-const addFlyLine = (longitude:number, latitude:number) => {
+// const polygonFilter3 = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //第一条边
+//   let length = polygonPoints.length
+//   let p1 = polygonPoints[0]
+//   let p2 = polygonPoints[1]
+//   let n = (p2.lat - p1.lat) / (p2.lng - p1.lng) 
+//   let c1 = polygonPoints[length-1].lat - (polygonPoints[length-1].lng-p2.lng) * n +p2.lat
+//   let c2 = checkPoint.lat - (checkPoint.lng- p2.lng) * n + p2.lat
+//   if(c1 <= 0){
+//     return c2 <= 0 ? true:false
+//   }else{
+//     return c2 >= 0 ? true:false
+//   }
+// }
+// const polygonFilter4 = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //最后一条边
+//   let length = polygonPoints.length
+//   let p2 = polygonPoints[length-1]
+//   let p4 = polygonPoints[length-2]
+//   let n = (p4.lat - p2.lat) / (p4.lng - p2.lng) 
+//   let m = p4.lat - p4.lng * n
+//   let c5 = checkPoint.lat -(checkPoint.lng-p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng)
+//   let c6 =p1.lat - (p1.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) + p4.lat
+//   if(c1 <= 0){
+//     return c2 <= 0 ? true:false
+//   }else{
+//     return c2 >= 0 ? true:false
+//   }
+// }
+const polygonFilter = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //判断点是否处于多边形内部
+  var counter = 0;
+  var i;
+  var xinters;
+  var p1, p2;
+  var pointCount = polygonPoints.length;
+  p1 = polygonPoints[0];
+  for (i = 1; i <= pointCount; i++) {
+    p2 = polygonPoints[i % pointCount];
+    if (
+      checkPoint.lat > Math.min(p1.lat, p2.lat) &&
+      checkPoint.lat <= Math.max(p1.lat, p2.lat)
+    ) {
+      if (checkPoint.lng <= Math.max(p1.lng, p2.lng)) {
+        if (p1.lat != p2.lat) {
+          xinters = (checkPoint.lat - p1.lat) * (p2.lng - p1.lng) / (p2.lat - p1.lat) + p1.lng;
+          if (p1.lng == p2.lng || checkPoint.lng <= xinters) {
+            counter++;
+          }
+        }
+      }
+    }
+    p1 = p2;
+  }
+  if (counter % 2 == 0) {
+    return false;
+  } else {
+    return true;
+  }
+}
+const arr2data = () => {
+  // const callback = new Cesium.CallbackProperty(()=>{
+  //   console.log('arr2');
+  //   return arr2
+  // })
+  // const obj ={
+  //   test:callback
+  // }
+  // console.log(obj);
+  // setInterval(()=>{
+  //   return arr2
+  // },100)
+  return arr2
+}
+const addFlyLine = (longitude: number, latitude: number) => {
   if (pointNum === 0) {
     startPoint = {
       longitude,
-      latitude
-    }
-    pointNum = 1
+      latitude,
+    };
+    pointNum = 1;
   } else if (pointNum === 1) {
     endPoint = {
       longitude,
-      latitude
-    }
-    createFlyLine(startPoint, endPoint)
-    pointNum = 0
+      latitude,
+    };
+    createFlyLine(startPoint, endPoint);
+    pointNum = 0;
   }
   viewer.entities.add({
     position: Cesium.Cartesian3.fromDegrees(longitude, latitude, 0),
     point: {
       pixelSize: 2,
-      color: Cesium.Color.BLUE
-    }
-  })
-}
-const addScanEllipse = (lng:number, lat:number) => {
-  let rotation = Cesium.Math.toRadians(0)
+      color: Cesium.Color.BLUE,
+    },
+  });
+};
+const addScanEllipse = (lng: number, lat: number) => {
+  let rotation = Cesium.Math.toRadians(0);
   // 旋转圆（扫描效果）
   viewer.entities.add({
     position: Cesium.Cartesian3.fromDegrees(lng, lat),
@@ -215,68 +375,51 @@ const addScanEllipse = (lng:number, lat:number) => {
       height: 0,
       material: new Cesium.ImageMaterialProperty({
         image: bluePng,
-        transparent: true // 透明
+        transparent: true, // 透明
       }),
       stRotation: new Cesium.CallbackProperty(() => {
         // 设置旋转角度
-        rotation += 0.08
-        return rotation
-      })
-    }
-  })
-}
+        rotation += 0.08;
+        return rotation;
+      }),
+    },
+  });
+};
 // 绘制添加各种Cesium实体
 const drawCesium = () => {
-  // 标记点图标弹跳效果
-  // viewer.entities.add({
-  //   position: new Cesium.CallbackProperty(function () {
-  //     h = h + up * 2000
-  //     if (h < 0) {
-  //       up = 1
-  //       h = 0
-  //     }
-  //     if (h > 100000) {
-  //       up = -1
-  //     }
-  //     return Cesium.Cartesian3.fromDegrees(113, 31, h)
-  //   }),
-  //   billboard: {
-  //     width: 35,
-  //     height: 35,
-  //     image: build02Svg,
-  //     verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-  //     scale: new Cesium.CallbackProperty(() => {
-  //       return (h / 100000) * 0.4 + 0.6
-  //     })
-  //   }
-  // })
   //雷达模型
   const modelConf = {
-      id:'model1',
-      position: Cesium.Cartesian3.fromDegrees(104, 32, 0),
-      model: {
-        uri:`/model/radar_static.gltf`,
-        scale:100,
-      },
-    }
-    viewer.entities.add(modelConf)
+    id: "model1",
+    position: Cesium.Cartesian3.fromDegrees(104, 32, 0),
+    model: {
+      uri: `/model/radar_static.gltf`,
+      // uri:`/model/radar_dynamic.glb`,
+      scale: 100,
+    },
+  };
+  viewer.entities.add(modelConf);
   // 点
   viewer.entities.add({
     position: Cesium.Cartesian3.fromDegrees(118, 30),
     point: {
       pixelSize: 10,
-      color: Cesium.Color.PINK
-    }
-  })
+      color: Cesium.Color.PINK,
+    },
+  });
   // 线
   viewer.entities.add({
     distanceDisplayCondition: new Cesium.DistanceDisplayCondition(100, 1000), // 实体可见的高度区间
     polyline: {
-      positions: Cesium.Cartesian3.fromDegreesArrayHeights([118, 30, 0, 110, 32, 0]),
+      positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+        118, 30, 0, 110, 32, 0, 118, 34, 0, 118, 30, 0,
+      ]),
       width: 8,
-      material: new Cesium.PolylineTrailLinkMaterialProperty(Cesium.Color.BLUE, 3000,3)
-    }
-  })
+      material: new Cesium.PolylineTrailLinkMaterialProperty(
+        Cesium.Color.BLUE,
+        3000
+      ),
+    },
+  });
   // 圆柱
   viewer.entities.add({
     position: Cesium.Cartesian3.fromDegrees(110, 32, 50000), // 位置在圆柱高度的中间点
@@ -284,14 +427,37 @@ const drawCesium = () => {
       length: 100000, // 高度
       topRadius: 4000, // 顶部半径
       bottomRadius: 4000, // 底部半径
-      material: Cesium.Color.GREEN.withAlpha(0.4)
-    }
-  })
-
+      material: Cesium.Color.GREEN.withAlpha(0.4),
+    },
+  });
+  // viewer.entities.add(
+  //   {
+  //   id: "redPolygon",
+  //   name: "Red polygon on surface",
+  //   polygon: {
+  //   hierarchy:Cesium.Cartesian3.fromDegreesArray([
+  //   -115.0,
+  //   37.0,
+  //   -115.0,
+  //   32.0,
+  //   -107.0,
+  //   33.0,
+  //   -102.0,
+  //   31.0,
+  //   -102.0,
+  //   35.0,
+  // ]),
+  // material:Cesium.Color.RED.withAlpha(0.5),
+  // outline: true,
+  // outlineColor: Cesium.Color.BLUE.withAlpha(0.2),
+  // outlineWidth: 1
+  //   },
+  // },
+  // )
   // 雷达扫描
   viewer.entities.add({
-    id: 'scan',
-    name: 'Scan',
+    id: "scan",
+    name: "Scan",
     position: Cesium.Cartesian3.fromDegrees(114, 30),
     ellipsoid: {
       radii: new Cesium.Cartesian3(100000.0, 100000.0, 100000.0),
@@ -299,22 +465,24 @@ const drawCesium = () => {
       material: Cesium.Color.BLUE.withAlpha(0.1),
       outline: true,
       outlineColor: Cesium.Color.BLUE.withAlpha(0.2),
-      outlineWidth: 1
-    }
-  })
-  let heading = 0
+      outlineWidth: 1,
+    },
+  });
+  let heading = 0;
   // let positionArr = this.calcPoints(114, 30, 100000, heading) // 经纬度、半径、起始角度
   // console.log(positionArr)
   viewer.entities.add({
-    id: 'wall',
+    id: "wall",
     wall: {
       positions: new Cesium.CallbackProperty(() => {
-        heading -= 1
-        return Cesium.Cartesian3.fromDegreesArrayHeights(calcPoints(114, 30, 100000, heading))
+        heading -= 1;
+        return Cesium.Cartesian3.fromDegreesArrayHeights(
+          calcPoints(114, 30, 100000, heading)
+        );
       }),
-      material: Cesium.Color.AQUAMARINE.withAlpha(0.5)
-    }
-  })
+      material: Cesium.Color.AQUAMARINE.withAlpha(0.5),
+    },
+  });
   // 执行动画效果
   // viewer.clock.onTick.addEventListener(() => {
   //   heading -= 1.5
@@ -323,13 +491,17 @@ const drawCesium = () => {
   // 粒子发射系统
   // this.fireadd(118, 30, 0, Cesium.Color.WHITE, new Cesium.ConeEmitter(160)) // 圆锥粒子发射系统
   // this.fireadd(110, 30, 0, Cesium.Color.GREEN, new Cesium.CircleEmitter(10000)) // 圆形粒子发射系统
-}
+};
 // 创建迁徙线
-const createFlyLine = (start:any, end:any) => {
+const createFlyLine = (start: any, end: any) => {
   // const data = this.flyLine
   // const center = data.center
   // const cities = data.points
-  const startPoint = Cesium.Cartesian3.fromDegrees(start.longitude, start.latitude, 0) // Cartesian3.fromDegrees经纬度转为笛卡尔坐标位置
+  const startPoint = Cesium.Cartesian3.fromDegrees(
+    start.longitude,
+    start.latitude,
+    0
+  ); // Cartesian3.fromDegrees经纬度转为笛卡尔坐标位置
   // 起点实体
   // viewer.entities.add({
   //   position: startPoint,
@@ -340,8 +512,15 @@ const createFlyLine = (start:any, end:any) => {
   // })
   // 终点与飞行线
   // cities.forEach((city) => {
-  let material = new Cesium.PolylineTrailLinkMaterialProperty(Cesium.Color.BLUE,1000,20)
-  const endPoint = Cesium.Cartesian3.fromDegrees(end.longitude, end.latitude, 0)
+  let material = new Cesium.PolylineTrailLinkMaterialProperty(
+    Cesium.Color.BLUE,
+    3000
+  );
+  const endPoint = Cesium.Cartesian3.fromDegrees(
+    end.longitude,
+    end.latitude,
+    0
+  );
   // viewer.entities.add({
   //   position: endPoint,
   //   point: {
@@ -353,34 +532,45 @@ const createFlyLine = (start:any, end:any) => {
     polyline: {
       positions: generateCurve(startPoint, endPoint), // 多个点坐标构成线条路径
       width: 8,
-      material: material
-    }
-  })
+      material: material,
+    },
+  });
   // })
-}
+};
 // 获取流动曲线上多个连续点
-const generateCurve = (startPoint:any, endPoint:any) => {
-  const addPointCartesian = new Cesium.Cartesian3()
-  Cesium.Cartesian3.add(startPoint, endPoint, addPointCartesian) // 将两个笛卡尔坐标按照分量求和，addPointCartesian是两点(x,y,z)相加后返回的结果(x,y,z)
-  const midPointCartesian = new Cesium.Cartesian3()
-  Cesium.Cartesian3.divideByScalar(addPointCartesian, 2, midPointCartesian) // midPointCartesian是点(x,y,z)除以2后返回的结果(x,y,z)
-  const midPointCartographic = Cesium.Cartographic.fromCartesian(midPointCartesian) // Cartographic.fromCartesian将笛卡尔位置转换为经纬度弧度值
-  midPointCartographic.height = Cesium.Cartesian3.distance(startPoint, endPoint) / 5 // 将起始点、终点两个坐标点之间的距离除5,设置为此中间点的高度
-  const midPoint = new Cesium.Cartesian3()
-  Cesium.Ellipsoid.WGS84.cartographicToCartesian(midPointCartographic, midPoint) // 初始化为WGS84标准的椭球实例，cartographicToCartesian将经纬度弧度为单位的坐标转笛卡尔坐标（x,y,z）
+const generateCurve = (startPoint: any, endPoint: any) => {
+  const addPointCartesian = new Cesium.Cartesian3();
+  Cesium.Cartesian3.add(startPoint, endPoint, addPointCartesian); // 将两个笛卡尔坐标按照分量求和，addPointCartesian是两点(x,y,z)相加后返回的结果(x,y,z)
+  const midPointCartesian = new Cesium.Cartesian3();
+  Cesium.Cartesian3.divideByScalar(addPointCartesian, 2, midPointCartesian); // midPointCartesian是点(x,y,z)除以2后返回的结果(x,y,z)
+  const midPointCartographic =
+    Cesium.Cartographic.fromCartesian(midPointCartesian); // Cartographic.fromCartesian将笛卡尔位置转换为经纬度弧度值
+  midPointCartographic.height =
+    Cesium.Cartesian3.distance(startPoint, endPoint) / 5; // 将起始点、终点两个坐标点之间的距离除5,设置为此中间点的高度
+  const midPoint = new Cesium.Cartesian3();
+  Cesium.Ellipsoid.WGS84.cartographicToCartesian(
+    midPointCartographic,
+    midPoint
+  ); // 初始化为WGS84标准的椭球实例，cartographicToCartesian将经纬度弧度为单位的坐标转笛卡尔坐标（x,y,z）
   const spline = new Cesium.CatmullRomSpline({
     // 立方样条曲线
     times: [0.0, 0.5, 1], // 曲线变化参数，严格递增，times.length必须等于points.length,最后一个值,与下面的evaluate()的参数相关（参数区间在0~1）
-    points: [startPoint, midPoint, endPoint] // 控制点,points.length必须 ≥ 2
-  })
-  let curvePoints:Array<any> = []
+    points: [startPoint, midPoint, endPoint], // 控制点,points.length必须 ≥ 2
+  });
+  let curvePoints: Array<any> = [];
   for (let i = 0, len = 200; i <= len; i++) {
-    curvePoints.push(spline.evaluate(i / len)) // 传时间参数，返回曲线上给定时间点的新实例,时间段划分越多，曲线越平滑
+    curvePoints.push(spline.evaluate(i / len)); // 传时间参数，返回曲线上给定时间点的新实例,时间段划分越多，曲线越平滑
   }
-  return curvePoints // 返回曲线上的多个点坐标集合
-}
+  return curvePoints; // 返回曲线上的多个点坐标集合
+};
 // 创建粒子发射系统
-const fireadd  = (lng:number, lat:number, height:number, color:any, emitter:any) => {
+const fireadd = (
+  lng: number,
+  lat: number,
+  height: number,
+  color: any,
+  emitter: any
+) => {
   // 获取事件触发所在的  html Canvas容器
   const firedata = new Cesium.ParticleSystem({
     startColor: color.withAlpha(1),
@@ -404,98 +594,135 @@ const fireadd  = (lng:number, lat:number, height:number, color:any, emitter:any)
     // emitter: new Cesium.ConeEmitter(170), //圆锥发射器，参数为圆锥角，以弧度为单位
     // emitter: new Cesium.BoxEmitter(Cesium.Cartesian3(100000, 100000, 1000)), //盒子发射器，参数盒子宽、高、深
     // emitter: new Cesium.SphereEmitter(1), //球形发射器，参数为球半径
-    updateCallback: (particle:any) => {
+    updateCallback: (particle: any) => {
       if (particle.age <= particle.life * 0.6) {
         // 生命前0.6
-        let s = 0.994
-        particle.velocity = new Cesium.Cartesian3(particle.velocity.x * s, particle.velocity.y * s, particle.velocity.z * s) // 让粒子速度衰减，可以自行定义衰减方法
+        let s = 0.994;
+        particle.velocity = new Cesium.Cartesian3(
+          particle.velocity.x * s,
+          particle.velocity.y * s,
+          particle.velocity.z * s
+        ); // 让粒子速度衰减，可以自行定义衰减方法
       } else {
         // let { x, y, z } = Cesium.Cartesian3.fromDegrees(lng, lat, height)
-        let { x, y, z } = particle.position
-        let n = 170
-        particle.velocity = new Cesium.Cartesian3(-x / n, -y / n, -z / n) // 速度向量改变（改变粒子运动方向），向原点（地球球心）运动
+        let { x, y, z } = particle.position;
+        let n = 170;
+        particle.velocity = new Cesium.Cartesian3(-x / n, -y / n, -z / n); // 速度向量改变（改变粒子运动方向），向原点（地球球心）运动
       }
     },
-    modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(lng, lat, height)) // 从模型转化成世界坐标
+    modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(
+      Cesium.Cartesian3.fromDegrees(lng, lat, height)
+    ), // 从模型转化成世界坐标
     // emitterModelMatrix: Cesium.Matrix4(),
-  })
-  viewer.scene.primitives.add(firedata)
+  });
+  viewer.scene.primitives.add(firedata);
   // setTimeout(() => {
   //   Cesium.scene.primitives.remove(firedata) //清除发射系统firedata
   // }, 3000)
-}
+};
 // 创建扩散圆组
-const addEllipses = (position:{lng:number,lat:number}, maxr = 60000, speed = 200, n = 3) => {
+const addEllipses = (
+  position: { lng: number; lat: number },
+  maxr = 60000,
+  speed = 200,
+  n = 3
+) => {
   for (let i = 0; i < n; i++) {
-    addEllipse(position, (i / n) * maxr, maxr, speed)
+    addEllipse(position, (i / n) * maxr, maxr, speed);
   }
-}
+};
 // 创建扩散圆
-const addEllipse = (position:{lng:number,lat:number}, startR:number, maxR:number, speed:number) => {
+const addEllipse = (
+  position: { lng: number; lat: number },
+  startR: number,
+  maxR: number,
+  speed: number
+) => {
   viewer.entities.add({
     position: Cesium.Cartesian3.fromDegrees(position.lng, position.lat),
     ellipse: {
       // 椭圆短半轴长度
       semiMinorAxis: new Cesium.CallbackProperty(() => {
         if (startR <= maxR) {
-          startR += speed
+          startR += speed;
         } else {
-          startR = 0
+          startR = 0;
         }
-        return startR
+        return startR;
       }),
       // 椭圆长半轴长度
       semiMajorAxis: new Cesium.CallbackProperty(() => {
         if (startR <= maxR) {
-          startR = startR + speed
+          startR = startR + speed;
         } else {
-          startR = 0
+          startR = 0;
         }
-        return startR
+        return startR;
       }),
       height: 0,
       material: new Cesium.ImageMaterialProperty({
         image: greenPng, // 材质贴图
         color: new Cesium.CallbackProperty(() => {
-          return Cesium.Color.WHITE.withAlpha(1 - startR / maxR + 0.05)
+          return Cesium.Color.WHITE.withAlpha(1 - startR / maxR + 0.05);
         }),
-        transparent: true // 材质是否透明（贴图为png格式图片时适用）
+        transparent: true, // 材质是否透明（贴图为png格式图片时适用）
         // repeat: new Cesium.Cartesian2(4, 4),//贴图重复参数
-      })
-    }
-  })
-}
+      }),
+    },
+  });
+};
 // 根据两个点 开始角度、夹角度 求取立面的扇形
-const computeCirclularFlight = (x1:number, y1:number, x2:number, y2:number, fx:number, angle:number) => {
-  const positionArr:Array<number> =[]
-  positionArr.push(x1)
-  positionArr.push(y1)
-  positionArr.push(0)
-  const radius = Cesium.Cartesian3.distance(Cesium.Cartesian3.fromDegrees(x1, y1), Cesium.Cartesian3.fromDegrees(x2, y2))
+const computeCirclularFlight = (
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  fx: number,
+  angle: number
+) => {
+  const positionArr: Array<number> = [];
+  positionArr.push(x1);
+  positionArr.push(y1);
+  positionArr.push(0);
+  const radius = Cesium.Cartesian3.distance(
+    Cesium.Cartesian3.fromDegrees(x1, y1),
+    Cesium.Cartesian3.fromDegrees(x2, y2)
+  );
   for (let i = fx; i <= fx + angle; i++) {
-    const h = radius * Math.sin((i * Math.PI) / 180.0)
-    const r = Math.cos((i * Math.PI) / 180.0)
-    const x = (x2 - x1) * r + x1
-    const y = (y2 - y1) * r + y1
-    positionArr.push(x)
-    positionArr.push(y)
-    positionArr.push(h)
+    const h = radius * Math.sin((i * Math.PI) / 180.0);
+    const r = Math.cos((i * Math.PI) / 180.0);
+    const x = (x2 - x1) * r + x1;
+    const y = (y2 - y1) * r + y1;
+    positionArr.push(x);
+    positionArr.push(y);
+    positionArr.push(h);
   }
-  return positionArr
-}
+  return positionArr;
+};
 
 // 根据第一个点 偏移距离 角度 求取第二个点的坐标
-const calcPoints = (x1:number, y1:number, radius:number, heading:number) => {
-  const m = Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(x1, y1))
-  const rx = radius * Math.cos((heading * Math.PI) / 180.0)
-  const ry = radius * Math.sin((heading * Math.PI) / 180.0)
-  const translation = Cesium.Cartesian3.fromElements(rx, ry, 0)
-  const d = Cesium.Matrix4.multiplyByPoint(m, translation, new Cesium.Cartesian3())
-  const c = Cesium.Cartographic.fromCartesian(d)
-  const x2 = Cesium.Math.toDegrees(c.longitude)
-  const y2 = Cesium.Math.toDegrees(c.latitude)
-  return computeCirclularFlight(x1, y1, x2, y2, 0, 90)
-}
+const calcPoints = (
+  x1: number,
+  y1: number,
+  radius: number,
+  heading: number
+) => {
+  const m = Cesium.Transforms.eastNorthUpToFixedFrame(
+    Cesium.Cartesian3.fromDegrees(x1, y1)
+  );
+  const rx = radius * Math.cos((heading * Math.PI) / 180.0);
+  const ry = radius * Math.sin((heading * Math.PI) / 180.0);
+  const translation = Cesium.Cartesian3.fromElements(rx, ry, 0);
+  const d = Cesium.Matrix4.multiplyByPoint(
+    m,
+    translation,
+    new Cesium.Cartesian3()
+  );
+  const c = Cesium.Cartographic.fromCartesian(d);
+  const x2 = Cesium.Math.toDegrees(c.longitude);
+  const y2 = Cesium.Math.toDegrees(c.latitude);
+  return computeCirclularFlight(x1, y1, x2, y2, 0, 90);
+};
 </script>
 
 <style lang="scss">
@@ -503,7 +730,7 @@ const calcPoints = (x1:number, y1:number, radius:number, heading:number) => {
   overflow: hidden;
   position: relative;
   width: 100%;
-  height: calc(100vh - 40px);
+  height: calc(100vh - 70px);
 }
 /* 隐藏Cesium地图图标 */
 #cesiumContainer .cesium-widget-credits {
