@@ -1,7 +1,7 @@
 <template>
   <div>
     <div id="cesiumContainer">
-      <toolbox :toolList="toolList" @toolChecked="toolChecked"></toolbox>
+      <toolbox :toolList="toolList" @toolChecked="toolChecked" @finishPolygon="reset"></toolbox>
     </div>
   </div>
 </template>
@@ -14,9 +14,9 @@ import greenPng from "@/assets/green.png";
 import Toolbox from "./toolbox.vue";
 import { onMounted, reactive } from "@vue/runtime-core";
 import { fetchCesium } from "@/apis/an-system";
-import { addPolygon } from "./polygon";
+import { addPolygon2, reset } from "./polygon";
 import { log } from "console";
-const Cesium = window.Cesium;
+import Cesium from '@/utils/importCesium'
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
   {
@@ -32,9 +32,9 @@ let toolList: Array<{ title: string; value: number }> = [
     value: 2,
   },
   {
-    title: "多边形",
+    title: "凸多边形",
     value: 3,
-  },
+  }
 ];
 let points: Array<{ name: string; lat: number; lng: number }> = [
   {
@@ -136,8 +136,6 @@ const initCesium = () => {
   if (viewer) {
     viewer.destroy();
   }
-  Cesium.Ion.defaultAccessToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2NTY0Mjk2ZS1kNzI5LTRiOGEtYjZjNy00YWQ3N2MwOWMwMWYiLCJpZCI6ODQ5ODQsImlhdCI6MTY0NjcxMTIwNn0.Xl93l2YDxc1lqLA0UZGcw6lg4jAAwmxVPc8vk6n-AJ8";
   viewer = new Cesium.Viewer("cesiumContainer", {
     animation: false, // 是否显示动画控件
     baseLayerPicker: false, // 是否显示图层选择控件
@@ -148,16 +146,24 @@ const initCesium = () => {
     infoBox: false, // 是否显示点击要素之后显示的信息
     fullscreenButton: false, // 是否显示全屏按钮
     selectionIndicator: false, // 是否显示选中指示器
+    terrainProvider: Cesium.createWorldTerrain(),
     // imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
     //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
     // })
   });
+  viewer.scene.globe.depthTestAgainstTerrain = true;
+  // var layer = new Cesium.UrlTemplateImageryProvider({
+  //   url: "http://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
+  //   minimumLevel: 4,
+  //   maximumLevel: 18
+  // })
+  // viewer.imageryLayers.addImageryProvider(layer);
   viewer.scene.screenSpaceCameraController.enableTit = false;
   // viewer.camera.setView({
   //   destination: Cesium.Cartesian3.fromDegrees(102, 34, 10000000)
   // })
   viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(102, 34, 10000000),
+    destination: Cesium.Cartesian3.fromDegrees(110, 30, 10000),
     duration: 1.6,
   });
 
@@ -183,162 +189,15 @@ const initCesium = () => {
             addScanEllipse(longitude, latitude);
             break; //旋转扫描效果
           case 3:
-            addPolygon2(longitude, latitude);
+            addPolygon2(viewer, longitude, latitude);
             break; //绘制多边形
         }
       }
     }
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-
   drawCesium();
 };
-// 经纬度 转 屏幕坐标
-const pointsTurnToScreen = (lng: number, lat: number) => {
-  let pos = Cesium.Cartesian3.fromDegrees(lng, lat); // 经纬度 转 笛卡尔世界坐标
-  return Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, pos); // 笛卡尔世界坐标 转 屏幕坐标
-};
-const addPolygon2 = (longitude: number, latitude: number) => {
-  if (arr2.length <= 4) {
-    arr2.push(longitude, latitude);
-    polygonPoints.push({ lng: longitude, lat: latitude })
-  } else {
-    // let res = polygonFilter({ lat: latitude, lng: longitude }, polygonPoints)
-    let s = polygonFilter2({ lat: latitude, lng: longitude }, polygonPoints)
-    // let s3 = polygonFilter3({ lat: latitude, lng: longitude },polygonPoints)
-    // let s4 = polygonFilter4({ lat: latitude, lng: longitude },polygonPoints)
-    if (s) {
-      arr2.push(longitude, latitude);
-      polygonPoints.push({ lng: longitude, lat: latitude })
-    }
-  }
-  let primitive = new Cesium.Primitive({
-    geometryInstances: new Cesium.GeometryInstance({
-      geometry: new Cesium.PolygonGeometry({
-        polygonHierarchy: new Cesium.PolygonHierarchy(
-          Cesium.Cartesian3.fromDegreesArray(arr2)
-        )
-      }),
-    }),
-    appearance: new Cesium.EllipsoidSurfaceAppearance({
-      material: Cesium.Material.fromType("Stripe"),
-    }),
-  })
-  if (arr2.length > 4) {
-    if (primitiveArr.length > 0) {
-      viewer.scene.primitives.remove(primitiveArr[0])
-      primitiveArr = []
-    }
-    primitiveArr.push(primitive)
-    viewer.scene.primitives.add(
-      primitive
-    );
-  }
-};
-const polygonFilter2 = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //首尾相连边
-  let length = polygonPoints.length
-  let p1 = polygonPoints[0]
-  let p3 = polygonPoints[1]
-  let p2 = polygonPoints[length - 1]
-  let p4 = polygonPoints[length - 2]  
-  // 2,4  1,2,  1,3
-  let c2 = checkPoint.lat - (checkPoint.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) + p2.lat
-  let c1 = p4.lat - (p4.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) + p2.lat
-  
-  let c3 = p2.lat - (p2.lng - p3.lng) * (p3.lat - p1.lat) / (p3.lng - p1.lng) + p3.lat
-  let c4 = checkPoint.lat - (checkPoint.lng - p3.lng) * (p3.lat - p1.lat) / (p3.lng - p1.lng) + p3.lat
 
-  let c5 = checkPoint.lat - (checkPoint.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) + p4.lat
-  let c6 = p1.lat - (p1.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) + p4.lat
-debugger
-  let r1, r2, r3
-  if (c5 <= 0) {
-    r1 = c6 <= 0 ? true : false
-  } else {
-    r1 = c6 >= 0 ? true : false
-  }
-  if (c3 <= 0) {
-    r2 = c4 <= 0 ? true : false
-  } else {
-    r2 = c4 >= 0 ? true : false
-  }
-  if (c1 <= 0) {
-    r3 = c2 >= 0 ? true : false
-  } else {
-    r3 = c2 <= 0 ? true : false
-  }
-  return r1 && r2 && r3
-}
-// const polygonFilter3 = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //第一条边
-//   let length = polygonPoints.length
-//   let p1 = polygonPoints[0]
-//   let p2 = polygonPoints[1]
-//   let n = (p2.lat - p1.lat) / (p2.lng - p1.lng) 
-//   let c1 = polygonPoints[length-1].lat - (polygonPoints[length-1].lng-p2.lng) * n +p2.lat
-//   let c2 = checkPoint.lat - (checkPoint.lng- p2.lng) * n + p2.lat
-//   if(c1 <= 0){
-//     return c2 <= 0 ? true:false
-//   }else{
-//     return c2 >= 0 ? true:false
-//   }
-// }
-// const polygonFilter4 = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //最后一条边
-//   let length = polygonPoints.length
-//   let p2 = polygonPoints[length-1]
-//   let p4 = polygonPoints[length-2]
-//   let n = (p4.lat - p2.lat) / (p4.lng - p2.lng) 
-//   let m = p4.lat - p4.lng * n
-//   let c5 = checkPoint.lat -(checkPoint.lng-p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng)
-//   let c6 =p1.lat - (p1.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) + p4.lat
-//   if(c1 <= 0){
-//     return c2 <= 0 ? true:false
-//   }else{
-//     return c2 >= 0 ? true:false
-//   }
-// }
-const polygonFilter = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //判断点是否处于多边形内部
-  var counter = 0;
-  var i;
-  var xinters;
-  var p1, p2;
-  var pointCount = polygonPoints.length;
-  p1 = polygonPoints[0];
-  for (i = 1; i <= pointCount; i++) {
-    p2 = polygonPoints[i % pointCount];
-    if (
-      checkPoint.lat > Math.min(p1.lat, p2.lat) &&
-      checkPoint.lat <= Math.max(p1.lat, p2.lat)
-    ) {
-      if (checkPoint.lng <= Math.max(p1.lng, p2.lng)) {
-        if (p1.lat != p2.lat) {
-          xinters = (checkPoint.lat - p1.lat) * (p2.lng - p1.lng) / (p2.lat - p1.lat) + p1.lng;
-          if (p1.lng == p2.lng || checkPoint.lng <= xinters) {
-            counter++;
-          }
-        }
-      }
-    }
-    p1 = p2;
-  }
-  if (counter % 2 == 0) {
-    return false;
-  } else {
-    return true;
-  }
-}
-const arr2data = () => {
-  // const callback = new Cesium.CallbackProperty(()=>{
-  //   console.log('arr2');
-  //   return arr2
-  // })
-  // const obj ={
-  //   test:callback
-  // }
-  // console.log(obj);
-  // setInterval(()=>{
-  //   return arr2
-  // },100)
-  return arr2
-}
 const addFlyLine = (longitude: number, latitude: number) => {
   if (pointNum === 0) {
     startPoint = {
@@ -372,7 +231,8 @@ const addScanEllipse = (lng: number, lat: number) => {
       semiMinorAxis: 80000,
       // 椭圆长半轴长度
       semiMajorAxis: 80000,
-      height: 0,
+      height: 10,
+      extrudedHeight: 10,
       material: new Cesium.ImageMaterialProperty({
         image: bluePng,
         transparent: true, // 透明
@@ -394,7 +254,7 @@ const drawCesium = () => {
     model: {
       uri: `/model/radar_static.gltf`,
       // uri:`/model/radar_dynamic.glb`,
-      scale: 100,
+      scale: 10,
     },
   };
   viewer.entities.add(modelConf);
@@ -421,39 +281,69 @@ const drawCesium = () => {
     },
   });
   // 圆柱
+  // viewer.entities.add({
+  //   position: Cesium.Cartesian3.fromDegrees(110, 32, 50000), // 位置在圆柱高度的中间点
+  //   cylinder: {
+  //     length: 100000, // 高度
+  //     topRadius: 4000, // 顶部半径
+  //     bottomRadius: 4000, // 底部半径
+  //     material: Cesium.Color.GREEN.withAlpha(0.4),
+  //   },
+  // });
+
+  // viewer.entities.add({
+  //   position: Cesium.Cartesian3.fromDegrees(110.1, 32),
+  //   ellipse: {
+  //     // 椭圆短半轴长度
+  //     semiMinorAxis: 8000,
+  //     // 椭圆长半轴长度
+  //     semiMajorAxis: 8000,
+  //     height: 0,
+  //     extrudedHeight:new Cesium.CallbackProperty(()=>{
+  //       waterH += 0.15* x
+  //       if(waterH > 315){
+  //         x = -1
+  //       }
+  //       if(waterH < 275){
+  //         x = 1
+  //       }
+  //       return waterH
+  //     }),//多边形凸出面高度
+  //     material: Cesium.Color.BLUE.withAlpha(0.4),
+  //   },
+  // });
+  let waterH = 200
+  let x = 1
   viewer.entities.add({
-    position: Cesium.Cartesian3.fromDegrees(110, 32, 50000), // 位置在圆柱高度的中间点
-    cylinder: {
-      length: 100000, // 高度
-      topRadius: 4000, // 顶部半径
-      bottomRadius: 4000, // 底部半径
-      material: Cesium.Color.GREEN.withAlpha(0.4),
+    polygon: {
+      hierarchy: Cesium.Cartesian3.fromDegreesArray([
+        110, 30.8,
+        110, 32,
+        110.8, 32,
+        110.8, 30.8
+      ]),
+      height: 0,
+      extrudedHeight: new Cesium.CallbackProperty(() => {
+        waterH += 0.15 * x
+        if (waterH > 230) {
+          x = -1
+        }
+        if (waterH < 200) {
+          x = 1
+        }
+        return waterH
+      }),
+      // material: new Cesium.PolylineTrailLinkMaterialProperty(
+      //   Cesium.Color.RED,
+      //   1000
+      // ),
+      material: Cesium.Color.BLUE.withAlpha(0.5),
     },
   });
-  // viewer.entities.add(
-  //   {
-  //   id: "redPolygon",
-  //   name: "Red polygon on surface",
-  //   polygon: {
-  //   hierarchy:Cesium.Cartesian3.fromDegreesArray([
-  //   -115.0,
-  //   37.0,
-  //   -115.0,
-  //   32.0,
-  //   -107.0,
-  //   33.0,
-  //   -102.0,
-  //   31.0,
-  //   -102.0,
-  //   35.0,
-  // ]),
-  // material:Cesium.Color.RED.withAlpha(0.5),
-  // outline: true,
-  // outlineColor: Cesium.Color.BLUE.withAlpha(0.2),
-  // outlineWidth: 1
-  //   },
-  // },
-  // )
+  viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(110.5, 31.05, 50000),
+    duration: 1.6,
+  });
   // 雷达扫描
   viewer.entities.add({
     id: "scan",
@@ -659,7 +549,8 @@ const addEllipse = (
         }
         return startR;
       }),
-      height: 0,
+      height: 10,
+      extrudedHeight: 10,
       material: new Cesium.ImageMaterialProperty({
         image: greenPng, // 材质贴图
         color: new Cesium.CallbackProperty(() => {

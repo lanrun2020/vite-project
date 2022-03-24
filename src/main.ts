@@ -4,9 +4,6 @@ import router from './router'
 import store from './store'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
-// if(store.getters.baseURL){
-//   import('../mock/index')
-// }
 import('../mock/index')
 
 const app = createApp(App)

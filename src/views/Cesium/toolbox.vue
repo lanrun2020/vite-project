@@ -12,10 +12,11 @@
         :key="item.value"
         :activeIndex="activeIndex"
         :value="item.value"
-        :label="item.title" 
+        :label="item.title"
         @toolChecked="toolChecked"
       ></toolitem>
     </div>
+    <el-button v-if="activeIndex === 3" @click="emit('finishPolygon')">完成</el-button>
   </div>
 </template>
 
@@ -28,14 +29,14 @@ let toolActive = ref(true);
 let activeIndex = ref(-1);
 
 //props带默认值的写法
-const props =withDefaults(defineProps<{
-  toolList?: Array<{value:number,title:string}>;
-}>(),{toolList:()=>[]});
+const props = withDefaults(defineProps<{
+  toolList?: Array<{ value: number, title: string }>;
+}>(), { toolList: () => [] });
 
-const emit = defineEmits(["toolChecked"]);
+const emit = defineEmits(["toolChecked", 'finishPolygon']);
 
 //监听
-watch(activeIndex,()=>{
+watch(activeIndex, () => {
   console.log('activeIndex change')
 })
 
@@ -59,7 +60,7 @@ const toolChecked = (active: boolean, value: any) => {
   height: 60vh;
   border-radius: 2px;
   border: 1px solid rgb(0, 195, 255);
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: rgba(0, 0, 0, 0.75);
   transition: right 0.15s linear;
 }
 .switchbox {
@@ -73,6 +74,7 @@ const toolChecked = (active: boolean, value: any) => {
   transform: translateX(-100%) translateY(-50%);
   cursor: pointer;
   color: rgb(0, 195, 255, 0.6);
+  background-color: rgba(0, 0, 0, 0.75);
 }
 .switchicon {
   font-size: 32px;
@@ -83,5 +85,7 @@ const toolChecked = (active: boolean, value: any) => {
 }
 .tool-box-content {
   display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 </style>

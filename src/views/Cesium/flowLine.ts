@@ -1,5 +1,5 @@
 import redimg from '../../assets/redLine.png'
-const Cesium = window.Cesium
+import Cesium from '@/utils/importCesium'
 
 export function initPolylineTrailLinkMaterialProperty () {
   function PolylineTrailLinkMaterialProperty (this: any, color:object, duration:number, U?:object) {
