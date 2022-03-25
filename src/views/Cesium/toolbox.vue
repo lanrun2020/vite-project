@@ -36,9 +36,9 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits(["toolChecked", 'finishPolygon']);
 
 //监听
-watch(activeIndex, () => {
-  console.log('activeIndex change')
-})
+// watch(activeIndex, () => {
+//   console.log('activeIndex change')
+// })
 
 const toolChecked = (active: boolean, value: any) => {
   if (active) {

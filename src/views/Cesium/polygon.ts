@@ -1,8 +1,32 @@
 import Cesium from "@/utils/importCesium"
-let arr2:Array<number> = [] 
-let polygonPoints:Array<{lng:number,lat:number}> = []
-let primitiveArr:Array<any> = []
-const addPolygon2 = (viewer:any, longitude: number, latitude: number) => {
+let arr2: Array<number> = []
+let polygonPoints: Array<{ lng: number, lat: number }> = []
+let primitiveArr: Array<any> = []
+// let longitude: number = 110
+// let latitude: number = 32
+
+let cartesian = null;
+let handler:any
+const addPolygon2 = (viewer: any, active: boolean) => {
+  if (active) {
+    let scene = viewer.scene
+    let ellipsoid = scene.globe.ellipsoid;
+    handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+    handler.setInputAction((event: any) => {
+      cartesian = viewer.camera.pickEllipsoid(event.position, ellipsoid);
+      if (cartesian) {
+        let cartographic = ellipsoid.cartesianToCartographic(cartesian);
+        const longitude = Cesium.Math.toDegrees(cartographic.longitude);
+        const latitude = Cesium.Math.toDegrees(cartographic.latitude);
+        addPolygon(viewer,longitude,latitude)
+      }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    
+  } else {
+    handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)//移除事件
+  }
+};
+const addPolygon = (viewer:any,longitude:number,latitude:number)=>{
   if (arr2.length <= 4) {
     arr2.push(longitude, latitude);
     polygonPoints.push({ lng: longitude, lat: latitude })
@@ -27,8 +51,8 @@ const addPolygon2 = (viewer:any, longitude: number, latitude: number) => {
           polygonHierarchy: new Cesium.PolygonHierarchy(
             Cesium.Cartesian3.fromDegreesArray(arr2)
           ),
-        height:0,
-        extrudedHeight:320,
+          height: 0,
+          extrudedHeight: 320,
         }),
       }),
       appearance: new Cesium.EllipsoidSurfaceAppearance({
@@ -40,7 +64,7 @@ const addPolygon2 = (viewer:any, longitude: number, latitude: number) => {
       primitive
     );
   }
-};
+}
 const polygonFilter2 = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //首尾相连边
   let length = polygonPoints.length
   let p1 = polygonPoints[0]
@@ -73,7 +97,8 @@ const polygonFilter2 = (checkPoint: { lat: number, lng: number }, polygonPoints:
   }
   return r1 && r2 && r3
 }
-const polygonFilter = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //判断点是否处于多边形内部
+// 判断点是否处于多边形内部
+const polygonFilter = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => {
   var counter = 0;
   var i;
   var xinters;
@@ -108,4 +133,4 @@ const reset = () => {
   polygonPoints = []
   primitiveArr = []
 }
-export {reset,addPolygon2}
+export { reset, addPolygon2 }
