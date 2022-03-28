@@ -4,17 +4,17 @@ import Cesium from '@/utils/importCesium'
 export default class PolylineTrailLinkMaterialProperty {
   private _color: object | undefined
   private _image: object | undefined
+  private _d: number
   private _definitionChanged: any
-  private _colorSubscription: object | undefined
   duration: number
   private _time: number
-  constructor(color: object, duration: number,image:any,d:number, U?: object) {
+  constructor(color: object, duration: number,image:any,d:number = 1, U?: object) {
     this._definitionChanged = new Cesium.Event()
-    this._colorSubscription = U
     this._color = color
     this.duration = duration
     this._time = (new Date()).getTime()
     this._image = image
+    this._d = d
     this.conbineProp()
     this.init()
   }
@@ -26,9 +26,8 @@ export default class PolylineTrailLinkMaterialProperty {
       result = {}
     }
     result.color = this._color
-    result.image = Cesium.Material.PolylineTrailLinkImage
-    result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration
-    
+    result.image = this._image
+    result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._d
     return result
   }
   equals(other) {
@@ -53,7 +52,6 @@ export default class PolylineTrailLinkMaterialProperty {
   init() {
     Cesium.PolylineTrailLinkMaterialProperty = PolylineTrailLinkMaterialProperty
     Cesium.Material.PolylineTrailLinkType = 'PolylineTrailLink'
-    Cesium.Material.PolylineTrailLinkImage = this._image || redimg // 图片
     Cesium.Material.PolylineTrailLinkSource =
       // eslint-disable-next-line no-multi-str
       'czm_material czm_getMaterial(czm_materialInput materialInput)\n\
@@ -72,8 +70,8 @@ export default class PolylineTrailLinkMaterialProperty {
         type: Cesium.Material.PolylineTrailLinkType,
         uniforms: {
           color: new Cesium.Color(0.0, 0.0, 0.0, 0.5),
-          image: '',
-          time: 0
+          image: this._image,
+          time: -20
         },
         source: Cesium.Material.PolylineTrailLinkSource
       },

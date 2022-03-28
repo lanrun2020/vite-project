@@ -18,7 +18,8 @@ import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
 import { addRiverFlood } from '@/views/Cesium/addRiverFlood'
 import { addStaticRadar } from '@/views/Cesium/addStaticRadar'
-import { addScanWall } from "./addScanWall";
+import { addScanWall } from "@/views/Cesium/addScanWall";
+import { addPlaneModel } from "@/views/Cesium/addPlaneModel";
 
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
@@ -49,6 +50,10 @@ let toolList: Array<{ title: string; value: number }> = [
   {
     title: "雷达扫描",
     value: 6,
+  },
+  {
+    title: "飞机航线",
+    value: 7,
   }
 ];
 onMounted(async () => {
@@ -78,6 +83,9 @@ const toolChecked = (active: boolean, value: number) => {
     case 6: //扇形雷达扫描
       addScanWall(viewer, active);
       break;
+    case 7: //直飞
+      addPlaneModel(viewer, active);
+      break;
     default: break;
   }
 };
@@ -86,10 +94,10 @@ const initCesium = () => {
     viewer.destroy();
   }
   viewer = new Cesium.Viewer("cesiumContainer", {
-    animation: false, // 是否显示动画控件
+    animation: true, // 是否显示时钟clock动画控件
     baseLayerPicker: false, // 是否显示图层选择控件
     geocoder: false, // 是否显示地名查找控件
-    timeline: false, // 是否显示时间线控件
+    timeline: true, // 是否显示时间线控件
     sceneModePicker: true, // 是否显示投影方式控件
     navigationHelpButton: false, // 是否显示帮助信息控件
     infoBox: false, // 是否显示点击要素之后显示的信息
@@ -100,6 +108,9 @@ const initCesium = () => {
     //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
     // })
   });
+  viewer.clock.shouldAnimate = true
+  viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
+
   viewer.scene.globe.depthTestAgainstTerrain = true;
   // var layer = new Cesium.UrlTemplateImageryProvider({
   //   url: "http://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",

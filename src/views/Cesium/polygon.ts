@@ -21,7 +21,6 @@ const addPolygon2 = (viewer: any, active: boolean) => {
         addPolygon(viewer,longitude,latitude)
       }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-    
   } else {
     handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)//移除事件
   }

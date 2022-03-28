@@ -1,4 +1,5 @@
 import Cesium from "@/utils/importCesium"
+import redimg from '../../assets/redLine.png'
 let entities: Array<any> = []
 const startPoint = { longitude: 110, latitude: 32 }
 const endPoint = [
@@ -37,7 +38,9 @@ const createFlyLine = (viewer, start: { longitude: number, latitude: number }, e
   // 终点与飞行线
   const material = new Cesium.PolylineTrailLinkMaterialProperty(
     Cesium.Color.BLUE,
-    3000
+    3000,
+    redimg,
+    1
   );
   endPoints.forEach((item) => {
     const endPoint = Cesium.Cartesian3.fromDegrees(

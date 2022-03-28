@@ -59,7 +59,8 @@ export const addRiverFlood = (viewer, active) => {
         material: new Cesium.PolylineTrailLinkMaterialProperty(
           Cesium.Color.BLUE.withAlpha(0.4),
           15000,
-          river
+          river,
+          0.3,
         ),
         outline: false, // height required for outlines to display
       }
