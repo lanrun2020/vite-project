@@ -38,7 +38,7 @@ export const addScanWall = (viewer: any, active: boolean) => {
           return Cesium.Cartesian3.fromDegreesArrayHeights(
             calcPoints(114, 30, 50000, heading)
           );
-        }),
+        },false),
         material: Cesium.Color.AQUAMARINE.withAlpha(0.5),
       },
     }));

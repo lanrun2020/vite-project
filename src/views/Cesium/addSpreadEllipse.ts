@@ -46,7 +46,7 @@ const addEllipse = (
           startR = 0;
         }
         return startR;
-      }),
+      },false),
       // 椭圆长半轴长度
       semiMajorAxis: new Cesium.CallbackProperty(() => {
         if (startR <= maxR) {
@@ -54,15 +54,15 @@ const addEllipse = (
         } else {
           startR = 0;
         }
-        return startR;
-      }),
+        return startR + 200;
+      },false),
       height: 10,
       extrudedHeight: 10,
       material: new Cesium.ImageMaterialProperty({
         image: greenPng, // 材质贴图
         color: new Cesium.CallbackProperty(() => {
           return Cesium.Color.WHITE.withAlpha(1 - startR / maxR + 0.05);
-        }),
+        },false),
         transparent: true, // 材质是否透明（贴图为png格式图片时适用）
         // repeat: new Cesium.Cartesian2(4, 4),//贴图重复参数
       }),

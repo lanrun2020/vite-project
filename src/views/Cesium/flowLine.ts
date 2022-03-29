@@ -1,6 +1,5 @@
 import redimg from '../../assets/redLine.png'
 import Cesium from '@/utils/importCesium'
-
 export function initPolylineTrailLinkMaterialProperty () {
   function PolylineTrailLinkMaterialProperty (this: any, color:object, duration:number, U?:object) {
     this._definitionChanged = new Cesium.Event()

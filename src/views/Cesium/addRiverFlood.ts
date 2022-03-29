@@ -53,7 +53,7 @@ export const addRiverFlood = (viewer, active) => {
             x = 1
           }
           return waterH
-        }),
+        },false),
         width: 800.0,
         cornerType: Cesium.CornerType.MITERED,
         material: new Cesium.PolylineTrailLinkMaterialProperty(

@@ -7,12 +7,12 @@
 </template>
 
 <script setup lang="ts">
-import "./flowLineMaterial";
 import Toolbox from "./toolbox.vue";
 import { onMounted, reactive } from "@vue/runtime-core";
 import { fetchCesium } from "@/apis/an-system";
 import { addPolygon2, reset } from "./polygon";
 import Cesium from '@/utils/importCesium'
+import "./flowLineMaterial";
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
@@ -93,6 +93,7 @@ const initCesium = () => {
   if (viewer) {
     viewer.destroy();
   }
+  
   viewer = new Cesium.Viewer("cesiumContainer", {
     animation: true, // 是否显示时钟clock动画控件
     baseLayerPicker: false, // 是否显示图层选择控件

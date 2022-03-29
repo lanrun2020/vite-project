@@ -29,7 +29,7 @@ export const addScanEllipse = (viewer: any, active: boolean, point: { lng: numbe
           // 设置旋转角度
           rotation += 0.08;
           return rotation;
-        }),
+        },false),
       },
     }));
   } else {

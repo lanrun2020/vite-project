@@ -1,6 +1,4 @@
-import redimg from '../../assets/redLine.png'
 import Cesium from '@/utils/importCesium'
-
 export default class PolylineTrailLinkMaterialProperty {
   private _color: object | undefined
   private _image: object | undefined
