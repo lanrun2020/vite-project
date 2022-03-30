@@ -1,7 +1,11 @@
 import Cesium from "@/utils/importCesium"
-let entities: Array<any> = []
+import { createLine } from "./flowline3";
+import redimg from '../../assets/redLine.png'
+import CallbackProperty from "cesium/Source/DataSources/CallbackProperty";
+
+let entities: Array<object> = []
 // 根据两个坐标点,获取Heading(朝向)
-function getHeading(pointA, pointB) {
+const getHeading = (pointA:object, pointB:object) => {
   //建立以点A为原点，X轴为east,Y轴为north,Z轴朝上的坐标系
   const transform = Cesium.Transforms.eastNorthUpToFixedFrame(pointA);
   //向量AB
@@ -17,24 +21,7 @@ function getHeading(pointA, pointB) {
   return Cesium.Math.TWO_PI - Cesium.Math.zeroToTwoPi(heading);
 }
 
-function computeCirclularFlight(Points,start) {
-  const property = new Cesium.SampledPositionProperty();
-  for (let i = 0; i < Points.length; i++) {
-    const time = Cesium.JulianDate.addSeconds(
-      start,
-      i,
-      new Cesium.JulianDate()
-    );
-    const position = Cesium.Cartesian3.fromDegrees(
-      Points[i].lon,
-      Points[i].lat,
-      Points[i].height,
-    );
-    property.addSample(time, position);
-  }
-  return property;
-}
-function computeCirclularFlight2(Points,start) {
+const computeCirclularFlight2 = ( Points:Array<object>,start:object) => {
   const property = new Cesium.SampledPositionProperty();
   for (let i = 0; i < Points.length; i++) {
     const time = Cesium.JulianDate.addSeconds(
@@ -47,15 +34,15 @@ function computeCirclularFlight2(Points,start) {
   return property;
 }
 // 获取流动曲线上多个连续点
-const generateCurve = (startPoint: any, endPoint: any, length:number) => {
+const generateCurve = (startPoint: object, endPoint: object, length:number) => {
   const addPointCartesian = new Cesium.Cartesian3();
   Cesium.Cartesian3.add(startPoint, endPoint, addPointCartesian); // 将两个笛卡尔坐标按照分量求和，addPointCartesian是两点(x,y,z)相加后返回的结果(x,y,z)
   const midPointCartesian = new Cesium.Cartesian3();
   Cesium.Cartesian3.divideByScalar(addPointCartesian, 2, midPointCartesian); // midPointCartesian是点(x,y,z)除以2后返回的结果(x,y,z)
   const midPointCartographic =
     Cesium.Cartographic.fromCartesian(midPointCartesian); // Cartographic.fromCartesian将笛卡尔位置转换为经纬度弧度值
-  midPointCartographic.height = 100000 ||
-    Cesium.Cartesian3.distance(startPoint, endPoint) / 25; // 将起始点、终点两个坐标点之间的距离除5,设置为此中间点的高度
+  midPointCartographic.height = 10000 ||
+    Cesium.Cartesian3.distance(startPoint, endPoint) / 100; // 将起始点、终点两个坐标点之间的距离除x,设置为此中间点的高度
   const midPoint = new Cesium.Cartesian3();
   Cesium.Ellipsoid.WGS84.cartographicToCartesian(
     midPointCartographic,
@@ -66,10 +53,11 @@ const generateCurve = (startPoint: any, endPoint: any, length:number) => {
     times: [0.0, 0.5, 1], // 曲线变化参数，严格递增，times.length必须等于points.length,最后一个值,与下面的evaluate()的参数相关（参数区间在0~1）
     points: [startPoint, midPoint, endPoint], // 控制点,points.length必须 ≥ 2
   });
-  let curvePoints: Array<any> = [];
-  for (let i = 0, len = length; i <= len; i++) {
+  let curvePoints: Array<object> = [spline.evaluate(0)];
+  for (let i = 2, len = length; i <= len - 2; i++) {
     curvePoints.push(spline.evaluate(i / len)); // 传时间参数，返回曲线上给定时间点的新实例,时间段划分越多，曲线越平滑
   }
+  curvePoints.push(spline.evaluate(1));
   return curvePoints; // 返回曲线上的多个点坐标集合
 };
 
@@ -79,13 +67,24 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
      const startPoint = Cesium.Cartesian3.fromDegrees(
       103.95223,
       30.57428,
-      0
+      5000
     );
     const endPoint = Cesium.Cartesian3.fromDegrees(
       116.410745,
       39.510251,
-      0
+      5000
     );
+    // viewer.camera.flyTo({
+    //   destination: Cesium.Cartesian3.fromDegrees(103, 26, 500000),
+    //   duration: 1.6,
+    //   orientation: {
+    //     // 指向
+    //       heading: Cesium.Math.toRadians(0),
+    //       // 视角
+    //       pitch: Cesium.Math.toRadians(-45),
+    //       roll: 0
+    //     }
+    // });
     const points = generateCurve(startPoint,endPoint,50) //获取路径上的点
     const start = Cesium.JulianDate.now()
     const stop = Cesium.JulianDate.addSeconds(start, points.length, new Cesium.JulianDate())
@@ -105,23 +104,40 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
       id: "Blueline",
       name: "Blue dashed line",
       polyline: {
-        // positions: Cesium.Cartesian3.fromDegreesArrayHeights(arr),
         positions:points,
-        width: 2,
-        material: new Cesium.PolylineDashMaterialProperty({
-          color: Cesium.Color.CYAN,
-        }),
+        width: 20,
+        material: new Cesium.PolylineTrailLinkMaterialProperty(
+          Cesium.Color.RED,
+          1000,
+          redimg,
+          1,
+          25
+        ),
       }
     }))
-    entities.push(viewer.entities.add({
+    const plane = viewer.entities.add({
       id: "modelPlane",
       position: property,
       model: {
         uri: `/model/CesiumAir.glb`,
-        scale: 500,
+        scale: 2,
+        minimumPixelSize:60,
       },
+      viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
       orientation: new Cesium.VelocityOrientationProperty(property),
-    }));
+    })
+    entities.push(plane);
+
+    // viewer.trackedEntity = plane;
+    // viewer.camera.setView({
+    //   destination: new Cesium.CallbackProperty(()=>{
+       
+        
+    //     return air.position
+    //   },false),
+    //   duration: 1.6,
+    // });
+    // createLine(viewer,true, points)
   } else {
     if (entities?.length) {
       entities.forEach((entity) => {

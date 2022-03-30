@@ -1,6 +1,7 @@
 // 圆形旋转扫描效果
 import Cesium from "@/utils/importCesium"
 import bluePng from "@/assets/blue.png";
+
 let entities: Array<any> = []
 const defaultPoint = { lng: 125, lat: 30 }
 export const addScanEllipse = (viewer: any, active: boolean, point: { lng: number, lat: number } = defaultPoint) => {
@@ -20,7 +21,7 @@ export const addScanEllipse = (viewer: any, active: boolean, point: { lng: numbe
         // 椭圆长半轴长度
         semiMajorAxis: 80000,
         height: 10,
-        extrudedHeight: 10,
+        extrudedHeight: 10000,
         material: new Cesium.ImageMaterialProperty({
           image: bluePng,
           transparent: true, // 透明

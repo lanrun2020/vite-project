@@ -57,7 +57,7 @@ const addEllipse = (
         return startR + 200;
       },false),
       height: 10,
-      extrudedHeight: 10,
+      extrudedHeight: 10000,
       material: new Cesium.ImageMaterialProperty({
         image: greenPng, // 材质贴图
         color: new Cesium.CallbackProperty(() => {

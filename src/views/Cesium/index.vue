@@ -20,6 +20,7 @@ import { addRiverFlood } from '@/views/Cesium/addRiverFlood'
 import { addStaticRadar } from '@/views/Cesium/addStaticRadar'
 import { addScanWall } from "@/views/Cesium/addScanWall";
 import { addPlaneModel } from "@/views/Cesium/addPlaneModel";
+import { addTude } from "./addTube";
 
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
@@ -54,6 +55,10 @@ let toolList: Array<{ title: string; value: number }> = [
   {
     title: "飞机航线",
     value: 7,
+  },
+  {
+    title: "流动管道",
+    value: 8,
   }
 ];
 onMounted(async () => {
@@ -85,6 +90,9 @@ const toolChecked = (active: boolean, value: number) => {
       break;
     case 7: //直飞
       addPlaneModel(viewer, active);
+      break;
+    case 8: //流动管道
+      addTude(viewer, active);
       break;
     default: break;
   }

@@ -3,16 +3,18 @@ export default class PolylineTrailLinkMaterialProperty {
   private _color: object | undefined
   private _image: object | undefined
   private _d: number
+  private _repeat: number
   private _definitionChanged: any
   duration: number
   private _time: number
-  constructor(color: object, duration: number,image:any,d:number = 1, U?: object) {
+  constructor(color: object, duration: number,image:any,d:number = 1,repeat:number = 1, U?: object) {
     this._definitionChanged = new Cesium.Event()
     this._color = color
     this.duration = duration
     this._time = (new Date()).getTime()
     this._image = image
     this._d = d
+    this._repeat = repeat
     this.conbineProp()
     this.init()
   }
@@ -29,7 +31,7 @@ export default class PolylineTrailLinkMaterialProperty {
     return result
   }
   equals(other) {
-    return this === other || (other instanceof PolylineTrailLinkMaterialProperty && Cesium.Property.equals(this._color, other._color))
+    return this === other || (other instanceof PolylineTrailLinkMaterialProperty && Cesium.Property.equals(this._color, other._color) && Cesium.Property.equals(this._image, other._image) && Cesium.Property.equals(this._repeat, other._repeat))
   }
   conbineProp() {
     Object.defineProperties(PolylineTrailLinkMaterialProperty.prototype, {
@@ -55,7 +57,7 @@ export default class PolylineTrailLinkMaterialProperty {
       'czm_material czm_getMaterial(czm_materialInput materialInput)\n\
       {\n\
           czm_material material = czm_getDefaultMaterial(materialInput);\n\
-          vec2 st = materialInput.st;\n\
+          vec2 st = fract (repeat *materialInput.st);\n\
           vec4 colorImage = texture2D(image, vec2(fract(st.s - time), st.t));\n\
           material.alpha = colorImage.a * color.a;\n\
           material.diffuse = (colorImage.rgb+color.rgb)/2.0;\n\
@@ -69,7 +71,8 @@ export default class PolylineTrailLinkMaterialProperty {
         uniforms: {
           color: new Cesium.Color(0.0, 0.0, 0.0, 0.5),
           image: this._image,
-          time: -20
+          repeat: new Cesium.Cartesian2(this._repeat, 1.0),
+          time: 0,
         },
         source: Cesium.Material.PolylineTrailLinkSource
       },
