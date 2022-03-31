@@ -1,7 +1,9 @@
 import Cesium from "@/utils/importCesium"
-import redimg from '../../assets/redLine.png'
+import redimg from '../../assets/newredLine.png'
+import greenPng from "@/assets/green.png";
 
 let entity: any = null
+let entity2: any = null
 const computeCircle = (radius:number) => {
   const positions:Array<object> = [];
   for (let i = 0; i < 360; i++) {
@@ -19,13 +21,13 @@ const computeCircle = (radius:number) => {
 export const addTude = (viewer:any, active:boolean) => {
   if (active) {
     viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(110.43934237419626, 31.01, 20000),
+      destination: Cesium.Cartesian3.fromDegrees(113, 28.5, 600000),
       duration: 1.6,
       orientation: {
         // 指向
           heading: Cesium.Math.toRadians(-30),
           // 视角
-          pitch: Cesium.Math.toRadians(-35),
+          pitch: Cesium.Math.toRadians(-55),
           roll: 0
         }
     });
@@ -34,28 +36,48 @@ export const addTude = (viewer:any, active:boolean) => {
     entity = viewer.entities.add({
       name: "Red tube with rounded corners",
       polylineVolume: {
-        positions: Cesium.Cartesian3.fromDegreesArray([
-          110.0,
+        positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+          108.0,
           31.0,
+          5000,
           112.0,
           32.0,
+          5000,
           112.0,
           34.0,
+          3000,
         ]),
-        shape: computeCircle(60000.0),
+        // cornerType: Cesium.CornerType.MITERED, // 拐角样式 
+        // cornerType: Cesium.CornerType.ROUNDED, // 拐角样式 
+        shape: computeCircle(6000.0),
         material: new Cesium.PolylineTrailLinkMaterialProperty(
           Cesium.Color.BLUE,
           3000,
           redimg,
-          1
+          1,
+          12
         ),
       },
     });
+    // entity2 = viewer.entities.add({
+    //     position: Cesium.Cartesian3.fromDegrees(105.0, 40.0, 200000.0),
+    //     cylinder: {
+    //       length: 400000.0,
+    //       topRadius: 0.0,
+    //       bottomRadius: 200000.0,
+    //       material: new Cesium.PolylineTrailLinkMaterialProperty(
+    //         Cesium.Color.BLUE,
+    //         3000,
+    //         greenPng,
+    //         5
+    //       ),
+    //     },
+    // });
   } else {
     if (entity) {
       viewer.entities.remove(entity)
+      viewer.entities.remove(entity2)
       entity = null
     }
   }
-
 }

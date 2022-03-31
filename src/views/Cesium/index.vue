@@ -21,6 +21,7 @@ import { addStaticRadar } from '@/views/Cesium/addStaticRadar'
 import { addScanWall } from "@/views/Cesium/addScanWall";
 import { addPlaneModel } from "@/views/Cesium/addPlaneModel";
 import { addTude } from "./addTube";
+import { addCylinder } from "./addCylinder";
 
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
@@ -59,6 +60,10 @@ let toolList: Array<{ title: string; value: number }> = [
   {
     title: "流动管道",
     value: 8,
+  },
+  {
+    title: "人口统计",
+    value: 9,
   }
 ];
 onMounted(async () => {
@@ -93,6 +98,9 @@ const toolChecked = (active: boolean, value: number) => {
       break;
     case 8: //流动管道
       addTude(viewer, active);
+      break;
+    case 9: //人口统计
+      addCylinder(viewer, active);
       break;
     default: break;
   }

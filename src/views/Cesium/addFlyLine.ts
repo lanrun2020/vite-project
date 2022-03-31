@@ -1,5 +1,5 @@
 import Cesium from "@/utils/importCesium"
-import redimg from '../../assets/redLine.png'
+import redimg from '../../assets/newredLine.png'
 let entities: Array<any> = []
 const startPoint = { longitude: 110, latitude: 32 }
 const endPoint = [
@@ -51,7 +51,7 @@ const createFlyLine = (viewer, start: { longitude: number, latitude: number }, e
     entities.push(viewer.entities.add({
       polyline: {
         positions: generateCurve(startPoint, endPoint), // 多个点坐标构成线条路径
-        width: 15,
+        width: 2,
         material: material,
       },
     }));

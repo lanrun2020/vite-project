@@ -6,7 +6,7 @@ let primitiveArr: Array<any> = []
 // let latitude: number = 32
 
 let cartesian = null;
-let handler:any
+let handler: any
 const addPolygon2 = (viewer: any, active: boolean) => {
   if (active) {
     let scene = viewer.scene
@@ -18,14 +18,14 @@ const addPolygon2 = (viewer: any, active: boolean) => {
         let cartographic = ellipsoid.cartesianToCartographic(cartesian);
         const longitude = Cesium.Math.toDegrees(cartographic.longitude);
         const latitude = Cesium.Math.toDegrees(cartographic.latitude);
-        addPolygon(viewer,longitude,latitude)
+        addPolygon(viewer, longitude, latitude)
       }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
   } else {
     handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)//移除事件
   }
 };
-const addPolygon = (viewer:any,longitude:number,latitude:number)=>{
+const addPolygon = (viewer: any, longitude: number, latitude: number) => {
   if (arr2.length <= 4) {
     arr2.push(longitude, latitude);
     polygonPoints.push({ lng: longitude, lat: latitude })
@@ -70,31 +70,33 @@ const polygonFilter2 = (checkPoint: { lat: number, lng: number }, polygonPoints:
   let p2 = polygonPoints[length - 1]
   let p3 = polygonPoints[1]
   let p4 = polygonPoints[length - 2]
-  let c2 = checkPoint.lat - (checkPoint.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) - p2.lat //第一个点，最后一个点
-  let c1 = p4.lat - (p4.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) - p2.lat
+
+  let c1 = p4.lat - (p4.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) - p2.lat //第一个点，最后一个点
+  let c2 = checkPoint.lat - (checkPoint.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) - p2.lat
 
   let c3 = p2.lat - (p2.lng - p3.lng) * (p3.lat - p1.lat) / (p3.lng - p1.lng) - p3.lat //最开始两个点
   let c4 = checkPoint.lat - (checkPoint.lng - p3.lng) * (p3.lat - p1.lat) / (p3.lng - p1.lng) - p3.lat
 
   let c5 = checkPoint.lat - (checkPoint.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) - p4.lat //最后两个点
   let c6 = p1.lat - (p1.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) - p4.lat
-  let r1, r2, r3
+
+  let res: boolean = true
   if (c5 <= 0) {
-    r1 = c6 <= 0 ? true : false
+    res = res && c6 <= 0 ? true : false
   } else {
-    r1 = c6 >= 0 ? true : false
+    res = res && c6 >= 0 ? true : false
   }
   if (c3 <= 0) {
-    r2 = c4 <= 0 ? true : false
+    res = res && c4 <= 0 ? true : false
   } else {
-    r2 = c4 >= 0 ? true : false
+    res = res && c4 >= 0 ? true : false
   }
   if (c1 <= 0) {
-    r3 = c2 >= 0 ? true : false
+    res = res && c2 >= 0 ? true : false
   } else {
-    r3 = c2 <= 0 ? true : false
+    res = res && c2 <= 0 ? true : false
   }
-  return r1 && r2 && r3
+  return res
 }
 // 判断点是否处于多边形内部
 const polygonFilter = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => {
