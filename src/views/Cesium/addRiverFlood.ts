@@ -38,12 +38,12 @@ export const addRiverFlood = (viewer:any, active:boolean) => {
           Cesium.Color.BLUE.withAlpha(0.4),
           15000,
           river,
-          0.3,
+          0.5,
+          30,
         ),
         outline: false, // height required for outlines to display
       }
     });
-
   } else {
     if (entity) {
       viewer.entities.remove(entity)

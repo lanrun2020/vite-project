@@ -41,5 +41,4 @@ export const addScanEllipse = (viewer: any, active: boolean, point: { lng: numbe
       entities = []
     }
   }
-
 };

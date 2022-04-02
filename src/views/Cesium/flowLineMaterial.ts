@@ -65,6 +65,7 @@ export default class PolylineTrailLinkMaterialProperty {
       }'
     // material.alpha:透明度;
     // material.diffuse：颜色;
+    // fract(x) 返回 x 的小数部分
     Cesium.Material._materialCache.addMaterial(Cesium.Material.PolylineTrailLinkType, {
       fabric: {
         type: Cesium.Material.PolylineTrailLinkType,

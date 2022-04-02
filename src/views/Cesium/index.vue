@@ -13,6 +13,7 @@ import { fetchCesium } from "@/apis/an-system";
 import { addPolygon2, reset } from "./polygon";
 import Cesium from '@/utils/importCesium'
 import "./flowLineMaterial";
+import "./RadarMaterial";
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
@@ -22,6 +23,7 @@ import { addScanWall } from "@/views/Cesium/addScanWall";
 import { addPlaneModel } from "@/views/Cesium/addPlaneModel";
 import { addTude } from "./addTube";
 import { addCylinder } from "./addCylinder";
+import { addClustering } from "./addClustering";
 
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
@@ -64,6 +66,10 @@ let toolList: Array<{ title: string; value: number }> = [
   {
     title: "人口统计",
     value: 9,
+  },
+  {
+    title: "点聚合",
+    value: 10,
   }
 ];
 onMounted(async () => {
@@ -85,6 +91,7 @@ const toolChecked = (active: boolean, value: number) => {
       addPolygon2(viewer, active);
       break;
     case 4://动态河流淹没
+      viewer.scene.globe.depthTestAgainstTerrain = true;
       addRiverFlood(viewer, active);
       break;
     case 5: //雷达模型
@@ -101,6 +108,9 @@ const toolChecked = (active: boolean, value: number) => {
       break;
     case 9: //人口统计
       addCylinder(viewer, active);
+      break;
+    case 10: //点聚合
+    addClustering(viewer, active);
       break;
     default: break;
   }
