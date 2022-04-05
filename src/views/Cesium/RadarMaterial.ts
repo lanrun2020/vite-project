@@ -1,20 +1,21 @@
 import Cesium from '@/utils/importCesium'
+import { Vector4 } from 'three'
 export default class RadarScanMaterialProperty {
   private _color: object | undefined
-  private _image: number
   private _d: number
   private _repeat: number
   private _definitionChanged: any
   duration: number
   private _time: number
-  constructor(color: object, duration: number,image:number,d:number = 1,repeat:number = 1, U?: object) {
+  private _thickness: number
+  constructor(color: Vector4 = new Cesium.Color(.1, 1, 0, 1), duration: number = 10000,d:number = 1,repeat:number = 10,thickness:number = 0.2, U?: object) {
     this._definitionChanged = new Cesium.Event()
     this._color = color
     this.duration = duration
     this._time = (new Date()).getTime()
-    this._image = image
     this._d = d
     this._repeat = repeat
+    this._thickness = thickness
     this.conbineProp()
     this.init()
   }
@@ -26,7 +27,6 @@ export default class RadarScanMaterialProperty {
       result = {}
     }
     result.color = this._color
-    result.image = this._image
     result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._d
     return result
   }
@@ -64,19 +64,13 @@ export default class RadarScanMaterialProperty {
         czm_material material = czm_getDefaultMaterial(materialInput);\n
         float sp = 1.0/repeat;\n  //1/30
         vec2 st = materialInput.st;\n
-        float dis = distance(st, vec2(0.5, 0.5));\n //从上自下 0 到 1/2
+        float dis = distance(st, vec2(0.5, 0.5)) + fract(materialInput.s - time);\n //从上自下 0 到 1/2
+        float dis2 = distance(st, vec2(0.5, 0.5));\n
         float m = mod(dis, sp);\n // 两数余数 返回0 - 1/30 
-        //fract(materialInput.s - time) //0-1
- 
-        // float a = step(m, sp*(thickness));\n //(0 - 1/30,1/60在中间) //一半0 一半1
-        // float a = step(m, sp*(thickness) * fract(time));\n  // 0 -> 1 增加
-        float a = step( sp*(thickness) * fract(-time),m) ;\n  //1 -> 0 增加
-        //float a = (1.0 - step(m, sp*(thickness)*(1.0 - fract(materialInput.s - time)))) *  step(m,sp*(thickness)*(fract(materialInput.s - time)));\n //返回0或1交错的repeat个阶梯值
-        // float a = step(sp*(thickness)*(fract(time - materialInput.s) - 0.5),m - 0.5);\n //返回0或1交错的repeat个阶梯值 //下部增加
-        //float a =step(sp*(thickness)*(fract(time - materialInput.s)-0.5),m);\n // 上部减少
-        // float a = step(m , sp*(thickness)*(0.5 - fract(materialInput.s - time))) + step(sp*(thickness)*(fract(time - materialInput.s) - 0.5),m - 0.5);\n
+        float a = step(m, sp*(thickness));\n //(0 - 1/30,1/60在中间) //一半0 一半1 取决于tickness的值划分
         material.diffuse = color.rgb;\n
-        material.alpha = a * color.a * (0.5 - dis);\n
+        // material.alpha = a * color.a * (0.5 - dis2);\n //渐变
+        material.alpha = a * color.a;\n
         return material;\n
       }\n`
     // material.alpha:透明度;
@@ -88,10 +82,10 @@ export default class RadarScanMaterialProperty {
       fabric: {
         type: Cesium.Material.RadarScanType,
         uniforms: {
-          color: new Cesium.Color(.2, 1, 0, 1),
+          color: this._color,
           repeat: this._repeat,
           time: 0,
-          thickness:this._image,
+          thickness:this._thickness,// 环高
         },
         source: Cesium.Material.RadarScanSource
       },

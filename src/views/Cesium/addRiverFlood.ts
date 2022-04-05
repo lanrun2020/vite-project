@@ -1,3 +1,4 @@
+// 动态河流
 import Cesium from "@/utils/importCesium"
 import river from '../../assets/river.png'
 let entity: any = null

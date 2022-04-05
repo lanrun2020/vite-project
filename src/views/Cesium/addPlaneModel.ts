@@ -1,3 +1,4 @@
+// 飞机航线
 import Cesium from "@/utils/importCesium"
 import { createLine } from "./flowline3";
 import redimg from '../../assets/redLine.png'
@@ -34,15 +35,15 @@ const computeCirclularFlight2 = ( Points:Array<object>,start:object) => {
   return property;
 }
 // 获取流动曲线上多个连续点
-const generateCurve = (startPoint: object, endPoint: object, length:number) => {
+const generateCurve = (startPoint: object, endPoint: object, length:number,height:number=0) => {
   const addPointCartesian = new Cesium.Cartesian3();
   Cesium.Cartesian3.add(startPoint, endPoint, addPointCartesian); // 将两个笛卡尔坐标按照分量求和，addPointCartesian是两点(x,y,z)相加后返回的结果(x,y,z)
   const midPointCartesian = new Cesium.Cartesian3();
   Cesium.Cartesian3.divideByScalar(addPointCartesian, 2, midPointCartesian); // midPointCartesian是点(x,y,z)除以2后返回的结果(x,y,z)
   const midPointCartographic =
     Cesium.Cartographic.fromCartesian(midPointCartesian); // Cartographic.fromCartesian将笛卡尔位置转换为经纬度弧度值
-  midPointCartographic.height = 10000 ||
-    Cesium.Cartesian3.distance(startPoint, endPoint) / 100; // 将起始点、终点两个坐标点之间的距离除x,设置为此中间点的高度
+  midPointCartographic.height = 
+    Cesium.Cartesian3.distance(startPoint, endPoint) / 50 - height; // 将起始点、终点两个坐标点之间的距离除x,设置为此中间点的高度
   const midPoint = new Cesium.Cartesian3();
   Cesium.Ellipsoid.WGS84.cartographicToCartesian(
     midPointCartographic,
@@ -115,7 +116,7 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
         ),
       }
     }))
-    const plane = viewer.entities.add({
+    entities.push(viewer.entities.add({
       id: "modelPlane",
       position: property,
       model: {
@@ -125,19 +126,35 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
       },
       viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
       orientation: new Cesium.VelocityOrientationProperty(property),
-    })
-    entities.push(plane);
-
-    // viewer.trackedEntity = plane;
-    // viewer.camera.setView({
-    //   destination: new Cesium.CallbackProperty(()=>{
-       
-        
-    //     return air.position
-    //   },false),
-    //   duration: 1.6,
-    // });
-    // createLine(viewer,true, points)
+    }))
+    const radarH = 10000 //雷达高度
+    const startPoint2 = Cesium.Cartesian3.fromDegrees(
+      103.95223,
+      30.57428,
+      5000-radarH/2
+    );
+    const endPoint2 = Cesium.Cartesian3.fromDegrees(
+      116.410745,
+      39.510251,
+      5000-radarH/2
+    );
+    const points2 = generateCurve(startPoint2,endPoint2,50,radarH/2) //获取路径上的点
+    let property2 = computeCirclularFlight2(points2,start)
+    entities.push(viewer.entities.add({
+      position: property2,
+      cylinder: {
+        length: radarH,
+        topRadius: 0.0,
+        bottomRadius: 4000.0,
+        material: new Cesium.RadarScanMaterialProperty(
+                new Cesium.Color(.1, 1, 0, 0.9),
+                10000,// 循环时长
+                1.0,//速度
+                20,//圈数
+                0.2,//环高
+              )
+      },
+    }))
   } else {
     if (entities?.length) {
       entities.forEach((entity) => {
