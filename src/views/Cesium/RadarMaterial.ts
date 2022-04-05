@@ -27,11 +27,17 @@ export default class RadarScanMaterialProperty {
       result = {}
     }
     result.color = this._color
+    result.repeat = this._repeat
+    result.thickness = this._thickness
+    result.duration = this.duration
+    result.d = this._d
     result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._d
     return result
   }
   equals(other) {
-    return this === other || (other instanceof RadarScanMaterialProperty && Cesium.Property.equals(this._color, other._color) && Cesium.Property.equals(this._repeat, other._repeat))
+    // console.log(this,other);
+    // console.log(this === other || (other instanceof RadarScanMaterialProperty && Cesium.Property.equals(this._color, other._color) && this._repeat === other._repeat))
+    return this === other
   }
   conbineProp() {
     Object.defineProperties(RadarScanMaterialProperty.prototype, {

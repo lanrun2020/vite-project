@@ -24,6 +24,7 @@ import { addPlaneModel } from "@/views/Cesium/addPlaneModel";
 import { addTude } from "./addTube";
 import { addCylinder } from "./addCylinder";
 import { addClustering } from "./addClustering";
+import { addSatellite } from "./addSatellite";
 
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
@@ -70,6 +71,10 @@ let toolList: Array<{ title: string; value: number }> = [
   {
     title: "点聚合",
     value: 10,
+  },
+  {
+    title: "卫星",
+    value: 11,
   }
 ];
 onMounted(async () => {
@@ -112,6 +117,9 @@ const toolChecked = (active: boolean, value: number) => {
     case 10: //点聚合
     addClustering(viewer, active);
       break;
+    case 11: //卫星
+     addSatellite(viewer, active);
+     break;
     default: break;
   }
 };
