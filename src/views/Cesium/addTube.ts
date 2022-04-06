@@ -1,8 +1,6 @@
 import Cesium from "@/utils/importCesium"
 import redimg from '../../assets/newredLine.png'
-import greenPng from "@/assets/green.png";
-import bluePng from "@/assets/blue12.png";
-let entity:Array<object>|null = null
+let entity: Array<object> | null = null
 const computeCircle = (radius: number) => {
   const positions: Array<object> = [];
   for (let i = 0; i < 360; i++) {
@@ -59,26 +57,9 @@ export const addTude = (viewer: any, active: boolean) => {
         ),
       },
     }));
-    
-
-    entity?.push(viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(112.0, 32.0, 200000),
-      cylinder: {
-        length: 400000.0,
-        topRadius: 0.0,
-        bottomRadius: 200000.0,
-        material: new Cesium.RadarScanMaterialProperty(
-                new Cesium.Color(.1, 1, 0, 0.9),
-                10000,// 循环时长
-                1.0,//速度
-                20,//圈数
-                0.2,//环高
-              )
-      },
-    }));
   } else {
     if (entity?.length) {
-      entity.forEach((item)=>{
+      entity.forEach((item) => {
         viewer.entities.remove(item)
       })
       entity = null

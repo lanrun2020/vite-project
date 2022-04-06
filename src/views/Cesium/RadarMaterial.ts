@@ -2,6 +2,8 @@ import Cesium from '@/utils/importCesium'
 import { Vector4 } from 'three'
 export default class RadarScanMaterialProperty {
   private _color: object | undefined
+  private isTranslucent:Function
+  
   private _d: number
   private _repeat: number
   private _definitionChanged: any
@@ -12,6 +14,9 @@ export default class RadarScanMaterialProperty {
     this._definitionChanged = new Cesium.Event()
     this._color = color
     this.duration = duration
+    this.isTranslucent =function () {
+      return true
+    };
     this._time = (new Date()).getTime()
     this._d = d
     this._repeat = repeat
@@ -34,9 +39,7 @@ export default class RadarScanMaterialProperty {
     result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._d
     return result
   }
-  equals(other) {
-    // console.log(this,other);
-    // console.log(this === other || (other instanceof RadarScanMaterialProperty && Cesium.Property.equals(this._color, other._color) && this._repeat === other._repeat))
+  equals(other:any) {
     return this === other
   }
   conbineProp() {
@@ -68,12 +71,12 @@ export default class RadarScanMaterialProperty {
       czm_material czm_getMaterial(czm_materialInput materialInput)\n
       {\n
         czm_material material = czm_getDefaultMaterial(materialInput);\n
-        float sp = 1.0/repeat;\n  //1/30
+        float sp = 1.0/repeat;\n
         vec2 st = materialInput.st;\n
-        float dis = distance(st, vec2(0.5, 0.5)) + fract(materialInput.s - time);\n //从上自下 0 到 1/2
+        float dis = distance(st, vec2(0.5, 0.5)) + fract(materialInput.s - time);\n
         float dis2 = distance(st, vec2(0.5, 0.5));\n
-        float m = mod(dis, sp);\n // 两数余数 返回0 - 1/30 
-        float a = step(m, sp*(thickness));\n //(0 - 1/30,1/60在中间) //一半0 一半1 取决于tickness的值划分
+        float m = mod(dis, sp);\n
+        float a = step(m, sp*(thickness));\n
         material.diffuse = color.rgb;\n
         // material.alpha = a * color.a * (0.5 - dis2);\n //渐变
         material.alpha = a * color.a;\n
@@ -93,11 +96,9 @@ export default class RadarScanMaterialProperty {
           time: 0,
           thickness:this._thickness,// 环高
         },
-        source: Cesium.Material.RadarScanSource
+        source: Cesium.Material.RadarScanSource,
       },
-      translucent: function () {
-        return true
-      }
+      translucent: false,
     })
   }
 }
