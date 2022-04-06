@@ -2,8 +2,6 @@ import Cesium from '@/utils/importCesium'
 import { Vector4 } from 'three'
 export default class RadarScanMaterialProperty {
   private _color: object | undefined
-  private isTranslucent:Function
-  
   private _d: number
   private _repeat: number
   private _definitionChanged: any
@@ -14,9 +12,6 @@ export default class RadarScanMaterialProperty {
     this._definitionChanged = new Cesium.Event()
     this._color = color
     this.duration = duration
-    this.isTranslucent =function () {
-      return true
-    };
     this._time = (new Date()).getTime()
     this._d = d
     this._repeat = repeat
@@ -93,12 +88,14 @@ export default class RadarScanMaterialProperty {
         uniforms: {
           color: this._color,
           repeat: this._repeat,
-          time: 0,
+          time: this._time,
           thickness:this._thickness,// 环高
         },
         source: Cesium.Material.RadarScanSource,
       },
-      translucent: false,
+      translucent:  function () {
+        return true
+      },
     })
   }
 }
