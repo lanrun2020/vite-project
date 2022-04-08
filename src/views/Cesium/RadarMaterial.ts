@@ -73,8 +73,8 @@ export default class RadarScanMaterialProperty {
         float m = mod(dis, sp);\n
         float a = step(m, sp*(thickness));\n
         material.diffuse = color.rgb;\n
-        // material.alpha = a * color.a * (0.5 - dis2);\n //渐变
-        material.alpha = a * color.a;\n
+        material.alpha = a * color.a * (1.0 - dis2);\n //渐变
+        // material.alpha = a * color.a;\n
         return material;\n
       }\n`
     // material.alpha:透明度;
@@ -93,6 +93,7 @@ export default class RadarScanMaterialProperty {
         },
         source: Cesium.Material.RadarScanSource,
       },
+      //translucent 为 true 或返回 true 的函数时，几何图形看起来应该是半透明的
       translucent:  function () {
         return true
       },

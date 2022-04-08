@@ -2,12 +2,13 @@
 import Cesium from "@/utils/importCesium"
 import redimg from "@/assets/redLine.png"
 import addRadar, { } from '@/views/Cesium/importMaterial'
+import {tick, radarMaterial,setPosition} from "./RadarMaterial2"
 let entities: Array<object> | null = null
 let primitive, primitives
 export const addSatellite = (viewer: any, active: boolean) => {
   if (active) {
     viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(113, 28.5, 600000),
+      destination: Cesium.Cartesian3.fromDegrees(116, 24.5, 1200000),
       duration: 1.6,
       orientation: {
         // 指向
@@ -74,42 +75,49 @@ export const addSatellite = (viewer: any, active: boolean) => {
       },
       viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
     }))
+    
+    entities.push(viewer.entities.add({
+      id: "satellite3",
+      position: Cesium.Cartesian3.fromDegrees(115.0, 30.0, 400000),
+      model: {
+        uri: `/model/satellite.glb`,
+        scale: 300000,
+        minimumPixelSize: 50,
+      },
+      viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
+    }))
 
-    // var center = Cesium.Cartesian3.fromDegrees(115, 30, 200000)
-    // var modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center);
-    // let instance = new Cesium.GeometryInstance({
-    //   geometry: new Cesium.CylinderGeometry({
-    //     length: 400000,
-    //     topRadius: 0.0,
-    //     bottomRadius: 100000.0,
-    //     vertexFormat: Cesium.MaterialAppearance.MaterialSupport.TEXTURED.vertexFormat
-    //   }),
-    //   modelMatrix: modelMatrix, // 提供位置参数
-    // });
-    // primitive = new Cesium.Primitive({
-    //   geometryInstances: instance,
-    //   appearance: new Cesium.MaterialAppearance({
-    //     material: new Cesium.Material({
-    //       fabric: {
-    //         type: Cesium.Material.RadarScanType,
-    //         uniforms: {
-    //           color: new Cesium.Color(.1,1,0,1),
-    //           repeat: 12,
-    //           thickness:0.5,// 环高
-    //         },
-    //         source: Cesium.Material.RadarScanSource,
-    //       },
-    //     })
-    //   })
-    // });
-    // primitives = viewer.scene.primitives.add(new Cesium.PrimitiveCollection())
-    // primitives.add(primitive)
+    var center = Cesium.Cartesian3.fromDegrees(115, 30, 200000)
+    var modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+    let instance = new Cesium.GeometryInstance({
+      geometry: new Cesium.CylinderGeometry({
+        length: 400000,
+        topRadius: 0.0,
+        bottomRadius: 100000.0,
+        vertexFormat: Cesium.MaterialAppearance.MaterialSupport.TEXTURED.vertexFormat
+      }),
+      modelMatrix: modelMatrix, // 提供位置参数
+    });
+    radarMaterial.uniforms.close = false
+    primitive = new Cesium.Primitive({
+      geometryInstances: instance,
+      appearance: new Cesium.MaterialAppearance({
+        material: radarMaterial,faceForward: !1, closed: !0
+      })
+    });
+    
+    tick();
+    console.log(radarMaterial);
+    
+    primitives = viewer.scene.primitives.add(new Cesium.PrimitiveCollection())
+    primitives.add(primitive)
   } else {
     if (entities?.length) {
       entities.forEach((item) => {
         viewer.entities.remove(item)
       })
-      // primitives.removeAll()
+      radarMaterial.uniforms.close = true
+      primitives.removeAll()
       entities = null
     }
   }
