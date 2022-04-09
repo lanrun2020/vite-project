@@ -1,5 +1,4 @@
 import Cesium from '@/utils/importCesium'
-import { Vector4 } from 'three'
 
 const source = `
 \n 
@@ -7,6 +6,8 @@ uniform vec4 color;\n
 uniform float repeat;\n 
 uniform float thickness;\n 
 uniform float time;\n
+uniform float gradual;\n
+uniform float gradualValue;\n
 czm_material czm_getMaterial(czm_materialInput materialInput)\n 
 {\n 
   czm_material material = czm_getDefaultMaterial(materialInput);\n 
@@ -18,40 +19,52 @@ czm_material czm_getMaterial(czm_materialInput materialInput)\n
   float a = step(sp*(1.0-thickness), m);\n 
   material.diffuse = color.rgb;\n 
   // material.alpha = a * color.a;\n 
-  material.alpha = a * color.a * (1.0 - dis2);\n //渐变
+  material.alpha = gradual * a * color.a * (gradualValue - dis2) + (1.0 - gradual) * a * color.a;\n //渐变
   return material;\n 
 }\n 
 `
 
-const radarMaterial = new Cesium.Material({
-  fabric: {
-    type: 'radarMaterial2',
-    uniforms: {
-      color: new Cesium.Color(.1, 1, 0, 1),
-      repeat: 30,
-      thickness: 0.2,// 环高
-      time: 0,
-      close: false,
-    },
-    source: source
-  }, translucent: !1,
-})
+const fabric = {
+  uniforms: {
+    color: new Cesium.Color(.1, 1, 0, 1),
+    repeat: 30,
+    thickness: 0.2,// 环高
+    time: 0,
+    close: false,
+    gradual:0.0,
+    gradualValue:0.5,
+  },
+  source: source
+}
 
-const ntime = (new Date()).getTime()
-let d = 100000 
-let s = 1
-function tick() {
-  if (!radarMaterial.uniforms.close) {
-    radarMaterial.uniforms.time = (((new Date()).getTime() - ntime) % d) / d * s
-    Cesium.requestAnimationFrame(tick);
+export default class radarMaterialsProperty {
+  private material: any
+  private duration: number
+  private speed: number
+  private _time: number
+  constructor(options?: { color?: typeof Cesium.Color, repeat?: number, thickness?: number, duration?: number, speed?: number,translucent?:boolean,gradual?:boolean,gradualValue?:number, U?: object }) {
+    this.material = new Cesium.Material({ fabric, translucent:options?.translucent||false})
+    this.material.uniforms.color = options?.color || new Cesium.Color(.1, 1, 0, 1)
+    this.material.uniforms.repeat = (options?.repeat || 10)*2
+    this.material.uniforms.thickness = options?.thickness || 0.5
+    this.material.uniforms.gradual = options?.gradual || false ? 1.0:0.0
+    this.material.uniforms.gradualValue = options?.gradualValue || 0.5
+    this.duration = options?.duration || 10000
+    this.speed = options?.speed || 1
+    this._time = (new Date()).getTime()
+  }
+  close() {
+    this.material.uniforms.close = true
+  }
+  getMaterial() {
+    this.material.uniforms.close = false
+    this.tick()
+    return this.material
+  }
+  tick: Function = () => {
+    if (!this.material.uniforms.close) {
+      this.material.uniforms.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this.speed
+      Cesium.requestAnimationFrame(this.tick);
+    }
   }
 }
-
-const setPosition = (color: Vector4 = new Cesium.Color(.1, 1, 0, 1), duration: number = 10000,speed:number = 1,repeat:number = 10,thickness:number = 0.2) => {
-  radarMaterial.uniforms.color = color
-  radarMaterial.uniforms.repeat = repeat
-  radarMaterial.uniforms.thickness = thickness
-  d = duration
-  s = speed
-}
-export { tick, radarMaterial ,setPosition}

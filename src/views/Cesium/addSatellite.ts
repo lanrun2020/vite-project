@@ -1,10 +1,11 @@
 // 人造卫星
 import Cesium from "@/utils/importCesium"
-import redimg from "@/assets/redLine.png"
-import addRadar, { } from '@/views/Cesium/importMaterial'
-import {tick, radarMaterial,setPosition} from "./RadarMaterial2"
+import radarMaterialsProperty from "./RadarMaterial2"
 let entities: Array<object> | null = null
-let primitive, primitives
+let primitives
+const radarMaterial = new radarMaterialsProperty({color:new Cesium.Color(.1, 1, 0, 0.8), repeat:1,thickness:0.8,gradual:true,gradualValue:0.6})
+const radarMaterial2 = new radarMaterialsProperty({color:new Cesium.Color(.1, 1, 0, 1), repeat:10,thickness:0.2})
+
 export const addSatellite = (viewer: any, active: boolean) => {
   if (active) {
     viewer.camera.flyTo({
@@ -98,25 +99,41 @@ export const addSatellite = (viewer: any, active: boolean) => {
       }),
       modelMatrix: modelMatrix, // 提供位置参数
     });
-    radarMaterial.uniforms.close = false
-    primitive = new Cesium.Primitive({
+    var center2 = Cesium.Cartesian3.fromDegrees(118, 30, 200000)
+    var modelMatrix2 = Cesium.Transforms.eastNorthUpToFixedFrame(center2);
+    let instance2 = new Cesium.GeometryInstance({
+      geometry: new Cesium.CylinderGeometry({
+        length: 400000,
+        topRadius: 0.0,
+        bottomRadius: 100000.0,
+        vertexFormat: Cesium.MaterialAppearance.MaterialSupport.TEXTURED.vertexFormat
+      }),
+      modelMatrix: modelMatrix2, // 提供位置参数
+    });
+    let primitive1 = new Cesium.Primitive({
       geometryInstances: instance,
       appearance: new Cesium.MaterialAppearance({
-        material: radarMaterial,faceForward: !1, closed: !0
+        material: radarMaterial.getMaterial(),faceForward: !1, closed: !0
       })
     });
-    
-    tick();
-    console.log(radarMaterial);
-    
+    let primitive2 = new Cesium.Primitive({
+      geometryInstances: instance2,
+      appearance: new Cesium.MaterialAppearance({
+        material: radarMaterial2.getMaterial(),faceForward: !1, closed: !0
+      })
+    });
     primitives = viewer.scene.primitives.add(new Cesium.PrimitiveCollection())
-    primitives.add(primitive)
+    primitives.add(primitive2)
+    primitives.add(primitive1)
+
   } else {
     if (entities?.length) {
       entities.forEach((item) => {
         viewer.entities.remove(item)
       })
-      radarMaterial.uniforms.close = true
+      radarMaterial.close()
+      radarMaterial2.close()
+      // radarMaterials.setPosition({close:true})
       primitives.removeAll()
       entities = null
     }
