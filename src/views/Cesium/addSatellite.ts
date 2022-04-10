@@ -54,6 +54,24 @@ export const addSatellite = (viewer: any, active: boolean) => {
     })
     entities.push(entity1)
     entities.push(entity2)
+    entities.push(viewer.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(118, 34),
+      ellipse: {
+        // 椭圆短半轴长度
+        semiMinorAxis: 100000,
+        // 椭圆长半轴长度
+        semiMajorAxis: 100000,
+        height: 1000,
+        extrudedHeight: 1000,
+        material: new Cesium.RadarScanMaterialProperty(
+          new Cesium.Color(.1, 1, 0, 0.8),
+          10000,// 循环时长
+          2.0,//速度
+          6,//圈数
+          .1,//环高
+        ),
+      },
+    }));
 
     entities.push(viewer.entities.add({
       id: "satellite",
