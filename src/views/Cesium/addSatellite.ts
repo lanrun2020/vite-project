@@ -64,10 +64,10 @@ export const addSatellite = (viewer: any, active: boolean) => {
         height: 1000,
         extrudedHeight: 1000,
         material: new Cesium.RadarScanMaterialProperty(
-          new Cesium.Color(.1, 1, 0, 0.8),
+          new Cesium.Color(.1, 1, 0, 0.4),
           10000,// 循环时长
           2.0,//速度
-          6,//圈数
+          8,//圈数
           .1,//环高
         ),
       },

@@ -1,8 +1,8 @@
 import http from '../apis/http'
 
 export function fetchLogin(params:any){
-  return params
-  // return http.post('/login',params)
+  // return params
+  return http.post('/login',params)
 }
 
 export function fetchTest(){

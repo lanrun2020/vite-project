@@ -36,12 +36,11 @@ const createFlyLine = (viewer, start: { longitude: number, latitude: number }, e
   });
   if(entities?.length) return
   // 终点与飞行线
-  const material = new Cesium.PolylineTrailLinkMaterialProperty(
-    Cesium.Color.BLUE,
-    3000,
-    redimg,
-    1
-  );
+  const material = new Cesium.PolylineMaterialProperty({
+    color:new Cesium.Color(0.0,1.0,0.0,1.0),
+    speed:2,
+    thickness:.5
+  });
   endPoints.forEach((item) => {
     const endPoint = Cesium.Cartesian3.fromDegrees(
       item.longitude,

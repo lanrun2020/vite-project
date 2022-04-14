@@ -1,4 +1,5 @@
 <template>
+  <!-- <div class='top-scroll'>{{ message }}</div> -->
   <h1>num1:{{ num1 }}</h1>
   <h1>num2:{{ num2 }}</h1>
   <h1>sum:{{ sum }}</h1>
@@ -15,6 +16,7 @@
   <el-button @click="test">测试</el-button>
   <el-button @click="test2">测试2</el-button>
   <el-button @click="test3">测试3</el-button>
+  <marquee >3333</marquee>
 </template>
 
 <script setup lang="ts">
@@ -31,7 +33,7 @@ const obj = {name:'jack',age:20}
 const newObj = ref(obj.age)
 const newObj2 = toRef(obj,'age')
 const newObj3 = toRefs(obj)
-
+const message = ref('dsfsdfsfeeffcs')
 const num3 = ref(num1.value)
 const nested = {
   count,
@@ -75,4 +77,23 @@ const test3 = async () => {
   newObj3.age.value = 26
   console.log(obj);
 };
+
 </script>
+<style lang="scss">
+.top-scroll{
+  transform: translate3d(100%,0,0);
+  animation: 40s 2s move linear infinite;
+  // &:hover{
+  //   cursor: pointer;
+  //   animation-play-state: paused;
+  // }
+  @keyframes move{
+    0%{
+      transform: translate3d(100%,0,0);
+    }
+    100%{
+      transform: translate3d(-100%,0,0);
+    }
+  }
+}
+</style>

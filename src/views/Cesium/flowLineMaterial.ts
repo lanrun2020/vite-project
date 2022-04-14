@@ -5,16 +5,16 @@ export default class PolylineTrailLinkMaterialProperty {
   private _d: number
   private _repeat: number
   private _definitionChanged: any
-  duration: number
+  private duration: number
   private _time: number
-  constructor(color: object, duration: number,image:any,d:number = 1,repeat:number = 1, U?: object) {
+  constructor(options?:{color?: object, duration?: number,image?:any,d?:number,repeat?:number}, U?: object) {
     this._definitionChanged = new Cesium.Event()
-    this._color = color
-    this.duration = duration
+    this._color = options?.color
+    this.duration = options?.duration || 100000
     this._time = (new Date()).getTime()
-    this._image = image
-    this._d = d
-    this._repeat = repeat
+    this._image = options?.image
+    this._d = options?.d || 1.0
+    this._repeat = options?.repeat || 1.0
     this.conbineProp()
     this.init()
   }
@@ -31,7 +31,7 @@ export default class PolylineTrailLinkMaterialProperty {
     return result
   }
   equals(other) {
-    return this === other || (other instanceof PolylineTrailLinkMaterialProperty && Cesium.Property.equals(this._color, other._color) && Cesium.Property.equals(this._image, other._image) && Cesium.Property.equals(this._repeat, other._repeat))
+    return this === other
   }
   conbineProp() {
     Object.defineProperties(PolylineTrailLinkMaterialProperty.prototype, {
@@ -70,7 +70,7 @@ export default class PolylineTrailLinkMaterialProperty {
       fabric: {
         type: Cesium.Material.PolylineTrailLinkType,
         uniforms: {
-          color: new Cesium.Color(0.0, 0.0, 0.0, 0.5),
+          color: this._color,
           image: this._image,
           repeat: new Cesium.Cartesian2(this._repeat, 1.0),
           time: 0,

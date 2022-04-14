@@ -106,14 +106,11 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
       name: "Blue dashed line",
       polyline: {
         positions:points,
-        width: 20,
-        material: new Cesium.PolylineTrailLinkMaterialProperty(
-          Cesium.Color.RED,
-          1000,
-          redimg,
-          1,
-          25
-        ),
+        width: 3,
+        material: new Cesium.PolylineMaterialProperty({
+          color:new Cesium.Color(0.0, 0.0, 1.0, 1.0),
+          repeat:5
+        }),
       }
     }))
     entities.push(viewer.entities.add({

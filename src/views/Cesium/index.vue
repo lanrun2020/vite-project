@@ -14,6 +14,7 @@ import { addPolygon2, reset } from "./polygon";
 import Cesium from '@/utils/importCesium'
 import "./flowLineMaterial";
 import "./RadarMaterial";
+import "./LineMaterial";
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'

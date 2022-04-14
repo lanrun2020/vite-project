@@ -35,13 +35,13 @@ export const addRiverFlood = (viewer:any, active:boolean) => {
         },false),
         width: 800.0,
         cornerType: Cesium.CornerType.MITERED,
-        material: new Cesium.PolylineTrailLinkMaterialProperty(
-          Cesium.Color.BLUE.withAlpha(0.4),
-          15000,
-          river,
-          0.5,
-          30,
-        ),
+        material: new Cesium.PolylineTrailLinkMaterialProperty({
+          color:Cesium.Color.BLUE.withAlpha(0.4),
+          duration:15000,
+          image:river,
+          d:0.5,
+          repeat:30,
+         }),
         outline: false, // height required for outlines to display
       }
     });
