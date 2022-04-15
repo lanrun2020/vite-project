@@ -67,7 +67,7 @@ export const addSatellite = (viewer: any, active: boolean) => {
           new Cesium.Color(.1, 1, 0, 0.4),
           10000,// 循环时长
           2.0,//速度
-          8,//圈数
+          4,//圈数
           .1,//环高
         ),
       },

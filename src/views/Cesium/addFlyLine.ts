@@ -55,6 +55,34 @@ const createFlyLine = (viewer, start: { longitude: number, latitude: number }, e
       },
     }));
   })
+  const material2 = new Cesium.PolylineMaterialProperty({
+    color:new Cesium.Color(0.0,1.0,0.0,1.0),
+    speed:2,
+    repeat:5,
+    thickness:.5
+  });
+  entities.push(viewer.entities.add({
+    polyline: {
+      positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+        110.5,
+        31,
+        5000,
+        110.5,
+        30,
+        5000,
+        111,
+        30,
+        5000,
+        111,
+        29,
+        5000,
+        111,28,
+        5000,
+      ]), // 多个点坐标构成线条路径
+      width: 2,
+      material: material2,
+    },
+  }));
 };
 // 获取流动曲线上多个连续点
 const generateCurve = (startPoint: any, endPoint: any) => {

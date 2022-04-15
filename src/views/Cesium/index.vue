@@ -26,6 +26,7 @@ import { addTude } from "./addTube";
 import { addCylinder } from "./addCylinder";
 import { addClustering } from "./addClustering";
 import { addSatellite } from "./addSatellite";
+import { addTrackPlane } from "./addTrackPlane";
 
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
@@ -76,9 +77,14 @@ let toolList: Array<{ title: string; value: number }> = [
   {
     title: "卫星",
     value: 11,
+  },
+  {
+    title: "追踪扫描",
+    value: 12,
   }
 ];
 onMounted(async () => {
+  console.log('cesium page')
   let res = await fetchCesium();
   initCesium();
 });
@@ -120,6 +126,9 @@ const toolChecked = (active: boolean, value: number) => {
       break;
     case 11: //卫星
      addSatellite(viewer, active);
+     break;
+    case 12: //追踪扫描
+     addTrackPlane(viewer, active);
      break;
     default: break;
   }

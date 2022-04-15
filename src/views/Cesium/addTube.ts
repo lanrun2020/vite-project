@@ -48,13 +48,12 @@ export const addTude = (viewer: any, active: boolean) => {
         // cornerType: Cesium.CornerType.MITERED, // 拐角样式 
         // cornerType: Cesium.CornerType.ROUNDED, // 拐角样式 
         shape: computeCircle(6000.0),
-        material: new Cesium.PolylineTrailLinkMaterialProperty(
-          Cesium.Color.BLUE,
-          3000,
-          redimg,
-          1,
-          12
-        ),
+        material: new Cesium.PolylineTrailLinkMaterialProperty({
+          color:Cesium.Color.BLUE,
+          duration:3000,
+          image:redimg,
+          repeat:12
+        }),
       },
     }));
   } else {
