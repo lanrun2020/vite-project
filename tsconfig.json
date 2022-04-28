@@ -3,21 +3,32 @@
     "target": "esnext",
     "useDefineForClassFields": true,
     "module": "esnext",
-    "allowJs": true,
-    "noImplicitAny": false,
     "moduleResolution": "node",
     "strict": true,
     "jsx": "preserve",
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "lib": ["esnext", "dom"],
-    "baseUrl": "./", // 解析非相对模块的地址，默认是当前目录
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "baseUrl": "./",
     "paths": { // 路径映射，相对于baseUrl
-      "@/*":["./src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
-    "types": ["element-plus/global", "node", "cesium", "vite/client"]
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/views/Echarts/OrbitControls.js"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }

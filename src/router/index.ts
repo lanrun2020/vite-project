@@ -1,28 +1,23 @@
-import store from '@/store'
-import { createRouter, createWebHashHistory, RouteRecordRaw  } from 'vue-router'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 
 // 路由配置
 const routes: Array<RouteRecordRaw> = [
   {
-    path:'/login',
+    path: '/login',
     component: () => import('../views/Login/index.vue'),
   },
   {
-    path:'/orbit',
+    path: '/orbit',
     component: () => import('../views/Three/Orbit.vue'),
   },
   {
-    path:'/terrain',
+    path: '/terrain',
     component: () => import('../views/Three/Terrain.vue'),
-  },
-  {
-    path:'/exportTable',
-    component: () => import('../views/Table/exportTable.vue'),
   },
   {
     path: '/',
     component: () => import('../layout/index.vue'),
-    redirect:'home',
+    redirect: 'home',
     children: [
       {
         path: 'home',
@@ -48,8 +43,5 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes,
 })
-router.beforeEach((to, from, next) => {
-  store.commit('CLEAR_CANCEL')
-  next()
-})
+
 export default router

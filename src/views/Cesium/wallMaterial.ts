@@ -1,7 +1,7 @@
 // 雷达扫描波形材质
 import Cesium from '@/utils/importCesium'
 import { Vector4 } from 'three'
-export default class RadarScanMaterialProperty {
+export default class WallScanMaterialProperty {
   private _color: object | undefined
   private _d: number
   private _repeat: number
@@ -21,7 +21,7 @@ export default class RadarScanMaterialProperty {
     this.init()
   }
   getType() {
-    return 'RadarScan'
+    return 'WallScan'
   }
   getValue(time: object, result: any) {
     if (!Cesium.defined(result)) {
@@ -39,7 +39,7 @@ export default class RadarScanMaterialProperty {
     return this === other
   }
   conbineProp() {
-    Object.defineProperties(RadarScanMaterialProperty.prototype, {
+    Object.defineProperties(WallScanMaterialProperty.prototype, {
       isConstant: {
         get: function () {
           return false
@@ -55,44 +55,38 @@ export default class RadarScanMaterialProperty {
     })
   }
   init() {
-    Cesium.RadarScanMaterialProperty = RadarScanMaterialProperty
-    Cesium.Material.RadarScanType = 'RadarScan'
-    Cesium.Material.RadarScanSource =
-      // eslint-disable-next-line no-multi-str
-      `\n
-      uniform vec4 color;\n
-      uniform float repeat;\n
-      uniform float offset;\n
-      uniform float thickness;\n
-      czm_material czm_getMaterial(czm_materialInput materialInput)\n
-      {\n
-        czm_material material = czm_getDefaultMaterial(materialInput);\n
-        float sp = 1.0/repeat;\n
-        vec2 st = materialInput.st;\n
-        float dis = distance(st, vec2(0.5, 0.5)) + fract(materialInput.s - time);\n
-        float dis2 = distance(st, vec2(0.5, 0.5));\n
-        float m = mod(dis, sp);\n
-        float a = step(m, sp*(thickness));\n
-        material.diffuse = color.rgb;\n
-        material.alpha = a * color.a * (1.0 - dis2);\n //渐变
-        // material.alpha = a * color.a;\n
-        return material;\n
-      }\n`
+    Cesium.WallScanMaterialProperty = WallScanMaterialProperty
+    Cesium.Material.WallScanType = 'WallScan'
+    Cesium.Material.WallScanSource =
+      `
+      czm_material czm_getMaterial(czm_materialInput materialInput)
+      {
+          czm_material material = czm_getDefaultMaterial(materialInput);
+          float sp = 1.0/repeat;
+          // float m = mod(materialInput.st.t-fract(time - materialInput.s),sp);
+          float m = mod(materialInput.st.t,sp);
+          // float a = step(sp * (1.0 - 0.5),m);
+          float a = materialInput.st.t + (1.0 - fract(time - materialInput.s)) - 1.0 * step(fract(time - materialInput.s),materialInput.st.t);
+          material.diffuse = vec3(0.0,1.0,0.0);
+          material.alpha = a * color.a;
+          return material;
+      }
+      `
     // material.alpha:透明度;
     // material.diffuse：颜色;
     // fract(x) 返回 x 的小数部分
     // float mod(float x, float y)  此函数会返回x除以y的余数。 
     // float step(float edge, float x)此函数会根据两个数值生成阶梯函数，如果x<edge则返回0.0，否则返回1.0
-    Cesium.Material._materialCache.addMaterial(Cesium.Material.RadarScanType, {
+    Cesium.Material._materialCache.addMaterial(Cesium.Material.WallScanType, {
       fabric: {
-        type: Cesium.Material.RadarScanType,
+        type: Cesium.Material.WallScanType,
         uniforms: {
           color: this._color,
           repeat: this._repeat,
           time: this._time,
           thickness: this._thickness,// 环高
         },
-        source: Cesium.Material.RadarScanSource,
+        source: Cesium.Material.WallScanSource,
       },
       //translucent 为 true 或返回 true 的函数时，几何图形看起来应该是半透明的
       translucent: function () {
@@ -103,4 +97,4 @@ export default class RadarScanMaterialProperty {
 }
 
 //@ts-ignore
-new RadarScanMaterialProperty()
+new WallScanMaterialProperty()

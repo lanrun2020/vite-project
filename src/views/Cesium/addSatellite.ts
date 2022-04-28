@@ -2,9 +2,9 @@
 import Cesium from "@/utils/importCesium"
 import radarMaterialsProperty from "./RadarMaterial2"
 let entities: Array<object> | null = null
-let primitives
-const radarMaterial = new radarMaterialsProperty({color:new Cesium.Color(.1, 1, 0, 0.8), repeat:1,thickness:0.8,gradual:true,gradualValue:0.6})
-const radarMaterial2 = new radarMaterialsProperty({color:new Cesium.Color(.1, 1, 0, 1), repeat:10,thickness:0.2})
+let primitives: any
+const radarMaterial = new radarMaterialsProperty({ color: new Cesium.Color(.1, 1, 0, 0.8), repeat: 1, thickness: 0.8, gradual: true, gradualValue: 0.6 })
+const radarMaterial2 = new radarMaterialsProperty({ color: new Cesium.Color(.1, 1, 0, 1), repeat: 10, thickness: 0.2 })
 
 export const addSatellite = (viewer: any, active: boolean) => {
   if (active) {
@@ -94,7 +94,7 @@ export const addSatellite = (viewer: any, active: boolean) => {
       },
       viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
     }))
-    
+
     entities.push(viewer.entities.add({
       id: "satellite3",
       position: Cesium.Cartesian3.fromDegrees(115.0, 30.0, 400000),
@@ -131,13 +131,13 @@ export const addSatellite = (viewer: any, active: boolean) => {
     let primitive1 = new Cesium.Primitive({
       geometryInstances: instance,
       appearance: new Cesium.MaterialAppearance({
-        material: radarMaterial.getMaterial(),faceForward: !1, closed: !0
+        material: radarMaterial.getMaterial(), faceForward: !1, closed: !0
       })
     });
     let primitive2 = new Cesium.Primitive({
       geometryInstances: instance2,
       appearance: new Cesium.MaterialAppearance({
-        material: radarMaterial2.getMaterial(),faceForward: !1, closed: !0
+        material: radarMaterial2.getMaterial(), faceForward: !1, closed: !0
       })
     });
     primitives = viewer.scene.primitives.add(new Cesium.PrimitiveCollection())

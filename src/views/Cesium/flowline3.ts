@@ -1,3 +1,4 @@
+// 迁徙线材质
 import Cesium from '@/utils/importCesium'
 import wallMater from '../../assets/redLine.png'
 
@@ -10,7 +11,7 @@ let source1 = "czm_material czm_getMaterial(czm_materialInput materialInput)\n\
             material.diffuse = (colorImage.rgb+color.rgb)/1.0;\n\
             return material;\n\
         }";
-function addPrimitiveFlowAppear(pos) {
+function addPrimitiveFlowAppear(pos: any) {
   var primitive = new Cesium.Primitive({
     geometryInstances: new Cesium.GeometryInstance({
       geometry: new Cesium.PolylineGeometry({
@@ -38,7 +39,7 @@ function addPrimitiveFlowAppear(pos) {
   });
   return primitive
 }
-function addPrimiFlowline(pos, fs) {
+function addPrimiFlowline(pos: any, fs: any) {
   var primitive = new Cesium.Primitive({
     geometryInstances: new Cesium.GeometryInstance({
       geometry: new Cesium.PolylineGeometry({
@@ -69,7 +70,7 @@ function addPrimiFlowline(pos, fs) {
   return primitive
 }
 
-export const createLine = (viewer: any, active: boolean , positions:Array<any>) => {
+export const createLine = (viewer: any, active: boolean, positions: Array<any>) => {
   // 通过设置fadetype 实现流动的线
   let primi = addPrimitiveFlowAppear(positions)
   viewer.scene.primitives.add(primi);

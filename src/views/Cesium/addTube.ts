@@ -1,3 +1,4 @@
+// 流动管道
 import Cesium from "@/utils/importCesium"
 import redimg from '../../assets/newredLine.png'
 let entity: Array<object> | null = null
@@ -49,10 +50,10 @@ export const addTude = (viewer: any, active: boolean) => {
         // cornerType: Cesium.CornerType.ROUNDED, // 拐角样式 
         shape: computeCircle(6000.0),
         material: new Cesium.PolylineTrailLinkMaterialProperty({
-          color:Cesium.Color.BLUE,
-          duration:3000,
-          image:redimg,
-          repeat:12
+          color: Cesium.Color.BLUE,
+          duration: 3000,
+          image: redimg,
+          repeat: 12
         }),
       },
     }));

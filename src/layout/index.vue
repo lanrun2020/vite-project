@@ -10,7 +10,9 @@
         <template v-for="item in menuList" :key="item.id">
           <el-sub-menu v-if="item.children" :index="item.id">
             <template v-slot:title>
-              <el-icon><setting /></el-icon>
+              <el-icon>
+                <setting />
+              </el-icon>
               <span>{{ item.menuName }}</span>
             </template>
             <el-menu-item-group>
@@ -19,13 +21,13 @@
                 :index="child.id"
                 :key="child.id"
                 @click="menuClick(child)"
-              >
-                {{ child.menuName }}
-              </el-menu-item>
+              >{{ child.menuName }}</el-menu-item>
             </el-menu-item-group>
           </el-sub-menu>
           <el-menu-item v-else :index="item.id" @click="menuClick(item)">
-            <el-icon><setting /></el-icon>
+            <el-icon>
+              <setting />
+            </el-icon>
             <template v-slot:title>
               <span>{{ item.menuName }}</span>
             </template>
@@ -33,7 +35,7 @@
         </template>
       </el-menu>
       <el-container>
-        <el-header height="50px"> </el-header>
+        <el-header height="50px"></el-header>
         <el-main class="el-main">
           <router-view v-slot="{ Component }">
             <component :is="Component" />
@@ -61,18 +63,18 @@ const menuList: Array<any> = [
   },
   {
     id: "2",
-    menuName: "Echarts",
+    menuName: "Three.js",
     parentId: "0",
     children: [
       {
         id: "21",
-        menuName: "柱状图",
+        menuName: "example1",
         menuUrl: "/barchart",
         parentId: "2",
       },
       {
         id: "22",
-        menuName: "折线图",
+        menuName: "example2",
         menuUrl: "/linechart",
         parentId: "2",
       },
@@ -92,8 +94,8 @@ const menuClick: Function = (item: any) => {
 };
 </script>
 <style lang="scss">
-.app-wrapper{
-  .el-main{
+.app-wrapper {
+  .el-main {
     padding: 10px;
   }
 }

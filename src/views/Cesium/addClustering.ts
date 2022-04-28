@@ -34,7 +34,7 @@ export const addClustering = (viewer: any, active: boolean) => {
     const dataSourcePromise = viewer.dataSources.add(datasource);
     viewer.zoomTo(datasource);
 
-    dataSourcePromise.then(function (dataSource) {
+    dataSourcePromise.then(function (dataSource: any) {
       const pixelRange = 15; // 聚合的像素范围
       const minimumClusterSize = 3; // 点聚合的最小个数
       const enabled = true; // 是否开启点聚合
@@ -43,7 +43,7 @@ export const addClustering = (viewer: any, active: boolean) => {
       dataSource.clustering.pixelRange = pixelRange;
       dataSource.clustering.minimumClusterSize = minimumClusterSize;
 
-      let removeListener;
+      let removeListener: any
 
       const pinBuilder = new Cesium.PinBuilder();
       const pin50 = pinBuilder
@@ -75,7 +75,7 @@ export const addClustering = (viewer: any, active: boolean) => {
           removeListener = undefined;
         } else {
           removeListener = dataSource.clustering.clusterEvent.addEventListener(
-            function (clusteredEntities, cluster) {
+            function (clusteredEntities: any, cluster: any) {
               cluster.label.show = false;
               cluster.billboard.show = true;
               cluster.billboard.id = cluster.label.id;
@@ -122,10 +122,10 @@ export const addClustering = (viewer: any, active: boolean) => {
       const toolbar = document.getElementById("toolbar");
       Cesium.knockout.applyBindings(viewModel, toolbar);
 
-      function subscribeParameter(name) {
+      function subscribeParameter(name: string) {
         Cesium.knockout
           .getObservable(viewModel, name)
-          .subscribe(function (newValue) {
+          .subscribe(function (newValue: any) {
             dataSource.clustering[name] = newValue;
           });
       }

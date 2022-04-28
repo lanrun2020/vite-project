@@ -12,15 +12,13 @@
   <el-button @click="$router.push('/login')">登录页</el-button>
   <el-button @click="$router.push('/orbit')">Orbit</el-button>
   <el-button @click="$router.push('/terrain')">Terrain</el-button>
-  <el-button @click="$router.push('/exportTable')">Table</el-button>
   <el-button @click="test">测试</el-button>
   <el-button @click="test2">测试2</el-button>
   <el-button @click="test3">测试3</el-button>
-  <marquee >3333</marquee>
 </template>
 
 <script setup lang="ts">
-import { fetchTest,fetchHome } from "@/apis/an-system";
+import { fetchTest, fetchHome } from "@/apis/an-system";
 import { reactive, ref, toRef } from "@vue/reactivity";
 import { computed, onMounted, provide, watch } from "@vue/runtime-core";
 import { toRefs } from "vue";
@@ -29,9 +27,9 @@ import myMarker from "./myMarker.vue";
 const num1 = ref(0);
 const num2 = ref(0);
 const count = ref(0);
-const obj = {name:'jack',age:20}
+const obj = { name: 'jack', age: 20 }
 const newObj = ref(obj.age)
-const newObj2 = toRef(obj,'age')
+const newObj2 = toRef(obj, 'age')
 const newObj3 = toRefs(obj)
 const message = ref('dsfsdfsfeeffcs')
 const num3 = ref(num1.value)
@@ -59,8 +57,8 @@ provide("num1", num1);
 provide("num2", num2);
 provide("sum", sum);
 
-onMounted(async ()=>{
-  let res =await fetchHome()
+onMounted(async () => {
+  let res = await fetchHome()
   console.log(res);
 })
 
@@ -80,19 +78,19 @@ const test3 = async () => {
 
 </script>
 <style lang="scss">
-.top-scroll{
-  transform: translate3d(100%,0,0);
+.top-scroll {
+  transform: translate3d(100%, 0, 0);
   animation: 40s 2s move linear infinite;
   // &:hover{
   //   cursor: pointer;
   //   animation-play-state: paused;
   // }
-  @keyframes move{
-    0%{
-      transform: translate3d(100%,0,0);
+  @keyframes move {
+    0% {
+      transform: translate3d(100%, 0, 0);
     }
-    100%{
-      transform: translate3d(-100%,0,0);
+    100% {
+      transform: translate3d(-100%, 0, 0);
     }
   }
 }

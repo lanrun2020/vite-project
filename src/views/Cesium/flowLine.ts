@@ -1,7 +1,8 @@
+// 迁徙线材质
 import redimg from '../../assets/redLine.png'
 import Cesium from '@/utils/importCesium'
-export function initPolylineTrailLinkMaterialProperty () {
-  function PolylineTrailLinkMaterialProperty (this: any, color:object, duration:number, U?:object) {
+export function initPolylineTrailLinkMaterialProperty() {
+  function PolylineTrailLinkMaterialProperty(this: any, color: object, duration: number, U?: object) {
     this._definitionChanged = new Cesium.Event()
     this._color = U
     this._colorSubscription = U
@@ -26,7 +27,7 @@ export function initPolylineTrailLinkMaterialProperty () {
   PolylineTrailLinkMaterialProperty.prototype.getType = function () {
     return 'PolylineTrailLink'
   }
-  PolylineTrailLinkMaterialProperty.prototype.getValue = function (time:object, result:any) {
+  PolylineTrailLinkMaterialProperty.prototype.getValue = function (time: object, result: any) {
     if (!Cesium.defined(result)) {
       result = {}
     }
@@ -36,7 +37,7 @@ export function initPolylineTrailLinkMaterialProperty () {
     result.time = ((performance.now() - this._time) % this.duration) / this.duration
     return result
   }
-  PolylineTrailLinkMaterialProperty.prototype.equals = function (other:{_color:any}) {
+  PolylineTrailLinkMaterialProperty.prototype.equals = function (other: { _color: any }) {
     return this === other || (other instanceof PolylineTrailLinkMaterialProperty && Cesium.Property.equals(this._color, other._color))
   }
   Cesium.PolylineTrailLinkMaterialProperty = PolylineTrailLinkMaterialProperty

@@ -1,3 +1,4 @@
+// 迁徙线
 import Cesium from "@/utils/importCesium"
 import redimg from '../../assets/newredLine.png'
 let entities: Array<any> = []
@@ -17,7 +18,7 @@ export const addFlyLine = (viewer: any, active: boolean) => {
   }
 }
 // 创建迁徙线
-const createFlyLine = (viewer, start: { longitude: number, latitude: number }, endPoints: Array<{ longitude: number, latitude: number }>) => {
+const createFlyLine = (viewer: any, start: { longitude: number, latitude: number }, endPoints: Array<{ longitude: number, latitude: number }>) => {
   const startPoint = Cesium.Cartesian3.fromDegrees(
     start.longitude,
     start.latitude,
@@ -28,18 +29,18 @@ const createFlyLine = (viewer, start: { longitude: number, latitude: number }, e
     duration: 1.6,
     orientation: {
       // 指向
-        heading: Cesium.Math.toRadians(0),
-        // 视角
-        pitch: Cesium.Math.toRadians(-45),
-        roll: 0
-      }
+      heading: Cesium.Math.toRadians(0),
+      // 视角
+      pitch: Cesium.Math.toRadians(-45),
+      roll: 0
+    }
   });
-  if(entities?.length) return
+  if (entities?.length) return
   // 终点与飞行线
   const material = new Cesium.PolylineMaterialProperty({
-    color:new Cesium.Color(0.0,1.0,0.0,1.0),
-    speed:2,
-    thickness:.5
+    color: new Cesium.Color(0.0, 1.0, 0.0, 1.0),
+    speed: 2,
+    thickness: .5
   });
   endPoints.forEach((item) => {
     const endPoint = Cesium.Cartesian3.fromDegrees(
@@ -56,10 +57,10 @@ const createFlyLine = (viewer, start: { longitude: number, latitude: number }, e
     }));
   })
   const material2 = new Cesium.PolylineMaterialProperty({
-    color:new Cesium.Color(0.0,1.0,0.0,1.0),
-    speed:2,
-    repeat:5,
-    thickness:.5
+    color: new Cesium.Color(0.0, 1.0, 0.0, 1.0),
+    speed: 2,
+    repeat: 5,
+    thickness: .5
   });
   entities.push(viewer.entities.add({
     polyline: {
@@ -76,7 +77,7 @@ const createFlyLine = (viewer, start: { longitude: number, latitude: number }, e
         111,
         29,
         5000,
-        111,28,
+        111, 28,
         5000,
       ]), // 多个点坐标构成线条路径
       width: 2,

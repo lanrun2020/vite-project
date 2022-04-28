@@ -15,6 +15,7 @@ import Cesium from '@/utils/importCesium'
 import "./flowLineMaterial";
 import "./RadarMaterial";
 import "./LineMaterial";
+import "./wallMaterial";
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
@@ -27,6 +28,7 @@ import { addCylinder } from "./addCylinder";
 import { addClustering } from "./addClustering";
 import { addSatellite } from "./addSatellite";
 import { addTrackPlane } from "./addTrackPlane";
+import { addWall } from "./addWall";
 
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
@@ -81,6 +83,10 @@ let toolList: Array<{ title: string; value: number }> = [
   {
     title: "追踪扫描",
     value: 12,
+  },
+  {
+    title: "动态墙",
+    value: 13,
   }
 ];
 onMounted(async () => {
@@ -92,13 +98,13 @@ const toolChecked = (active: boolean, value: number) => {
   switch (value) {
     case 0:// 增加迁徙线
       addFlyLine(viewer, active);
-      break; 
+      break;
     case 1:// 扩散扫描效果
       addSpreadEllipse(viewer, active);
-      break; 
+      break;
     case 2://旋转扫描效果
       addScanEllipse(viewer, active);
-      break; 
+      break;
     case 3://绘制多边形
       addPolygon2(viewer, active);
       break;
@@ -122,14 +128,17 @@ const toolChecked = (active: boolean, value: number) => {
       addCylinder(viewer, active);
       break;
     case 10: //点聚合
-    addClustering(viewer, active);
+      addClustering(viewer, active);
       break;
     case 11: //卫星
-     addSatellite(viewer, active);
-     break;
+      addSatellite(viewer, active);
+      break;
     case 12: //追踪扫描
-     addTrackPlane(viewer, active);
-     break;
+      addTrackPlane(viewer, active);
+      break;
+    case 13: //动态墙
+      addWall(viewer, active);
+      break;
     default: break;
   }
 };
@@ -137,7 +146,7 @@ const initCesium = () => {
   if (viewer) {
     viewer.destroy();
   }
-  
+
   viewer = new Cesium.Viewer("cesiumContainer", {
     animation: true, // 是否显示时钟clock动画控件
     baseLayerPicker: false, // 是否显示图层选择控件

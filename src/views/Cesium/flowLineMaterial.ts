@@ -1,3 +1,4 @@
+// 迁徙线材质
 import Cesium from '@/utils/importCesium'
 export default class PolylineTrailLinkMaterialProperty {
   private _color: object | undefined
@@ -7,7 +8,7 @@ export default class PolylineTrailLinkMaterialProperty {
   private _definitionChanged: any
   private duration: number
   private _time: number
-  constructor(options?:{color?: object, duration?: number,image?:any,d?:number,repeat?:number}, U?: object) {
+  constructor(options?: { color?: object, duration?: number, image?: any, d?: number, repeat?: number }, U?: object) {
     this._definitionChanged = new Cesium.Event()
     this._color = options?.color
     this.duration = options?.duration || 100000
@@ -21,7 +22,7 @@ export default class PolylineTrailLinkMaterialProperty {
   getType() {
     return 'PolylineTrailLink'
   }
-  getValue(time:object,result: any) {
+  getValue(time: object, result: any) {
     if (!Cesium.defined(result)) {
       result = {}
     }
@@ -30,7 +31,7 @@ export default class PolylineTrailLinkMaterialProperty {
     result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._d
     return result
   }
-  equals(other) {
+  equals(other: object) {
     return this === other
   }
   conbineProp() {
@@ -39,13 +40,13 @@ export default class PolylineTrailLinkMaterialProperty {
         get: function () {
           return false
         },
-        configurable:true
+        configurable: true
       },
       definitionChanged: {
         get: function () {
           return this._definitionChanged
         },
-        configurable:true
+        configurable: true
       }
     })
   }

@@ -1,16 +1,17 @@
+// 线材质
 import Cesium from '@/utils/importCesium'
 
 export default class PolylineMaterialProperty {
   private _color: object
   private _speed: number
   private _repeat: number
-  private _thickness:number
+  private _thickness: number
   private _definitionChanged: any
   private duration: number
   private _time: number
-  constructor( options?:{color?: object, duration?: number,speed?:number,repeat?:number,thickness?:number}) {
+  constructor(options?: { color?: object, duration?: number, speed?: number, repeat?: number, thickness?: number }) {
     this._definitionChanged = new Cesium.Event()
-    this._color = options?.color || new Cesium.Color(0.0,0.0,1.0,1.0)
+    this._color = options?.color || new Cesium.Color(0.0, 0.0, 1.0, 1.0)
     this.duration = options?.duration || 10000
     this._time = (new Date()).getTime()
     this._speed = options?.speed || 1.0
@@ -22,7 +23,7 @@ export default class PolylineMaterialProperty {
   getType() {
     return 'Polyline'
   }
-  getValue(time:object,result: any) {
+  getValue(time: object, result: any) {
     if (!Cesium.defined(result)) {
       result = {}
     }
@@ -35,7 +36,7 @@ export default class PolylineMaterialProperty {
     result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._speed
     return result
   }
-  equals(other) {
+  equals(other: object) {
     return this === other
   }
   conbineProp() {
@@ -44,13 +45,13 @@ export default class PolylineMaterialProperty {
         get: function () {
           return false
         },
-        configurable:true
+        configurable: true
       },
       definitionChanged: {
         get: function () {
           return this._definitionChanged
         },
-        configurable:true
+        configurable: true
       }
     })
   }

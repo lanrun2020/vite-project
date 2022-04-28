@@ -1,3 +1,4 @@
+//雷达扫描波形材质
 import Cesium from '@/utils/importCesium'
 
 const source = `
@@ -31,8 +32,8 @@ const fabric = {
     thickness: 0.2,// 环高
     time: 0,
     close: false,
-    gradual:0.0,
-    gradualValue:0.5,
+    gradual: 0.0,
+    gradualValue: 0.5,
   },
   source: source
 }
@@ -42,12 +43,12 @@ export default class radarMaterialsProperty {
   private duration: number
   private speed: number
   private _time: number
-  constructor(options?: { color?: typeof Cesium.Color, repeat?: number, thickness?: number, duration?: number, speed?: number,translucent?:boolean,gradual?:boolean,gradualValue?:number, U?: object }) {
-    this.material = new Cesium.Material({ fabric, translucent:options?.translucent||false})
+  constructor(options?: { color?: typeof Cesium.Color, repeat?: number, thickness?: number, duration?: number, speed?: number, translucent?: boolean, gradual?: boolean, gradualValue?: number, U?: object }) {
+    this.material = new Cesium.Material({ fabric, translucent: options?.translucent || false })
     this.material.uniforms.color = options?.color || new Cesium.Color(.1, 1, 0, 1)
-    this.material.uniforms.repeat = (options?.repeat || 10)*2
+    this.material.uniforms.repeat = (options?.repeat || 10) * 2
     this.material.uniforms.thickness = options?.thickness || 0.5
-    this.material.uniforms.gradual = options?.gradual || false ? 1.0:0.0
+    this.material.uniforms.gradual = options?.gradual || false ? 1.0 : 0.0
     this.material.uniforms.gradualValue = options?.gradualValue || 0.5
     this.duration = options?.duration || 10000
     this.speed = options?.speed || 1

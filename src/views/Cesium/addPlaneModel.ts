@@ -3,7 +3,7 @@ import Cesium from "@/utils/importCesium"
 import { createLine } from "./flowline3";
 import redimg from '../../assets/redLine.png'
 import CallbackProperty from "cesium/Source/DataSources/CallbackProperty";
-
+import { computeCirclularFlight } from './util'
 let entities: Array<object> = []
 // 根据两个坐标点,获取Heading(朝向)
 const getHeading = (pointA:object, pointB:object) => {
@@ -22,18 +22,6 @@ const getHeading = (pointA:object, pointB:object) => {
   return Cesium.Math.TWO_PI - Cesium.Math.zeroToTwoPi(heading);
 }
 
-const computeCirclularFlight2 = ( Points:Array<object>,start:object) => {
-  const property = new Cesium.SampledPositionProperty();
-  for (let i = 0; i < Points.length; i++) {
-    const time = Cesium.JulianDate.addSeconds(
-      start,
-      i * 1,
-      new Cesium.JulianDate()
-    );
-    property.addSample(time, Points[i]);
-  }
-  return property;
-}
 // 获取流动曲线上多个连续点
 const generateCurve = (startPoint: object, endPoint: object, length:number,height:number=0) => {
   const addPointCartesian = new Cesium.Cartesian3();
@@ -97,7 +85,7 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
     //Set timeline to simulation bounds
     viewer.timeline.zoomTo(start, stop);
    
-    let property = computeCirclularFlight2(points,start)
+    let property = computeCirclularFlight(points,start)
     
     //Populate it with data
     if (entities?.length) return
@@ -136,7 +124,7 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
       5000-radarH/2
     );
     const points2 = generateCurve(startPoint2,endPoint2,50,radarH/2) //获取路径上的点
-    let property2 = computeCirclularFlight2(points2,start)
+    let property2 = computeCirclularFlight(points2,start)
     entities.push(viewer.entities.add({
       position: property2,
       cylinder: {

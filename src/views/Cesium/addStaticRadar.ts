@@ -1,3 +1,4 @@
+// 静态雷达模型
 import Cesium from "@/utils/importCesium"
 
 let model: any = null
@@ -8,13 +9,13 @@ export const addStaticRadar = (viewer: any, active: boolean) => {
       duration: 1.6,
       orientation: {
         // 指向
-          heading: Cesium.Math.toRadians(0),
-          // 视角
-          pitch: Cesium.Math.toRadians(-45),
-          roll: 0
-        }
+        heading: Cesium.Math.toRadians(0),
+        // 视角
+        pitch: Cesium.Math.toRadians(-45),
+        roll: 0
+      }
     });
-    if(model) return
+    if (model) return
     model = viewer.entities.add({
       id: "model1",
       position: Cesium.Cartesian3.fromDegrees(104, 32, 0),
@@ -29,5 +30,4 @@ export const addStaticRadar = (viewer: any, active: boolean) => {
       model = null
     }
   }
-
 }

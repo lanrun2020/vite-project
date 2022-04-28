@@ -7,6 +7,8 @@
 import { onMounted } from "@vue/runtime-core";
 import { ref } from "vue";
 import * as THREE from "three";
+import dalishi from '../../assets/dalishi.jpg'
+
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 const domWidth = ref(2);
 const domHeight = ref(1);
@@ -22,7 +24,7 @@ const renderer = new THREE.WebGLRenderer(); //renderer（渲染器）
 let controls = new OrbitControls(camera,renderer.domElement)
 //要创建一个立方体，我们需要一个BoxGeometry（立方体）对象. 这个对象包含了一个立方体中所有的顶点（vertices）和面（faces）
 const geometry = new THREE.BoxGeometry(20, 20, 20);
-const texture = new THREE.TextureLoader().load("/src/assets/dalishi.jpg"); //首先，获取到材质贴图纹理
+const texture = new THREE.TextureLoader().load(dalishi); //首先，获取到材质贴图纹理
 const material = new THREE.MeshBasicMaterial({ map: texture });//添加到材质上
 //  new THREE.MeshBasicMaterial({ color: 0x00ff00 }); //绿色材质
 const cube = new THREE.Mesh(geometry, material); //Mesh（网格）。 网格包含一个几何体以及作用在此几何体上的材质，我们可以直接将网格对象放入到我们的场景中，并让它在场景中自由移动

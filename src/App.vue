@@ -1,19 +1,19 @@
 <template>
-   <router-view v-slot="{ Component }">
-      <component :is="Component" />
-    </router-view>
+  <router-view v-slot="{ Component }">
+    <component :is="Component" />
+  </router-view>
 </template>
 
 <script lang="ts">
 </script>
 
-<style>
+<style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-body{
+body {
   margin: 0;
   padding: 0;
 }

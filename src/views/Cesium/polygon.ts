@@ -1,3 +1,4 @@
+// 点击地图 构造多边形
 import Cesium from "@/utils/importCesium"
 let arr2: Array<number> = []
 let polygonPoints: Array<{ lng: number, lat: number }> = []
