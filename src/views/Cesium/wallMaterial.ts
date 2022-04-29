@@ -66,7 +66,7 @@ export default class WallScanMaterialProperty {
           // float m = mod(materialInput.st.t-fract(time - materialInput.s),sp);
           float m = mod(materialInput.st.t,sp);
           // float a = step(sp * (1.0 - 0.5),m);
-          float a = materialInput.st.t + (1.0 - fract(time - materialInput.s)) - 1.0 * step(fract(time - materialInput.s),materialInput.st.t);
+          float a =step(0.1,materialInput.st.t)*(materialInput.st.t + (1.0 - fract(time - materialInput.s)) - 1.0 * step(fract(time - materialInput.s),materialInput.st.t)) + step(materialInput.st.t,0.1);
           material.diffuse = vec3(0.0,1.0,0.0);
           material.alpha = a * color.a;
           return material;

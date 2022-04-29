@@ -1,6 +1,6 @@
-// 扇形扫描
+// 雷达扫描 扇形扫描
 import Cesium from "@/utils/importCesium"
-let entities:Array<any> = []
+let entities: Array<any> = []
 export const addScanWall = (viewer: any, active: boolean) => {
   if (active) {
     // 雷达扫描
@@ -9,13 +9,13 @@ export const addScanWall = (viewer: any, active: boolean) => {
       duration: 1.6,
       orientation: {
         // 指向
-          heading: Cesium.Math.toRadians(0),
-          // 视角
-          pitch: Cesium.Math.toRadians(-45),
-          roll: 0
-        }
+        heading: Cesium.Math.toRadians(0),
+        // 视角
+        pitch: Cesium.Math.toRadians(-45),
+        roll: 0
+      }
     });
-    if(entities?.length) return
+    if (entities?.length) return
     entities.push(viewer.entities.add({
       id: "scan",
       name: "Scan",
@@ -23,7 +23,13 @@ export const addScanWall = (viewer: any, active: boolean) => {
       ellipsoid: {
         radii: new Cesium.Cartesian3(50000.0, 50000.0, 50000.0),
         maximumCone: Cesium.Math.toRadians(90),
-        material: Cesium.Color.BLUE.withAlpha(0.1),
+        material: new Cesium.WallScanMaterialProperty(
+          new Cesium.Color(.1, 1, 0, 0.8),
+          10000,// 循环时长
+          1,//速度
+          30,//圈数
+          0.1,//环高
+        ),
         outline: true,
         outlineColor: Cesium.Color.BLUE.withAlpha(0.2),
         outlineWidth: 1,
@@ -38,7 +44,7 @@ export const addScanWall = (viewer: any, active: boolean) => {
           return Cesium.Cartesian3.fromDegreesArrayHeights(
             calcPoints(114, 30, 50000, heading)
           );
-        },false),
+        }, false),
         material: Cesium.Color.AQUAMARINE.withAlpha(0.5),
       },
     }));

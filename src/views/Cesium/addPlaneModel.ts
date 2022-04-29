@@ -1,12 +1,9 @@
 // 飞机航线
 import Cesium from "@/utils/importCesium"
-import { createLine } from "./flowline3";
-import redimg from '../../assets/redLine.png'
-import CallbackProperty from "cesium/Source/DataSources/CallbackProperty";
 import { computeCirclularFlight } from './util'
 let entities: Array<object> = []
 // 根据两个坐标点,获取Heading(朝向)
-const getHeading = (pointA:object, pointB:object) => {
+const getHeading = (pointA: object, pointB: object) => {
   //建立以点A为原点，X轴为east,Y轴为north,Z轴朝上的坐标系
   const transform = Cesium.Transforms.eastNorthUpToFixedFrame(pointA);
   //向量AB
@@ -23,14 +20,14 @@ const getHeading = (pointA:object, pointB:object) => {
 }
 
 // 获取流动曲线上多个连续点
-const generateCurve = (startPoint: object, endPoint: object, length:number,height:number=0) => {
+const generateCurve = (startPoint: object, endPoint: object, length: number, height: number = 0) => {
   const addPointCartesian = new Cesium.Cartesian3();
   Cesium.Cartesian3.add(startPoint, endPoint, addPointCartesian); // 将两个笛卡尔坐标按照分量求和，addPointCartesian是两点(x,y,z)相加后返回的结果(x,y,z)
   const midPointCartesian = new Cesium.Cartesian3();
   Cesium.Cartesian3.divideByScalar(addPointCartesian, 2, midPointCartesian); // midPointCartesian是点(x,y,z)除以2后返回的结果(x,y,z)
   const midPointCartographic =
     Cesium.Cartographic.fromCartesian(midPointCartesian); // Cartographic.fromCartesian将笛卡尔位置转换为经纬度弧度值
-  midPointCartographic.height = 
+  midPointCartographic.height =
     Cesium.Cartesian3.distance(startPoint, endPoint) / 50 - height; // 将起始点、终点两个坐标点之间的距离除x,设置为此中间点的高度
   const midPoint = new Cesium.Cartesian3();
   Cesium.Ellipsoid.WGS84.cartographicToCartesian(
@@ -50,10 +47,10 @@ const generateCurve = (startPoint: object, endPoint: object, length:number,heigh
   return curvePoints; // 返回曲线上的多个点坐标集合
 };
 
-export const addPlaneModel = (viewer:any, active: boolean) => {
+export const addPlaneModel = (viewer: any, active: boolean) => {
   if (active) {
-     //起点，终点
-     const startPoint = Cesium.Cartesian3.fromDegrees(
+    //起点，终点
+    const startPoint = Cesium.Cartesian3.fromDegrees(
       103.95223,
       30.57428,
       5000
@@ -74,7 +71,7 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
     //       roll: 0
     //     }
     // });
-    const points = generateCurve(startPoint,endPoint,50) //获取路径上的点
+    const points = generateCurve(startPoint, endPoint, 50) //获取路径上的点
     const start = Cesium.JulianDate.now()
     const stop = Cesium.JulianDate.addSeconds(start, points.length, new Cesium.JulianDate())
     //时间段循环
@@ -84,20 +81,20 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
     viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
     //Set timeline to simulation bounds
     viewer.timeline.zoomTo(start, stop);
-   
-    let property = computeCirclularFlight(points,start)
-    
+
+    let property = computeCirclularFlight(points, start)
+
     //Populate it with data
     if (entities?.length) return
     entities.push(viewer.entities.add({
       id: "Blueline",
       name: "Blue dashed line",
       polyline: {
-        positions:points,
+        positions: points,
         width: 3,
         material: new Cesium.PolylineMaterialProperty({
-          color:new Cesium.Color(0.0, 0.0, 1.0, 1.0),
-          repeat:5
+          color: new Cesium.Color(0.0, 0.0, 1.0, 1.0),
+          repeat: 5
         }),
       }
     }))
@@ -107,7 +104,7 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
       model: {
         uri: `/model/CesiumAir.glb`,
         scale: 2,
-        minimumPixelSize:60,
+        minimumPixelSize: 60,
       },
       viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
       orientation: new Cesium.VelocityOrientationProperty(property),
@@ -116,15 +113,15 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
     const startPoint2 = Cesium.Cartesian3.fromDegrees(
       103.95223,
       30.57428,
-      5000-radarH/2
+      5000 - radarH / 2
     );
     const endPoint2 = Cesium.Cartesian3.fromDegrees(
       116.410745,
       39.510251,
-      5000-radarH/2
+      5000 - radarH / 2
     );
-    const points2 = generateCurve(startPoint2,endPoint2,50,radarH/2) //获取路径上的点
-    let property2 = computeCirclularFlight(points2,start)
+    const points2 = generateCurve(startPoint2, endPoint2, 50, radarH / 2) //获取路径上的点
+    let property2 = computeCirclularFlight(points2, start)
     entities.push(viewer.entities.add({
       position: property2,
       cylinder: {
@@ -132,12 +129,12 @@ export const addPlaneModel = (viewer:any, active: boolean) => {
         topRadius: 0.0,
         bottomRadius: 4000.0,
         material: new Cesium.RadarScanMaterialProperty(
-                new Cesium.Color(.1, 1, 0, 0.9),
-                10000,// 循环时长
-                1.0,//速度
-                20,//圈数
-                0.2,//环高
-              )
+          new Cesium.Color(.1, 1, 0, 0.9),
+          10000,// 循环时长
+          1.0,//速度
+          20,//圈数
+          0.2,//环高
+        )
       },
     }))
   } else {

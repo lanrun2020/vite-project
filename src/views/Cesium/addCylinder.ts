@@ -1,6 +1,5 @@
 // 人口统计柱状图 模拟
 import Cesium from "@/utils/importCesium"
-import redimg from '../../assets/newredLine.png'
 
 let entity: Array<object> = []
 let primitive: object
@@ -53,19 +52,19 @@ const addCylinderItem = (point: { lon: number, lat: number, num: number }) => {
   //   return prev + curr;
   // });
   const r = Math.random()
-      var center = Cesium.Cartesian3.fromDegrees(point.lon, point.lat, point.num*1000)
-    var modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center);
-      let instance = new Cesium.GeometryInstance({
-      geometry: new Cesium.CylinderGeometry({
-        length: point.num * 2000,
-        topRadius: 5000.0,
-        bottomRadius: 5000.0,
-      }),
-      attributes: {
-        color: Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(0.5, point.num / 50, 0, 1))
-      },
-      modelMatrix: modelMatrix, // 提供位置参数
-    });
+  var center = Cesium.Cartesian3.fromDegrees(point.lon, point.lat, point.num * 1000)
+  var modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+  let instance = new Cesium.GeometryInstance({
+    geometry: new Cesium.CylinderGeometry({
+      length: point.num * 2000,
+      topRadius: 5000.0,
+      bottomRadius: 5000.0,
+    }),
+    attributes: {
+      color: Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(0.5, point.num / 50, 0, 1))
+    },
+    modelMatrix: modelMatrix, // 提供位置参数
+  });
   // point.num.forEach((n, index) => {
   //   let h = n * 1000
   //   let startH = 0
@@ -100,9 +99,9 @@ const addCylinderItem = (point: { lon: number, lat: number, num: number }) => {
   primitive = new Cesium.Primitive({
     geometryInstances: instance,
     appearance: new Cesium.PerInstanceColorAppearance({
-      flat : true,
-      faceForward:true,
-      translucent : true,
+      flat: true,
+      faceForward: true,
+      translucent: true,
     })
   });
   return primitive

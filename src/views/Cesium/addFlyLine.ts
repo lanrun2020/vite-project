@@ -1,6 +1,5 @@
 // 迁徙线
 import Cesium from "@/utils/importCesium"
-import redimg from '../../assets/newredLine.png'
 let entities: Array<any> = []
 const startPoint = { longitude: 110, latitude: 32 }
 const endPoint = [

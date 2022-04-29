@@ -40,7 +40,7 @@ const emit = defineEmits(["toolChecked", 'finishPolygon']);
 //   console.log('activeIndex change')
 // })
 
-const toolChecked = (active: boolean, value: any) => {
+const toolChecked = (active: boolean, value: number) => {
   if (active) {
     activeIndex.value = value;
   } else {

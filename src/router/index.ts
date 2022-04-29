@@ -33,7 +33,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'cesium',
-        component: () => import('../views/Cesium/index.vue'),
+        component: import('../views/Cesium/index.vue'),
       },
     ],
   },
