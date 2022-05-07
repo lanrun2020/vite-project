@@ -47,9 +47,9 @@ const rules = reactive({
   username: [{ required: true, validator: validateUserName, trigger: 'blur' }],
 })
 
-const login = (formEl:any) => {
-  formEl.validate(async (valid:boolean)=>{
-    if(valid){
+const login = (formEl: any) => {
+  formEl.validate(async (valid: boolean) => {
+    if (valid) {
       const res = await fetchLogin(params)
       router.push('/home')
     }
@@ -59,21 +59,22 @@ const login = (formEl:any) => {
 </script>
 
 <style lang="scss">
-  .login-page{
-    width: 100vw;
-    height: 100vh;
-    background:url('@/assets/login-bgimg.jpg') no-repeat fixed center;
-    background-size: 100%;
-  }
-  .login-box{
-    background-color: #def5ff;
-    border: 1px solid rgb(58, 133, 146);
-    border-radius: 5px;
-    padding: 20px;
-    width:400px;
-    position: absolute;
-    top:50%;
-    left: 50%;
-    transform: translateY(-50%);
-  }
+.login-page {
+  width: 100vw;
+  height: 100vh;
+  background: url('@/assets/login-bgimg.jpg') no-repeat fixed center;
+  background-size: 100%;
+}
+
+.login-box {
+  background-color: #def5ff;
+  border: 1px solid rgb(58, 133, 146);
+  border-radius: 5px;
+  padding: 20px;
+  width: 400px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%);
+}
 </style>

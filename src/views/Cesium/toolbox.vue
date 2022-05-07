@@ -7,14 +7,8 @@
       </el-icon>
     </span>
     <div class="tool-box-content">
-      <toolitem
-        v-for="item in toolList"
-        :key="item.value"
-        :activeIndex="activeIndex"
-        :value="item.value"
-        :label="item.title"
-        @toolChecked="toolChecked"
-      ></toolitem>
+      <toolitem v-for="item in toolList" :key="item.value" :activeIndex="activeIndex" :value="item.value"
+        :label="item.title" @toolChecked="toolChecked"></toolitem>
     </div>
     <el-button v-if="activeIndex === 3" @click="emit('finishPolygon')">完成</el-button>
   </div>
@@ -63,6 +57,7 @@ const toolChecked = (active: boolean, value: number) => {
   background-color: rgba(0, 0, 0, 0.75);
   transition: right 0.15s linear;
 }
+
 .switchbox {
   position: absolute;
   display: inline-block;
@@ -76,13 +71,16 @@ const toolChecked = (active: boolean, value: number) => {
   color: rgb(0, 195, 255, 0.6);
   background-color: rgba(0, 0, 0, 0.75);
 }
+
 .switchicon {
   font-size: 32px;
   font-weight: bold;
 }
+
 .switchbox:hover {
   color: rgb(0, 195, 255);
 }
+
 .tool-box-content {
   display: flex;
   justify-content: space-between;

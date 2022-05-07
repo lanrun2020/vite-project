@@ -95,8 +95,6 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
     viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
     //Set timeline to simulation bounds
     viewer.timeline.zoomTo(start, stop);
-    let property = computeCirclularFlight(points, start)
-
   } else {
     if (entities.length) {
       entities.forEach((entity) => {

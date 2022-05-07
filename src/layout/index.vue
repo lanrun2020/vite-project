@@ -1,38 +1,40 @@
 <template>
   <div class="app-wrapper">
     <el-container style="height: 100vh">
-      <el-menu
-        class="el-menu-vertical-demo"
-        background-color="#545c64"
-        text-color="#fff"
-        active-text-color="#ffd04b"
-      >
-        <template v-for="item in menuList" :key="item.id">
-          <el-sub-menu v-if="item.children" :index="item.id">
+      <el-menu class="el-menu-vertical-demo" background-color="#545c64" text-color="#fff" active-text-color="#ffd04b" @select="menuSelect">
+
+          <el-menu-item index="/home">
             <template v-slot:title>
-              <el-icon>
-                <setting />
-              </el-icon>
-              <span>{{ item.menuName }}</span>
-            </template>
-            <el-menu-item-group>
-              <el-menu-item
-                v-for="child in item.children"
-                :index="child.id"
-                :key="child.id"
-                @click="menuClick(child)"
-              >{{ child.menuName }}</el-menu-item>
-            </el-menu-item-group>
-          </el-sub-menu>
-          <el-menu-item v-else :index="item.id" @click="menuClick(item)">
-            <el-icon>
-              <setting />
-            </el-icon>
-            <template v-slot:title>
-              <span>{{ item.menuName }}</span>
+              <span>首页</span>
             </template>
           </el-menu-item>
-        </template>
+
+          <el-sub-menu index="/">
+            <template v-slot:title>
+              <el-icon>
+                <IconMenu />
+              </el-icon>
+              <span>Three.js</span>
+            </template>
+            <el-menu-item-group>
+              <el-menu-item index="/barchart">
+                example1
+              </el-menu-item>
+              <el-menu-item index="/linechart">
+                example2
+              </el-menu-item>
+            </el-menu-item-group>
+          </el-sub-menu>
+
+          <el-menu-item index="/cesium">
+            <el-icon>
+              <Compass />
+            </el-icon>
+            <template v-slot:title>
+              <span>Cesium</span>
+            </template>
+          </el-menu-item>
+
       </el-menu>
       <el-container>
         <el-header height="50px"></el-header>
@@ -51,45 +53,14 @@ import router from "../router";
 import {
   Location,
   Document,
+  Compass,
   Menu as IconMenu,
   Setting,
 } from "@element-plus/icons-vue";
-const menuList: Array<any> = [
-  {
-    id: "1",
-    menuName: "首页",
-    menuUrl: "/home",
-    parentId: "0",
-  },
-  {
-    id: "2",
-    menuName: "Three.js",
-    parentId: "0",
-    children: [
-      {
-        id: "21",
-        menuName: "example1",
-        menuUrl: "/barchart",
-        parentId: "2",
-      },
-      {
-        id: "22",
-        menuName: "example2",
-        menuUrl: "/linechart",
-        parentId: "2",
-      },
-    ],
-  },
-  {
-    id: "3",
-    menuName: "Cesium",
-    menuUrl: "/cesium",
-    parentId: "0",
-  },
-];
-const menuClick: Function = (item: any) => {
-  if (item.menuUrl !== router.currentRoute.value.path) {
-    router.push({ path: item.menuUrl });
+
+const menuSelect: Function = (path: string) => {
+  if (path !== router.currentRoute.value.path) {
+    router.push({ path });
   }
 };
 </script>
@@ -99,6 +70,7 @@ const menuClick: Function = (item: any) => {
     padding: 10px;
   }
 }
+
 .el-menu-vertical-demo {
   width: 200px;
   min-height: 100vh;

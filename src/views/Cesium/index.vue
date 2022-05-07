@@ -196,5 +196,11 @@ const initCesium = () => {
 #cesiumContainer .cesium-widget-credits {
   display: none !important;
 }
+.cesium-viewer-animationContainer,
+.cesium-viewer-timelineContainer,
+.cesium-viewer-bottom,
+.cesium-viewer-fullscreenContainer{
+  display: none !important;
+}
 </style>
 

@@ -3,29 +3,23 @@ import store from '../store/index'
 const http = axios.create()
 //请求拦截
 http.interceptors.request.use(
-  (config:any) => {
+  (config: object) => {
     const { baseURL } = store.getters
-    config = { ...config, baseURL, timeout:300000 }
-
-    config.cancelToken = new axios.CancelToken((cancel:Function)=>{
-      store.commit('PUSH_CANCEL',{
-        cancelToken:cancel,
-      })
-    })
+    config = { ...config, baseURL, timeout: 300000 }
     return config
   },
-  (error:Error)=>{
+  (error: Error) => {
     return Promise.reject(error)
   }
 )
 
 //响应拦截
 http.interceptors.response.use(
-  (response:any)=>{
+  (response: any) => {
     const res = response.data
     return res.data
   },
-  (error:Error)=>{
+  (error: Error) => {
     return Promise.reject(error)
   }
 )

@@ -6,17 +6,15 @@
 <script setup lang="ts">
 import { onMounted } from "@vue/runtime-core";
 import ThreeJs2 from "./index";
-import {ref} from 'vue'
+import { ref } from 'vue'
 onMounted(() => {
   init();
   resizeListener();
 });
 
 const init = () => {
-  const dom = document.getElementById("demo");
-  if (dom) {
-    ThreeJs2(dom);
-  }
+  const dom = document.getElementById("demo") as HTMLDivElement;
+  ThreeJs2(dom);
 };
 const resizeListener = () => {
   // window.addEventListener('resize',() =>)
