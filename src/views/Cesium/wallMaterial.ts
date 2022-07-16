@@ -20,10 +20,10 @@ export default class WallScanMaterialProperty {
     this.conbineProp()
     this.init()
   }
-  getType() {
+  getType () {
     return 'WallScan'
   }
-  getValue(time: object, result: any) {
+  getValue (time: object, result: any) {
     if (!Cesium.defined(result)) {
       result = {}
     }
@@ -35,10 +35,10 @@ export default class WallScanMaterialProperty {
     result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._d
     return result
   }
-  equals(other: any) {
+  equals (other: any) {
     return this === other
   }
-  conbineProp() {
+  conbineProp () {
     Object.defineProperties(WallScanMaterialProperty.prototype, {
       isConstant: {
         get: function () {
@@ -54,7 +54,7 @@ export default class WallScanMaterialProperty {
       }
     })
   }
-  init() {
+  init () {
     Cesium.WallScanMaterialProperty = WallScanMaterialProperty
     Cesium.Material.WallScanType = 'WallScan'
     Cesium.Material.WallScanSource =
@@ -62,11 +62,11 @@ export default class WallScanMaterialProperty {
       czm_material czm_getMaterial(czm_materialInput materialInput)
       {
           czm_material material = czm_getDefaultMaterial(materialInput);
-          float sp = 1.0/repeat;
+          // float sp = 1.0/repeat;
           // float m = mod(materialInput.st.t-fract(time - materialInput.s),sp);
-          float m = mod(materialInput.st.t,sp);
+          // float m = mod(materialInput.st.t,sp);
           // float a = step(sp * (1.0 - 0.5),m);
-          float a =step(0.1,materialInput.st.t)*(materialInput.st.t + (1.0 - fract(time - materialInput.s)) - 1.0 * step(fract(time - materialInput.s),materialInput.st.t)) + step(materialInput.st.t,0.1);
+          float a =step(0.1,materialInput.st.t)*(materialInput.st.t + (1.0 - fract(time - materialInput.s)) - 1.0 * step(fract(time - materialInput.s),materialInput.st.t)) + step(materialInput.st.t,0.2);
           material.diffuse = vec3(0.0,1.0,0.0);
           material.alpha = a * color.a;
           return material;

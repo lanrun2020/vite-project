@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
+import { el } from 'element-plus/lib/locale'
 import store from '../store/index'
 const http = axios.create()
 //请求拦截
@@ -16,8 +18,11 @@ http.interceptors.request.use(
 //响应拦截
 http.interceptors.response.use(
   (response: any) => {
-    const res = response.data
-    return res.data
+    if (response.data.code === '200') {
+      return response.data.data
+    } else {
+      ElMessage.error(response.data.message ? response.data.message : '接口异常')
+    }
   },
   (error: Error) => {
     return Promise.reject(error)

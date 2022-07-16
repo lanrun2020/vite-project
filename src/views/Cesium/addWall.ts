@@ -1,12 +1,13 @@
 // 动态墙
 // 流动管道
 import Cesium from "@/utils/importCesium"
+import { chengdu } from "./geo"
 let entity: Array<object> | null = null
-
+let arr = new Array(chengdu.length / 2).fill('3000')
 export const addWall = (viewer: any, active: boolean) => {
   if (active) {
     viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(106, 32.5, 600000),
+      destination: Cesium.Cartesian3.fromDegrees(104.188587, 30.619864, 15000),
       duration: 1.6,
       orientation: {
         // 指向
@@ -22,31 +23,19 @@ export const addWall = (viewer: any, active: boolean) => {
     entity?.push(viewer.entities.add({
       name: "Green wall from surface with outline",
       wall: {
-        positions: Cesium.Cartesian3.fromDegreesArrayHeights([
-          104.0,
-          36.0,
-          100000.0,
-          103.0,
-          36.0,
-          100000.0,
-          103.0,
-          35.0,
-          100000.0,
-          102.0,
-          35.0,
-          100000.0,
-          102.0,
-          34.0,
-          100000.0,
-        ]),
+        positions: Cesium.Cartesian3.fromDegreesArray(chengdu),
+        maximumHeights: arr,
+        outline: false,
+        outlineColor: Cesium.Color(.1, 1, 0, 0.6),
+        outlineWidth: 20,
         material: new Cesium.WallScanMaterialProperty(
           new Cesium.Color(.1, 1, 0, 0.6),
           3000,// 循环时长
           1.0,//速度
-          3,//圈数
+          6,//圈数
           .5,//环高
         ),
-        outline: false,
+        // outline: false,
       }
     }))
   } else {
