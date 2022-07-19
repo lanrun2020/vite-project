@@ -7,14 +7,6 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/Login/index.vue'),
   },
   {
-    path: '/orbit',
-    component: () => import('../views/Three/Orbit.vue'),
-  },
-  {
-    path: '/terrain',
-    component: () => import('../views/Three/Terrain.vue'),
-  },
-  {
     path: '/',
     component: () => import('../layout/index.vue'),
     redirect: 'home',
@@ -24,12 +16,20 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/Home/index.vue'),
       },
       {
-        path: 'barChart',
-        component: () => import('../views/Echarts/barChart.vue'),
+        path: 'example1',
+        component: () => import('../views/Three/example1.vue'),
       },
       {
-        path: 'lineChart',
-        component: () => import('../views/Echarts/lineChart.vue'),
+        path: 'example2',
+        component: () => import('../views/Three/example2.vue'),
+      },
+      {
+        path: 'example3',
+        component: () => import('../views/Three/example3.vue'),
+      },
+      {
+        path: 'orbit',
+        component: () => import('../views/Three/Orbit.vue'),
       },
       {
         path: 'cesium',

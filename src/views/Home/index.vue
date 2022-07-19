@@ -9,9 +9,6 @@
   <h1>count:{{ count }}</h1>
   <h1>nested.count:{{ nested.count.value }}</h1>
   <el-button @click="count++">count++</el-button>
-  <el-button @click="$router.push('/login')">登录页</el-button>
-  <el-button @click="$router.push('/orbit')">Orbit</el-button>
-  <el-button @click="$router.push('/terrain')">Terrain</el-button>
   <el-button @click="test">测试</el-button>
   <el-button @click="test2">测试2</el-button>
   <el-button @click="test3">测试3</el-button>

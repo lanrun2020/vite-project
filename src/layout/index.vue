@@ -19,11 +19,17 @@
             <span>Three.js</span>
           </template>
           <el-menu-item-group>
-            <el-menu-item index="/barchart">
+            <el-menu-item index="/example1">
               example1
             </el-menu-item>
-            <el-menu-item index="/linechart">
+            <el-menu-item index="/example2">
               example2
+            </el-menu-item>
+            <el-menu-item index="/example3">
+              example3
+            </el-menu-item>
+            <el-menu-item index="/orbit">
+              Orbit
             </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
