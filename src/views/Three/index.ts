@@ -7,6 +7,7 @@ import dalishi from '../../assets/dalishi.jpg'
 export default function ThreeJs2(dom: any) {
   let scene: THREE.Scene
   let camera: THREE.PerspectiveCamera
+  let cubeCamera: THREE.CubeCamera
   let renderer: THREE.WebGLRenderer
   let mesh: THREE.Mesh
   let controls: any
@@ -19,7 +20,7 @@ export default function ThreeJs2(dom: any) {
       0.1,
       1000
     );
-    camera.position.z = 5;
+    camera.position.z = 75;
   }
 
   // 设置渲染器
@@ -37,8 +38,8 @@ export default function ThreeJs2(dom: any) {
     controls.enableDamping = true; // 阻尼（惯性）是否启用
     controls.dampingFactor = 0.05; // 阻尼系数
     controls.screenSpacePanning = false; //定义平移时如何平移相机的位置。如果为 true，则相机在屏幕空间中平移。否则，相机会在与相机向上方向正交的平面中平移。OrbitControls 默认为 true；MapControls 为 false。
-    controls.minDistance = 100; //移动最小距离
-    controls.maxDistance = 500; //移动最大距离
+    // controls.minDistance = 50; //移动最小距离
+    controls.maxDistance = 1500; //移动最大距离
     controls.maxPolarAngle = Math.PI; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
   }
   // 创建网格模型
@@ -52,11 +53,12 @@ export default function ThreeJs2(dom: any) {
       const material1 = new THREE.MeshBasicMaterial({ map: texture })//side 镜像翻转
       const material = [material1, material1, material1, material1, material1, material1]; //然后创建一个phong材质来处理着色，并传递给纹理映射
       mesh = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+      mesh.position.set(40, 0, 0)
       scene.add(mesh); //网格模型添加到场景中
 
       const material2 = new THREE.MeshStandardMaterial({
         roughness: 0.01,//粗糙度 0平滑镜面反射  1完全漫反射
-        metalness: 1 //金属度 非金属0 金属1
+        metalness: 0 //金属度 非金属0 金属1
       });
 
       let cube = new THREE.Mesh(new THREE.BoxGeometry(15, 15, 15), material2);
@@ -88,13 +90,14 @@ export default function ThreeJs2(dom: any) {
 
       let cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256);
       cubeRenderTarget.texture.type = THREE.HalfFloatType;
-      let material3 = new THREE.MeshStandardMaterial({
-        // envMap: cubeRenderTarget.texture,
-        roughness: 0.05,
+      cubeCamera = new THREE.CubeCamera(1, 1000, cubeRenderTarget);
+      let material3 = new THREE.MeshStandardMaterial({ //网格标准材质
+        envMap: cubeRenderTarget.texture,
+        roughness: 0.01,
         metalness: 1
       });
       let sphere2 = new THREE.Mesh(new THREE.IcosahedronGeometry(15, 15), material3); //20面几何体 (半径，精细度)，精细度大于0时，将添加更多的顶点
-      sphere2.position.set(-80, 0, 0)
+      sphere2.position.set(0, 0, 0)
       scene.add(sphere2);
     }
   }
@@ -110,6 +113,7 @@ export default function ThreeJs2(dom: any) {
   const animate = () => {
     if (mesh) {
       requestAnimationFrame(animate);
+      cubeCamera.update(renderer, scene);
       controls.update()
       // 设置画布的大小
       renderer.setSize(dom.offsetWidth, dom.offsetHeight);
@@ -149,9 +153,12 @@ export default function ThreeJs2(dom: any) {
 
   // 监听窗口变化，重新设置画布大小
   const onWindowResize = () => {
-    camera.aspect = dom.offsetWidth / dom.offsetHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(dom.offsetWidth, dom.offsetHeight);
+    // console.log(dom);
+    if (dom.offsetWidth) {
+      camera.aspect = dom.offsetWidth / dom.offsetHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(dom.offsetWidth, dom.offsetHeight);
+    }
   }
 
   const setScene = () => {
@@ -159,7 +166,7 @@ export default function ThreeJs2(dom: any) {
     // scene.background = new THREE.Color(0xcccccc); //背景颜色
     // scene.fog = new THREE.FogExp2(0xcccccc, 0.002); //雾效果
 
-    // Grid 添加网格
+    // Grid 添加网格辅助对象
     const helper = new THREE.GridHelper(1000, 50, 0x303030, 0x303030); //长度1000 划分为50份
     helper.position.y = -50;
     scene.add(helper);
