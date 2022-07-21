@@ -45,23 +45,23 @@ const animate = () => {
   requestAnimationFrame(animate); //每帧都会执行（正常情况下是60次/秒）
 };
 const addMesh = () => {
-  const geometry2 = new THREE.CylinderGeometry(0, 4, 40, 6, 1);
+  const geometry2 = new THREE.CylinderGeometry(0, 40, 20, 10, 1);
   const material2 = new THREE.MeshPhongMaterial({ color: 0xffffff, flatShading: true });
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < 50; i++) {
     const mesh = new THREE.Mesh(geometry2, material2);
     mesh.position.x = Math.random() * 1600 - 800;
-    mesh.position.y = Math.random() * 1600 - 800;
+    // mesh.position.y = Math.random() * 1600 - 800;
     mesh.position.z = Math.random() * 1600 - 800;
     mesh.updateMatrix();
     mesh.matrixAutoUpdate = false;
     scene.add(mesh);
-    const timer = setInterval(() => {
-      mesh.position.y += 10
-      if (mesh.position.y > 800) {
-        mesh.position.y = -800
-      }
-      mesh.updateMatrix();
-    }, 20)
+    // const timer = setInterval(() => {
+    //   mesh.position.y += 10
+    //   if (mesh.position.y > 800) {
+    //     mesh.position.y = -800
+    //   }
+    //   mesh.updateMatrix();
+    // }, 20)
   }
 }
 const init = () => {
