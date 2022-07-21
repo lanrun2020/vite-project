@@ -41,7 +41,7 @@ export default class ThreeJs2 {
 
   // 设置控制器
   setControls() {
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement) //控制器
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement) //轨道控制器
     this.controls.update();
     this.controls.enableDamping = true; // 阻尼（惯性）是否启用
     this.controls.dampingFactor = 0.05; // 阻尼系数
