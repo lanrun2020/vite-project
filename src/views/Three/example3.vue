@@ -115,6 +115,22 @@ const init = () => {
 
   });
 
+  dom.addEventListener('mousedown', () => {
+
+    dom.requestPointerLock();
+
+  });
+  dom.addEventListener('mouseup', () => {
+
+  });
+  dom.addEventListener('mousemove', (event) => {
+    console.log(document.pointerLockElement && document.pointerLockElement.id === 'demo4');
+    if (document.pointerLockElement && document.pointerLockElement.id === 'demo4') {
+      model.rotation.y -= event.movementX / 500;
+      model.rotation.x -= event.movementY / 500;
+    }
+  });
+
   animate()
 }
 
@@ -139,7 +155,6 @@ const animate = () => {
   }
   soliderMove()
   render();
-
 }
 
 const soliderMove = () => {
@@ -147,24 +162,19 @@ const soliderMove = () => {
     setWeight(walkAction, 1)
     model.position.z -= speed * Math.cos(model.rotation.y)
     model.position.x -= speed * Math.sin(model.rotation.y)
-    camera.position.z = model.position.z + 50
-    camera.position.x = model.position.x
-    camera.position.y = model.position.y + 50
-    // console.log(camera);
-    camera.rotation._x = model.rotation.x
-    camera.rotation._y = model.rotation.y
-    camera.rotation._z = model.rotation.z
-
-    // camera.position.x = model.position.x
-    // camera.position.x = model.position.x
-    // camera.rotation = model.rotation
-
+    camera.position.z = model.position.z + 100 * Math.cos(model.rotation.y)
+    camera.position.x = model.position.x + 100 * Math.sin(model.rotation.y)
+    camera.position.y = 160
   }
   if (keyState.KeyA) {
-    model.rotation.y += Math.PI / 60
+    model.rotation.y += Math.PI / 90
+    camera.position.z = model.position.z + 100 * Math.cos(model.rotation.y)
+    camera.position.x = model.position.x + 100 * Math.sin(model.rotation.y)
   }
   if (keyState.KeyD) {
-    model.rotation.y -= Math.PI / 60
+    model.rotation.y -= Math.PI / 90
+    camera.position.z = model.position.z + 100 * Math.cos(model.rotation.y)
+    camera.position.x = model.position.x + 100 * Math.sin(model.rotation.y)
   }
   // if (keyState.KeyS) {
   //   setWeight(walkAction, 1)
