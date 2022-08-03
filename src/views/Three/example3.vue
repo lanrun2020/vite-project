@@ -4,8 +4,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted } from "@vue/runtime-core";
-import { fa } from "element-plus/lib/locale";
+import { onMounted, reactive, watch } from "@vue/runtime-core";
+import { mode } from "cesium";
 import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -13,19 +13,35 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 let camera: any, controls: any, scene: any, renderer: any, dom: HTMLElement, mixer: any, idleAction: any, walkAction: any, runAction: any, clock: any, model: any, flag: boolean = true
 let speed: number = 0.4
 
-let keyState = {
-  'KeyW': false,
-  'KeyA': false,
-  'KeyS': false,
-  'KeyD': false,
-}
+let keyState = reactive({
+  KeyW: false,
+  KeyA: false,
+  KeyS: false,
+  KeyD: false,
+})
 onMounted(() => {
   init();
+})
+watch(() => keyState.KeyA, (newVal, oldVal) => {
+  if (newVal && model) {
+    model.rotation.y += Math.PI / 4
+    // if (keyState.KeyW) {
+    //   model.rotation.y += Math.PI / 4
+    // } else {
+    //   model.rotation.y += Math.PI / 4
+    // }
+  }
+  // if (!newVal && model) {
+  // model.rotation.y -= Math.PI / 4
+  // }
 })
 const init = () => {
   dom = document.getElementById("demo4")!
   clock = new THREE.Clock();
   scene = new THREE.Scene();
+  console.log(scene);
+  scene.position.set(0, 0, 20)
+
   scene.background = new THREE.Color(0xcccccc);
   const helper = new THREE.GridHelper(1000, 50, 0x303030, 0x303030); //长度1000 划分为50份
   // helper.position.y = -50;
@@ -92,6 +108,7 @@ const init = () => {
         break
       case 'KeyD':
         keyState.KeyD = true
+        // model.rotation.y -= Math.PI / 90
         break
     }
   });
@@ -115,19 +132,25 @@ const init = () => {
 
   });
 
-  dom.addEventListener('mousedown', () => {
-
-    dom.requestPointerLock();
-
+  dom.addEventListener('click', () => {
+    if (!document.pointerLockElement) {
+      dom.requestPointerLock();
+    }
   });
-  dom.addEventListener('mouseup', () => {
+  // dom.addEventListener('mouseup', () => {
 
-  });
+  // });
   dom.addEventListener('mousemove', (event) => {
-    console.log(document.pointerLockElement && document.pointerLockElement.id === 'demo4');
-    if (document.pointerLockElement && document.pointerLockElement.id === 'demo4') {
-      model.rotation.y -= event.movementX / 500;
-      model.rotation.x -= event.movementY / 500;
+    if (document.pointerLockElement) {
+      model.rotation.y -= event.movementX / 1000;
+      // camera.position.y -= event.movementY / 40
+      // if (camera.position.y < 0) {
+      //   camera.position.y = 0
+      // }
+      // }
+      // camera.rotation._x = model.rotation.x
+      // camera.rotation._y = model.rotation.y
+      // camera.rotation._z = model.rotation.z
     }
   });
 
@@ -151,7 +174,15 @@ const animate = () => {
     mixer.update(mixerUpdateDelta);
   }
   if (model) {
+    // const position = model.position\
+    // const position = new THREE.Vector3()
+    // position.x = model.position.x + 10
+    // position.z = model.position.z + 20
+    // position.z = model.position.z - 75 * Math.cos(model.rotation.y)
+    // position.x = model.position.x - 75 * Math.sin(model.rotation.y)
     camera.lookAt(model.position)
+    // console.log(model.position);
+
   }
   soliderMove()
   render();
@@ -162,19 +193,22 @@ const soliderMove = () => {
     setWeight(walkAction, 1)
     model.position.z -= speed * Math.cos(model.rotation.y)
     model.position.x -= speed * Math.sin(model.rotation.y)
-    camera.position.z = model.position.z + 100 * Math.cos(model.rotation.y)
-    camera.position.x = model.position.x + 100 * Math.sin(model.rotation.y)
-    camera.position.y = 160
+    camera.position.z = model.position.z + 50 * Math.cos(model.rotation.y)
+    camera.position.x = model.position.x + 50 * Math.sin(model.rotation.y)
+    camera.position.y = model.position.y + 30
   }
-  if (keyState.KeyA) {
-    model.rotation.y += Math.PI / 90
-    camera.position.z = model.position.z + 100 * Math.cos(model.rotation.y)
-    camera.position.x = model.position.x + 100 * Math.sin(model.rotation.y)
+  if (!keyState.KeyW && keyState.KeyA) {
+    // setWeight(walkAction, 1)
+    model.position.z -= speed * Math.cos(model.rotation.y + Math.PI / 4)
+    model.position.x -= speed * Math.sin(model.rotation.y + Math.PI / 4)
+    // model.rotation.y += Math.PI / 90
+    // camera.position.z = model.position.z + 100 * Math.cos(model.rotation.y)
+    // camera.position.x = model.position.x + 100 * Math.sin(model.rotation.y)
   }
   if (keyState.KeyD) {
-    model.rotation.y -= Math.PI / 90
-    camera.position.z = model.position.z + 100 * Math.cos(model.rotation.y)
-    camera.position.x = model.position.x + 100 * Math.sin(model.rotation.y)
+    // model.rotation.y -= Math.PI / 90
+    // camera.position.z = model.position.z + 100 * Math.cos(model.rotation.y)
+    // camera.position.x = model.position.x + 100 * Math.sin(model.rotation.y)
   }
   // if (keyState.KeyS) {
   //   setWeight(walkAction, 1)
@@ -190,6 +224,12 @@ const addSolider = () => {
     model.position.set(0, 0, 0)
     model.rotation.y = Math.PI  //旋转180度
     scene.add(model);
+    const wordPosition = new THREE.Vector3()
+    model.getWorldPosition(wordPosition)
+    console.log(model.position);
+    console.log(wordPosition);
+
+
     model.traverse(function (object: any) {
       if (object.isMesh) object.castShadow = false;
     });
