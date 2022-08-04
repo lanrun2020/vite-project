@@ -3,8 +3,6 @@ import Cesium from "@/utils/importCesium"
 let arr2: Array<number> = []
 let polygonPoints: Array<{ lng: number, lat: number }> = []
 let primitiveArr: Array<any> = []
-// let longitude: number = 110
-// let latitude: number = 32
 
 let cartesian = null;
 let handler: any

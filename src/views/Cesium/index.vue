@@ -29,7 +29,7 @@ import { addClustering } from "./addClustering";
 import { addSatellite } from "./addSatellite";
 import { addTrackPlane } from "./addTrackPlane";
 import { addWall } from "./addWall";
-
+import { serveyDistance } from "./serveyDistance";
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
   {
@@ -87,6 +87,10 @@ let toolList: Array<{ title: string; value: number }> = [
   {
     title: "动态墙",
     value: 13,
+  },
+  {
+    title: "测距",
+    value: 14,
   }
 ];
 onMounted(async () => {
@@ -139,6 +143,9 @@ const toolChecked = (active: boolean, value: number) => {
     case 13: //动态墙
       addWall(viewer, active);
       break;
+    case 14: //测距
+      serveyDistance(viewer, active);
+      break;
     default: break;
   }
 };
@@ -157,15 +164,19 @@ const initCesium = () => {
     infoBox: false, // 是否显示点击要素之后显示的信息
     fullscreenButton: false, // 是否显示全屏按钮
     selectionIndicator: false, // 是否显示选中指示器
-    terrainProvider: Cesium.createWorldTerrain(),
+    // terrainProvider: Cesium.createWorldTerrain({
+    // requestVertexNormals: true,
+    // requestWaterMask: true
+    // }),
     // imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
     //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
     // })
   });
+  // viewer.scene.globe.enableLighting = true;
   viewer.clock.shouldAnimate = true
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
 
-  viewer.scene.globe.depthTestAgainstTerrain = true;
+  viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
   // var layer = new Cesium.UrlTemplateImageryProvider({
   //   url: "http://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
   //   minimumLevel: 4,
@@ -192,14 +203,16 @@ const initCesium = () => {
   width: 100%;
   height: calc(100vh - 70px);
 }
+
 /* 隐藏Cesium地图图标 */
 #cesiumContainer .cesium-widget-credits {
   display: none !important;
 }
+
 .cesium-viewer-animationContainer,
 .cesium-viewer-timelineContainer,
 .cesium-viewer-bottom,
-.cesium-viewer-fullscreenContainer{
+.cesium-viewer-fullscreenContainer {
   display: none !important;
 }
 </style>
