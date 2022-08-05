@@ -1,5 +1,4 @@
 // 动态墙
-// 流动管道
 import Cesium from "@/utils/importCesium"
 import { chengdu } from "./geo"
 let entity: Array<object> | null = null

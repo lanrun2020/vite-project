@@ -20,10 +20,10 @@ export default class WallScanMaterialProperty {
     this.conbineProp()
     this.init()
   }
-  getType () {
+  getType() {
     return 'WallScan'
   }
-  getValue (time: object, result: any) {
+  getValue(time: object, result: any) {
     if (!Cesium.defined(result)) {
       result = {}
     }
@@ -35,10 +35,10 @@ export default class WallScanMaterialProperty {
     result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._d
     return result
   }
-  equals (other: any) {
+  equals(other: any) {
     return this === other
   }
-  conbineProp () {
+  conbineProp() {
     Object.defineProperties(WallScanMaterialProperty.prototype, {
       isConstant: {
         get: function () {
@@ -54,7 +54,7 @@ export default class WallScanMaterialProperty {
       }
     })
   }
-  init () {
+  init() {
     Cesium.WallScanMaterialProperty = WallScanMaterialProperty
     Cesium.Material.WallScanType = 'WallScan'
     Cesium.Material.WallScanSource =
@@ -66,7 +66,7 @@ export default class WallScanMaterialProperty {
           // float m = mod(materialInput.st.t-fract(time - materialInput.s),sp);
           // float m = mod(materialInput.st.t,sp);
           // float a = step(sp * (1.0 - 0.5),m);
-          float a =step(0.1,materialInput.st.t)*(materialInput.st.t + (1.0 - fract(time - materialInput.s)) - 1.0 * step(fract(time - materialInput.s),materialInput.st.t)) + step(materialInput.st.t,0.2);
+          float a =step(0.1,materialInput.st.t)*(materialInput.st.t + (1.0 - fract(time - materialInput.s)) - 1.0 * step(fract(time - materialInput.s),materialInput.st.t)) + step(materialInput.st.t,0.0);
           material.diffuse = vec3(0.0,1.0,0.0);
           material.alpha = a * color.a;
           return material;
@@ -75,7 +75,7 @@ export default class WallScanMaterialProperty {
     // material.alpha:透明度;
     // material.diffuse：颜色;
     // fract(x) 返回 x 的小数部分
-    // float mod(float x, float y)  此函数会返回x除以y的余数。 
+    // float mod(float x, float y)  此函数会返回x除以y的余数。
     // float step(float edge, float x)此函数会根据两个数值生成阶梯函数，如果x<edge则返回0.0，否则返回1.0
     Cesium.Material._materialCache.addMaterial(Cesium.Material.WallScanType, {
       fabric: {

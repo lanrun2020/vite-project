@@ -21,7 +21,7 @@ const computeCirclularFlight = (Points: Array<object>, start: object) => {
   return property;
 }
 // 根据第一个点 偏移距离 角度 求取第二个点的坐标
-function calcPoints(x1: number = 105, y1: number = 30, radius: number = 10000, heading: number = 1, height: number = 100000) {
+const calcPoints = (x1: number = 105, y1: number = 30, radius: number = 10000, heading: number = 1, height: number = 100000) => {
   const m = Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(x1, y1))
   const rx = radius * Math.cos((heading * Math.PI) / 180.0)
   const ry = radius * Math.sin((heading * Math.PI) / 180.0)
@@ -34,7 +34,7 @@ function calcPoints(x1: number = 105, y1: number = 30, radius: number = 10000, h
 }
 
 // 根据两个坐标点,获取Heading(朝向)
-function getHeading(pointA: typeof Cesium.Cartesian3.fromDegrees, pointB: typeof Cesium.Cartesian3.fromDegrees) {
+const getHeading = (pointA: typeof Cesium.Cartesian3.fromDegrees, pointB: typeof Cesium.Cartesian3.fromDegrees) => {
   //建立以点A为原点，X轴为east,Y轴为north,Z轴朝上的坐标系
   const transform = Cesium.Transforms.eastNorthUpToFixedFrame(pointA);
   //向量AB
@@ -51,7 +51,7 @@ function getHeading(pointA: typeof Cesium.Cartesian3.fromDegrees, pointB: typeof
 }
 
 // 根据两个坐标点,获取Pitch(俯仰角)
-function getPitch(pointA: typeof Cesium.Cartesian3, pointB: typeof Cesium.Cartesian3): number {
+const getPitch = (pointA: typeof Cesium.Cartesian3, pointB: typeof Cesium.Cartesian3): number => {
   let transfrom = Cesium.Transforms.eastNorthUpToFixedFrame(pointA);
   const vector = Cesium.Cartesian3.subtract(pointB, pointA, new Cesium.Cartesian3());
   let direction = Cesium.Matrix4.multiplyByPointAsVector(Cesium.Matrix4.inverse(transfrom, transfrom), vector, vector);
@@ -61,7 +61,7 @@ function getPitch(pointA: typeof Cesium.Cartesian3, pointB: typeof Cesium.Cartes
 }
 
 // 获取圆形路径上的点
-function getRoutePoints(lng: number, lat: number, radius: number, height: number) {
+const getRoutePoints = (lng: number, lat: number, radius: number, height: number) => {
   let h = 0
   const points: Array<Object> = Array(3600).fill('').map(() => {
     h += 0.1
@@ -70,4 +70,24 @@ function getRoutePoints(lng: number, lat: number, radius: number, height: number
   return points
 }
 
-export { pointsTurnToScreen, computeCirclularFlight, calcPoints, getHeading, getPitch, getRoutePoints }
+// 获取两点之间距离
+const getDistance = (start: typeof Cesium.Cartographic.fromDegrees, end: typeof Cesium.Cartographic.fromDegrees) => {
+  const geodesic = new Cesium.EllipsoidGeodesic();
+  geodesic.setEndPoints(start, end); //设置测地线起点终点
+  return geodesic.surfaceDistance //返回距离
+}
+// 获取两点之间中点
+const getMidPoint = (start: typeof Cesium.Cartographic.fromDegrees, end: typeof Cesium.Cartographic.fromDegrees) => {
+  const geodesic = new Cesium.EllipsoidGeodesic()
+  const scratch = new Cesium.Cartographic();
+  geodesic.setEndPoints(start, end);
+  const midpointCartographic = geodesic.interpolateUsingFraction(
+    0.5,
+    scratch
+  );
+  return Cesium.Cartesian3.fromRadians(
+    midpointCartographic.longitude,
+    midpointCartographic.latitude
+  );
+}
+export { pointsTurnToScreen, computeCirclularFlight, calcPoints, getHeading, getPitch, getRoutePoints, getDistance, getMidPoint }

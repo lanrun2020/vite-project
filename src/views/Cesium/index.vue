@@ -30,6 +30,10 @@ import { addSatellite } from "./addSatellite";
 import { addTrackPlane } from "./addTrackPlane";
 import { addWall } from "./addWall";
 import { serveyDistance } from "./serveyDistance";
+import { serveyArea } from "./serveyArea";
+import { addSatellite2 } from "./addSatellite2";
+import { addEcharts } from "./addEcharts";
+
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
   {
@@ -89,8 +93,20 @@ let toolList: Array<{ title: string; value: number }> = [
     value: 13,
   },
   {
-    title: "测距",
+    title: "测量距离",
     value: 14,
+  },
+  {
+    title: "测量面积",
+    value: 15,
+  },
+  {
+    title: "卫星wx",
+    value: 16,
+  },
+  {
+    title: "结合echarts",
+    value: 17,
   }
 ];
 onMounted(async () => {
@@ -143,8 +159,17 @@ const toolChecked = (active: boolean, value: number) => {
     case 13: //动态墙
       addWall(viewer, active);
       break;
-    case 14: //测距
+    case 14: //测量距离
       serveyDistance(viewer, active);
+      break;
+    case 15: //测量面积
+      serveyArea(viewer, active);
+      break;
+    case 16: //卫星
+      addSatellite2(viewer, active);
+      break;
+    case 17: //echarts
+      addEcharts(viewer, active);
       break;
     default: break;
   }

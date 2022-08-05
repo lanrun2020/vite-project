@@ -1,6 +1,5 @@
-// 测量距离
+// 测量面积
 import Cesium from "@/utils/importCesium"
-import { getDistance, getMidPoint } from "./util";
 let Points: Array<{ lng: number, lat: number }> = []
 let cartesian = null;
 let handler: any
@@ -9,17 +8,17 @@ let entity: Array<Object> = []
 let length: number = 0
 let activeEntity: any
 let activeShapePoints: any = []
-const serveyDistance = (viewer: any, active: boolean) => {
+const serveyArea = (viewer: any, active: boolean) => {
   if (active) {
     let scene = viewer.scene
     let ellipsoid = scene.globe.ellipsoid;
     activeEntity = viewer.entities.add({
-      polyline: {
-        positions: activeShapePoints,
-        width: 2,
-        material: Cesium.Color.RED,
-        clampToGround: true,
-      }
+      polygon: {
+        hierarchy: new Cesium.PolygonHierarchy(activeShapePoints),
+        material: new Cesium.ColorMaterialProperty(
+          Cesium.Color.WHITE.withAlpha(0.7)
+        ),
+      },
     })
     entity?.push(activeEntity)
     handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
@@ -33,10 +32,10 @@ const serveyDistance = (viewer: any, active: boolean) => {
         num++
         addPoint(viewer, longitude, latitude)
         Points.push({ lng: longitude, lat: latitude })
-        computeDistance(viewer)
+        // computeDistance(viewer)
         if (num == 1) {
-          activeEntity.polyline.positions = new Cesium.CallbackProperty(() => {
-            return activeShapePoints
+          activeEntity.polygon.hierarchy = new Cesium.CallbackProperty(() => {
+            return new Cesium.PolygonHierarchy(activeShapePoints)
           }, false)
         }
       }
@@ -56,15 +55,15 @@ const serveyDistance = (viewer: any, active: boolean) => {
         entity?.push(viewer.entities.add({
           label: {
             font: "20px sans-serif",
-            text: '总长度:' + setDistanse(length),
+            text: '总面积:' + getArea(activeShapePoints) + 'km²',
             pixelOffset: new Cesium.Cartesian2(0.0, -40),
             distanceDisplayCondition: new Cesium.DistanceDisplayCondition(10.0, 10000000.0)
           },
-          polyline: {
-            positions: activeShapePoints,
-            width: 2,
-            material: Cesium.Color.RED,
-            clampToGround: true,
+          polygon: {
+            hierarchy: new Cesium.PolygonHierarchy(activeShapePoints),
+            material: new Cesium.ColorMaterialProperty(
+              Cesium.Color.WHITE.withAlpha(0.7)
+            ),
           },
           position: Cesium.Cartesian3.fromDegrees(Points[num - 1].lng, Points[num - 1].lat)
         }));
@@ -78,49 +77,31 @@ const serveyDistance = (viewer: any, active: boolean) => {
     reset(viewer)
   }
 };
+const getArea = (Points: Array<any>) => {
+  let area = 0
+  let p1: any, p2: any
+  if (Points.length > 2) {
+    for (let i = 0; i < Points.length; i++) {
+      p1 = Points[i]
+      p2 = Points[(i + 1) % Points.length]
+      area += p1.x * p2.y
+      area -= p2.x * p1.y
+    }
+  }
+  return Math.abs(area / 1000000).toFixed(6)
+}
+
 const addPoint = (viewer: any, longitude: number, latitude: number) => {
   entity?.push(viewer.entities.add({
     position: Cesium.Cartesian3.fromDegrees(longitude, latitude),
     point: {
       show: true, // default
       color: Cesium.Color.SKYBLUE, // default: WHITE
-      pixelSize: 10, // default: 1
+      pixelSize: 5, // default: 1
       outlineColor: Cesium.Color.YELLOW, // default: BLACK
-      outlineWidth: 3, // default: 0
-    },
-    label: {
-      font: "20px sans-serif",
-      text: num.toString(),
-      pixelOffset: new Cesium.Cartesian2(0.0, -20),
-      distanceDisplayCondition: new Cesium.DistanceDisplayCondition(10.0, 10000000.0)
+      outlineWidth: 2, // default: 0
     },
   }));
-}
-const computeDistance = (viewer: any) => {
-  if (num > 1) {
-    let start = Cesium.Cartographic.fromDegrees(Points[num - 2].lng, Points[num - 2].lat)
-    let end = Cesium.Cartographic.fromDegrees(Points[num - 1].lng, Points[num - 1].lat)
-    // let geodesic = new Cesium.EllipsoidGeodesic();
-    // geodesic.setEndPoints(start, end);
-    let distance = getDistance(start, end)
-    length += distance
-    entity?.push(viewer.entities.add({
-      label: {
-        font: "20px sans-serif",
-        text: setDistanse(distance),
-        pixelOffset: new Cesium.Cartesian2(0.0, -20),
-        distanceDisplayCondition: new Cesium.DistanceDisplayCondition(10.0, 10000000.0)
-      },
-      position: getMidPoint(start, end)
-    }));
-  }
-}
-const setDistanse = (distance: number) => {
-  if (distance > 1000) {
-    return (distance / 1000).toFixed(2) + 'km'
-  } else {
-    return distance.toFixed(2) + 'm'
-  }
 }
 
 const reset = (viewer: any) => {
@@ -137,4 +118,4 @@ const reset = (viewer: any) => {
     entity = []
   }
 }
-export { serveyDistance }
+export { serveyArea }
