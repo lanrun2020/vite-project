@@ -4,14 +4,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, reactive, watch } from "@vue/runtime-core";
-import { mode } from "cesium";
+import { onMounted, reactive, watch } from "vue";
 import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-let camera: any, controls: any, scene: any, renderer: any, dom: HTMLElement, mixer: any, idleAction: any, walkAction: any, runAction: any, clock: any, model: any, flag: boolean = true
-let speed: number = 0.4
+let camera: any, controls: any, scene: any, renderer: any, dom: HTMLElement, mixer: any, idleAction: any, walkAction: any, runAction: any, clock: any, model: any, flag = true
+let speed = 0.4
 
 let keyState = reactive({
   KeyW: false,

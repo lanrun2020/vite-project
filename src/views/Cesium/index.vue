@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import Toolbox from "./toolbox.vue";
-import { onMounted, reactive } from "@vue/runtime-core";
+import { onMounted } from "vue";
 import { fetchCesium } from "@/apis/an-system";
 import { addPolygon2, reset } from "./polygon";
 import Cesium from '@/utils/importCesium'
@@ -33,6 +33,8 @@ import { serveyDistance } from "./serveyDistance";
 import { serveyArea } from "./serveyArea";
 import { addSatellite2 } from "./addSatellite2";
 import { addEcharts } from "./addEcharts";
+import { addCity } from "./addCity";
+import { addLoad } from "./addLoad";
 
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
@@ -101,12 +103,20 @@ let toolList: Array<{ title: string; value: number }> = [
     value: 15,
   },
   {
-    title: "卫星wx",
+    title: "环绕卫星",
     value: 16,
   },
   {
-    title: "结合echarts",
+    title: "echarts",
     value: 17,
+  },
+  {
+    title: "白膜建筑",
+    value: 18,
+  },
+  {
+    title: "城市道路",
+    value: 19,
   }
 ];
 onMounted(async () => {
@@ -165,11 +175,17 @@ const toolChecked = (active: boolean, value: number) => {
     case 15: //测量面积
       serveyArea(viewer, active);
       break;
-    case 16: //卫星
+    case 16: //环绕卫星
       addSatellite2(viewer, active);
       break;
     case 17: //echarts
       addEcharts(viewer, active);
+      break;
+    case 18: //白膜建筑
+      addCity(viewer, active);
+      break;
+    case 19: //城市道路
+      addLoad(viewer, active);
       break;
     default: break;
   }
@@ -189,10 +205,10 @@ const initCesium = () => {
     infoBox: false, // 是否显示点击要素之后显示的信息
     fullscreenButton: false, // 是否显示全屏按钮
     selectionIndicator: false, // 是否显示选中指示器
-    // terrainProvider: Cesium.createWorldTerrain({
-    // requestVertexNormals: true,
-    // requestWaterMask: true
-    // }),
+    terrainProvider: Cesium.createWorldTerrain({
+      // requestVertexNormals: true,
+      // requestWaterMask: true
+    }),
     // imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
     //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
     // })
@@ -201,7 +217,7 @@ const initCesium = () => {
   viewer.clock.shouldAnimate = true
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
 
-  viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
+  viewer.scene.globe.depthTestAgainstTerrain = false; //几何图形是否有高程遮挡效果
   // var layer = new Cesium.UrlTemplateImageryProvider({
   //   url: "http://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
   //   minimumLevel: 4,

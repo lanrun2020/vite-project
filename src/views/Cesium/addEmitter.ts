@@ -6,7 +6,7 @@ const fireadd = (
   height: number,
   color: any,
   emitter: any,
-  viewer:any,
+  viewer: any,
 ) => {
   // 获取事件触发所在的  html Canvas容器
   const firedata = new Cesium.ParticleSystem({
@@ -34,7 +34,7 @@ const fireadd = (
     updateCallback: (particle: any) => {
       if (particle.age <= particle.life * 0.6) {
         // 生命前0.6
-        let s = 0.994;
+        const s = 0.994;
         particle.velocity = new Cesium.Cartesian3(
           particle.velocity.x * s,
           particle.velocity.y * s,
@@ -42,8 +42,8 @@ const fireadd = (
         ); // 让粒子速度衰减，可以自行定义衰减方法
       } else {
         // let { x, y, z } = Cesium.Cartesian3.fromDegrees(lng, lat, height)
-        let { x, y, z } = particle.position;
-        let n = 170;
+        const { x, y, z } = particle.position;
+        const n = 170;
         particle.velocity = new Cesium.Cartesian3(-x / n, -y / n, -z / n); // 速度向量改变（改变粒子运动方向），向原点（地球球心）运动
       }
     },

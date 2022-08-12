@@ -106,9 +106,9 @@ export const addSatellite = (viewer: any, active: boolean) => {
       viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
     }))
 
-    var center = Cesium.Cartesian3.fromDegrees(115, 30, 200000)
-    var modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center);
-    let instance = new Cesium.GeometryInstance({
+    const center = Cesium.Cartesian3.fromDegrees(115, 30, 200000)
+    const modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+    const instance = new Cesium.GeometryInstance({
       geometry: new Cesium.CylinderGeometry({
         length: 400000,
         topRadius: 0.0,
@@ -117,9 +117,9 @@ export const addSatellite = (viewer: any, active: boolean) => {
       }),
       modelMatrix: modelMatrix, // 提供位置参数
     });
-    var center2 = Cesium.Cartesian3.fromDegrees(118, 30, 200000)
-    var modelMatrix2 = Cesium.Transforms.eastNorthUpToFixedFrame(center2);
-    let instance2 = new Cesium.GeometryInstance({
+    const center2 = Cesium.Cartesian3.fromDegrees(118, 30, 200000)
+    const modelMatrix2 = Cesium.Transforms.eastNorthUpToFixedFrame(center2);
+    const instance2 = new Cesium.GeometryInstance({
       geometry: new Cesium.CylinderGeometry({
         length: 400000,
         topRadius: 0.0,
@@ -128,13 +128,13 @@ export const addSatellite = (viewer: any, active: boolean) => {
       }),
       modelMatrix: modelMatrix2, // 提供位置参数
     });
-    let primitive1 = new Cesium.Primitive({
+    const primitive1 = new Cesium.Primitive({
       geometryInstances: instance,
       appearance: new Cesium.MaterialAppearance({
         material: radarMaterial.getMaterial(), faceForward: !1, closed: !0
       })
     });
-    let primitive2 = new Cesium.Primitive({
+    const primitive2 = new Cesium.Primitive({
       geometryInstances: instance2,
       appearance: new Cesium.MaterialAppearance({
         material: radarMaterial2.getMaterial(), faceForward: !1, closed: !0

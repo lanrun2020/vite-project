@@ -61,7 +61,6 @@
 import router from "../router";
 import {
   Compass,
-  House,
   HomeFilled,
   Menu as IconMenu,
 } from "@element-plus/icons-vue";
@@ -73,7 +72,8 @@ onMounted(() => {
   }
 })
 let isCollapse = ref(false)
-const menuSelect: Function = (path: string) => {
+// eslint-disable-next-line @typescript-eslint/ban-types
+const menuSelect = (path: string) => {
   if (path !== router.currentRoute.value.path) {
     router.push({ path });
   }

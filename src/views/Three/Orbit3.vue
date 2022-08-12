@@ -4,7 +4,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted } from "@vue/runtime-core";
+import { onMounted } from "vue";
 import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 let camera: any, controls: any, scene: any, renderer: any;

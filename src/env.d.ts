@@ -6,6 +6,10 @@ declare module '*.vue' {
   const component: DefineComponent<{}, {}, any>
   export default component
 }
+// declare module '*.js' {
+
+//   export default EchartsLayers
+// }
 declare module 'three'
 declare interface Window {
   Cesium: any,

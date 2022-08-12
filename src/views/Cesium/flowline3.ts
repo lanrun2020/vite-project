@@ -2,7 +2,7 @@
 import Cesium from '@/utils/importCesium'
 import wallMater from '../../assets/redLine.png'
 
-let source1 = "czm_material czm_getMaterial(czm_materialInput materialInput)\n\
+const source1 = "czm_material czm_getMaterial(czm_materialInput materialInput)\n\
         {\n\
             czm_material material = czm_getDefaultMaterial(materialInput);\n\
             vec2 st = fract (repeat *materialInput.st);\n\
@@ -12,7 +12,7 @@ let source1 = "czm_material czm_getMaterial(czm_materialInput materialInput)\n\
             return material;\n\
         }";
 function addPrimitiveFlowAppear(pos: any) {
-  var primitive = new Cesium.Primitive({
+  const primitive = new Cesium.Primitive({
     geometryInstances: new Cesium.GeometryInstance({
       geometry: new Cesium.PolylineGeometry({
         positions: pos,
@@ -40,7 +40,7 @@ function addPrimitiveFlowAppear(pos: any) {
   return primitive
 }
 function addPrimiFlowline(pos: any, fs: any) {
-  var primitive = new Cesium.Primitive({
+  const primitive = new Cesium.Primitive({
     geometryInstances: new Cesium.GeometryInstance({
       geometry: new Cesium.PolylineGeometry({
         positions: pos,
@@ -72,15 +72,15 @@ function addPrimiFlowline(pos: any, fs: any) {
 
 export const createLine = (viewer: any, active: boolean, positions: Array<any>) => {
   // 通过设置fadetype 实现流动的线
-  let primi = addPrimitiveFlowAppear(positions)
+  const primi = addPrimitiveFlowAppear(positions)
   viewer.scene.primitives.add(primi);
   // 添加数字流动线
 
 
-  let linePos = Cesium.Cartesian3.fromDegreesArrayHeights([110.21725, 23.63556, 10000, 120.21725, 23.63556, 100000.0])
+  const linePos = Cesium.Cartesian3.fromDegreesArrayHeights([110.21725, 23.63556, 10000, 120.21725, 23.63556, 100000.0])
   // let linePos1 = Cesium.Cartesian3.fromDegreesArrayHeights([110.32044, 23.63392, 10000, 120.32044, 23.63392, 100000.0])
   // let lineUniforms = { animationSpeed: 1000,time: new Cesium.Cartesian2(0.0, 0.0), color: Cesium.Color.BLUE.withAlpha(0.6), repeat: new Cesium.Cartesian2(10.0, 1.0) }
-  let num_line = addPrimiFlowline(linePos, source1)
+  const num_line = addPrimiFlowline(linePos, source1)
   // num_line.appearance.material.uniforms = lineUniforms
   // let num_line1 = addPrimiFlowline(linePos1, source1)
   // num_line1.appearance.material.uniforms.color = Cesium.Color.BLACK
@@ -91,7 +91,7 @@ export const createLine = (viewer: any, active: boolean, positions: Array<any>) 
     destination: Cesium.Cartesian3.fromDegrees(120.32044, 23.63392, 1000000.0),
     duration: 1.6
   });
-  var timex = 0;
+  let timex = 0;
   function render() {
     timex += 0.01;
     if (timex >= 1.0) {

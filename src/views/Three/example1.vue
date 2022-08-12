@@ -4,7 +4,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "@vue/runtime-core";
+import { onMounted, onUnmounted } from "vue";
 // import ThreeJs2 from "./index"
 import ThreeJs2 from "./three"
 let T: any

@@ -92,5 +92,4 @@ export default class PolylineMaterialProperty {
   }
 }
 
-//@ts-ignore
 new PolylineMaterialProperty()

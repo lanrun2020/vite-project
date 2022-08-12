@@ -3,7 +3,7 @@ import Cesium from '@/utils/importCesium'
 
 // 经纬度 转 屏幕坐标
 const pointsTurnToScreen = (scene: any, lng: number, lat: number) => {
-  let pos = Cesium.Cartesian3.fromDegrees(lng, lat); // 经纬度 转 笛卡尔世界坐标
+  const pos = Cesium.Cartesian3.fromDegrees(lng, lat); // 经纬度 转 笛卡尔世界坐标
   return Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, pos); // 笛卡尔世界坐标 转 屏幕坐标
 };
 
@@ -18,10 +18,12 @@ const computeCirclularFlight = (Points: Array<object>, start: object) => {
     );
     property.addSample(time, Points[i]);
   }
+  console.log(property);
+
   return property;
 }
 // 根据第一个点 偏移距离 角度 求取第二个点的坐标
-const calcPoints = (x1: number = 105, y1: number = 30, radius: number = 10000, heading: number = 1, height: number = 100000) => {
+const calcPoints = (x1 = 105, y1 = 30, radius = 10000, heading = 1, height = 100000) => {
   const m = Cesium.Transforms.eastNorthUpToFixedFrame(Cesium.Cartesian3.fromDegrees(x1, y1))
   const rx = radius * Math.cos((heading * Math.PI) / 180.0)
   const ry = radius * Math.sin((heading * Math.PI) / 180.0)
@@ -52,9 +54,9 @@ const getHeading = (pointA: typeof Cesium.Cartesian3.fromDegrees, pointB: typeof
 
 // 根据两个坐标点,获取Pitch(俯仰角)
 const getPitch = (pointA: typeof Cesium.Cartesian3, pointB: typeof Cesium.Cartesian3): number => {
-  let transfrom = Cesium.Transforms.eastNorthUpToFixedFrame(pointA);
+  const transfrom = Cesium.Transforms.eastNorthUpToFixedFrame(pointA);
   const vector = Cesium.Cartesian3.subtract(pointB, pointA, new Cesium.Cartesian3());
-  let direction = Cesium.Matrix4.multiplyByPointAsVector(Cesium.Matrix4.inverse(transfrom, transfrom), vector, vector);
+  const direction = Cesium.Matrix4.multiplyByPointAsVector(Cesium.Matrix4.inverse(transfrom, transfrom), vector, vector);
   Cesium.Cartesian3.normalize(direction, direction);
   //因为direction已归一化，斜边长度等于1，所以余弦函数等于direction.z
   return Cesium.Math.PI_OVER_TWO - Cesium.Math.acosClamped(direction.z);
@@ -63,7 +65,7 @@ const getPitch = (pointA: typeof Cesium.Cartesian3, pointB: typeof Cesium.Cartes
 // 获取圆形路径上的点
 const getRoutePoints = (lng: number, lat: number, radius: number, height: number) => {
   let h = 0
-  const points: Array<Object> = Array(3600).fill('').map(() => {
+  const points: Array<any> = Array(3600).fill('').map(() => {
     h += 0.1
     return calcPoints(lng, lat, radius, h, height)
   })

@@ -9,7 +9,7 @@ export default class WallScanMaterialProperty {
   duration: number
   private _time: number
   private _thickness: number
-  constructor(color: typeof Vector4 = new Cesium.Color(.1, 1, 0, 1), duration: number = 10000, d: number = 1, repeat: number = 10, thickness: number = 0.2, U?: object) {
+  constructor(color: typeof Vector4 = new Cesium.Color(.1, 1, 0, 1), duration = 10000, d = 1, repeat = 10, thickness = 0.2, U?: object) {
     this._definitionChanged = new Cesium.Event()
     this._color = color
     this.duration = duration
@@ -96,5 +96,4 @@ export default class WallScanMaterialProperty {
   }
 }
 
-//@ts-ignore
 new WallScanMaterialProperty()

@@ -22,12 +22,8 @@ import {
   UserFilled,
   SwitchButton
 } from "@element-plus/icons-vue";
-import { onMounted } from "vue";
 import router from "@/router";
 const emit = defineEmits(['collapseChange'])
-onMounted(() => {
-
-})
 const iconClick = () => {
   emit('collapseChange')
 }

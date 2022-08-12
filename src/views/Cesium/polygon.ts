@@ -8,13 +8,13 @@ let cartesian = null;
 let handler: any
 const addPolygon2 = (viewer: any, active: boolean) => {
   if (active) {
-    let scene = viewer.scene
-    let ellipsoid = scene.globe.ellipsoid;
+    const scene = viewer.scene
+    const ellipsoid = scene.globe.ellipsoid;
     handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
     handler.setInputAction((event: any) => {
       cartesian = viewer.camera.pickEllipsoid(event.position, ellipsoid);
       if (cartesian) {
-        let cartographic = ellipsoid.cartesianToCartographic(cartesian);
+        const cartographic = ellipsoid.cartesianToCartographic(cartesian);
         const longitude = Cesium.Math.toDegrees(cartographic.longitude);
         const latitude = Cesium.Math.toDegrees(cartographic.latitude);
         addPolygon(viewer, longitude, latitude)
@@ -30,7 +30,7 @@ const addPolygon = (viewer: any, longitude: number, latitude: number) => {
     polygonPoints.push({ lng: longitude, lat: latitude })
   } else {
     //验证添加点的位置是否符合凸多边形的构成
-    let s = polygonFilter2({ lat: latitude, lng: longitude }, polygonPoints)
+    const s = polygonFilter2({ lat: latitude, lng: longitude }, polygonPoints)
     if (s) {
       arr2.push(longitude, latitude);
       polygonPoints.push({ lng: longitude, lat: latitude })
@@ -43,7 +43,7 @@ const addPolygon = (viewer: any, longitude: number, latitude: number) => {
       viewer.scene.primitives.remove(primitiveArr[0])
       primitiveArr = []
     }
-    let primitive = new Cesium.Primitive({
+    const primitive = new Cesium.Primitive({
       geometryInstances: new Cesium.GeometryInstance({
         geometry: new Cesium.PolygonGeometry({
           polygonHierarchy: new Cesium.PolygonHierarchy(
@@ -64,22 +64,22 @@ const addPolygon = (viewer: any, longitude: number, latitude: number) => {
   }
 }
 const polygonFilter2 = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //首尾相连边
-  let length = polygonPoints.length
-  let p1 = polygonPoints[0]
-  let p2 = polygonPoints[length - 1]
-  let p3 = polygonPoints[1]
-  let p4 = polygonPoints[length - 2]
+  const length = polygonPoints.length
+  const p1 = polygonPoints[0]
+  const p2 = polygonPoints[length - 1]
+  const p3 = polygonPoints[1]
+  const p4 = polygonPoints[length - 2]
 
-  let c1 = p4.lat - (p4.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) - p2.lat //第一个点，最后一个点
-  let c2 = checkPoint.lat - (checkPoint.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) - p2.lat
+  const c1 = p4.lat - (p4.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) - p2.lat //第一个点，最后一个点
+  const c2 = checkPoint.lat - (checkPoint.lng - p2.lng) * (p2.lat - p1.lat) / (p2.lng - p1.lng) - p2.lat
 
-  let c3 = p2.lat - (p2.lng - p3.lng) * (p3.lat - p1.lat) / (p3.lng - p1.lng) - p3.lat //最开始两个点
-  let c4 = checkPoint.lat - (checkPoint.lng - p3.lng) * (p3.lat - p1.lat) / (p3.lng - p1.lng) - p3.lat
+  const c3 = p2.lat - (p2.lng - p3.lng) * (p3.lat - p1.lat) / (p3.lng - p1.lng) - p3.lat //最开始两个点
+  const c4 = checkPoint.lat - (checkPoint.lng - p3.lng) * (p3.lat - p1.lat) / (p3.lng - p1.lng) - p3.lat
 
-  let c5 = checkPoint.lat - (checkPoint.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) - p4.lat //最后两个点
-  let c6 = p1.lat - (p1.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) - p4.lat
+  const c5 = checkPoint.lat - (checkPoint.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) - p4.lat //最后两个点
+  const c6 = p1.lat - (p1.lng - p4.lng) * (p4.lat - p2.lat) / (p4.lng - p2.lng) - p4.lat
 
-  let res: boolean = true
+  let res = true
   if (c5 <= 0) {
     res = res && c6 <= 0 ? true : false
   } else {
@@ -99,11 +99,11 @@ const polygonFilter2 = (checkPoint: { lat: number, lng: number }, polygonPoints:
 }
 // 判断点是否处于多边形内部
 const polygonFilter = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => {
-  var counter = 0;
-  var i;
-  var xinters;
-  var p1, p2;
-  var pointCount = polygonPoints.length;
+  let counter = 0;
+  let i;
+  let xinters;
+  let p1, p2;
+  const pointCount = polygonPoints.length;
   p1 = polygonPoints[0];
   for (i = 1; i <= pointCount; i++) {
     p2 = polygonPoints[i % pointCount];

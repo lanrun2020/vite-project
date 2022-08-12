@@ -4,7 +4,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "@vue/runtime-core";
+import { onMounted, onUnmounted } from "vue";
 import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';

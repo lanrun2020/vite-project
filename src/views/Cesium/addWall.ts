@@ -2,7 +2,7 @@
 import Cesium from "@/utils/importCesium"
 import { chengdu } from "./geo"
 let entity: Array<object> | null = null
-let arr = new Array(chengdu.length / 2).fill('3000')
+const arr = new Array(chengdu.length / 2).fill('3000')
 export const addWall = (viewer: any, active: boolean) => {
   if (active) {
     viewer.camera.flyTo({

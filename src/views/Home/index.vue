@@ -28,8 +28,8 @@
 
 <script setup lang="ts">
 import { fetchTest, fetchHome } from "@/apis/an-system";
-import { reactive, ref, toRef } from "@vue/reactivity";
-import { computed, onMounted, provide, watch } from "@vue/runtime-core";
+import { reactive, ref, toRef } from "vue";
+import { computed, onMounted, provide, watch } from "vue";
 import { toRefs } from "vue";
 import myMarker from "./myMarker.vue";
 // ref会返回一个可变的响应式对象,只包含一个名为 value 的 property

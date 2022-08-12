@@ -4,7 +4,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted } from "@vue/runtime-core";
+import { onMounted } from "vue";
 import { ref } from "vue";
 import * as THREE from "three";
 import dalishi from '../../assets/dalishi.jpg'
@@ -19,7 +19,7 @@ scene.fog = new THREE.FogExp2(0xcccccc, 0.002);
 //PerspectiveCamera (透视摄像机) 参数1.视野角度（FOV） 2.长宽比（aspect ratio） 3.近截面（near） 4.远截面（far）
 let camera = new THREE.PerspectiveCamera(60, domWidth.value / domHeight.value, 1, 1000);
 camera.position.set(400, 400, 400)
-let dom = ref(<any>null);
+// let dom = ref(<any>null);
 const renderer = new THREE.WebGLRenderer(); //renderer（渲染器）
 let controls = new OrbitControls(camera, renderer.domElement) //控制器 通过鼠标对场景进行旋转缩放平移等场景控制
 //要创建一个立方体，我们需要一个BoxGeometry（立方体）对象. 这个对象包含了一个立方体中所有的顶点（vertices）和面（faces）
@@ -34,7 +34,7 @@ onMounted(() => {
 const animate = () => {
   // scene.rotation.x += 0.01;
   // scene.rotation.z -= 0.01;
-  dom = document.getElementById("demo2");
+  const dom = document.getElementById("demo2");
   if (dom) {
     domWidth.value = dom.offsetWidth;
     domHeight.value = dom.offsetHeight;
@@ -65,11 +65,14 @@ const addMesh = () => {
   }
 }
 const init = () => {
-  dom = document.getElementById("demo2");
-  domWidth.value = dom.offsetWidth;
-  domHeight.value = dom.offsetHeight;
-  renderer.setSize(domWidth.value, domHeight.value);
-  dom.appendChild(renderer.domElement);
+  const dom = document.getElementById("demo2");
+  if (dom) {
+    domWidth.value = dom.offsetWidth;
+    domHeight.value = dom.offsetHeight;
+    renderer.setSize(domWidth.value, domHeight.value);
+    dom.appendChild(renderer.domElement);
+  }
+
   addMesh()
   // var light = new THREE.AmbientLight( 0x00ff00 ); // soft white light
   const dirLight1 = new THREE.DirectionalLight(0xffffff);

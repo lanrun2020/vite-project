@@ -85,5 +85,4 @@ export default class PolylineTrailLinkMaterialProperty {
   }
 }
 
-//@ts-ignore
 new PolylineTrailLinkMaterialProperty()

@@ -61,7 +61,7 @@ export default function ThreeJs2(dom: any) {
         metalness: 0 //金属度 非金属0 金属1
       });
 
-      let cube = new THREE.Mesh(new THREE.BoxGeometry(15, 15, 15), material2);
+      const cube = new THREE.Mesh(new THREE.BoxGeometry(15, 15, 15), material2);
       cube.position.set(-40, 0, 0)
       scene.add(cube);
     }
@@ -83,20 +83,20 @@ export default function ThreeJs2(dom: any) {
       const sphereMaterial3 = new THREE.MeshPhongMaterial({ color: 0xdddddd, specular: 0x009900, shininess: 30, flatShading: true })
 
       // 球体网格模型
-      let geometry = new THREE.SphereGeometry(10, 60, 60); //球半径，后面两个参数经纬度细分数，控制球表面精度
-      let mesh = new THREE.Mesh(geometry, sphereMaterial3); //网格模型对象Mesh
+      const geometry = new THREE.SphereGeometry(10, 60, 60); //球半径，后面两个参数经纬度细分数，控制球表面精度
+      const mesh = new THREE.Mesh(geometry, sphereMaterial3); //网格模型对象Mesh
       mesh.translateY(40); //球体网格模型沿Y轴正方向平移120
       scene.add(mesh);
 
-      let cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256);
+      const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256);
       cubeRenderTarget.texture.type = THREE.HalfFloatType;
       cubeCamera = new THREE.CubeCamera(1, 1000, cubeRenderTarget);
-      let material3 = new THREE.MeshStandardMaterial({ //网格标准材质
+      const material3 = new THREE.MeshStandardMaterial({ //网格标准材质
         envMap: cubeRenderTarget.texture,
         roughness: 0.01,
         metalness: 1
       });
-      let sphere2 = new THREE.Mesh(new THREE.IcosahedronGeometry(15, 15), material3); //20面几何体 (半径，精细度)，精细度大于0时，将添加更多的顶点
+      const sphere2 = new THREE.Mesh(new THREE.IcosahedronGeometry(15, 15), material3); //20面几何体 (半径，精细度)，精细度大于0时，将添加更多的顶点
       sphere2.position.set(0, 0, 0)
       scene.add(sphere2);
     }
@@ -130,7 +130,7 @@ export default function ThreeJs2(dom: any) {
       // scene.add(ambient);
 
       // 点光源
-      var point = new THREE.PointLight(0xffffff);
+      const point = new THREE.PointLight(0xffffff);
       point.position.set(100, 100, 100); //点光源位置
       // 通过add方法插入场景中，不插入的话，渲染的时候不会获取光源的信息进行光照计算
       scene.add(point); //点光源添加到场景中
@@ -142,7 +142,7 @@ export default function ThreeJs2(dom: any) {
       directionalLight.position.normalize();
       scene.add(directionalLight);
 
-      let pointLight = new THREE.PointLight(0xffffff, 1);
+      const pointLight = new THREE.PointLight(0xffffff, 1);
       pointLight.position.set(300, 300, 300);
       scene.add(pointLight);
 

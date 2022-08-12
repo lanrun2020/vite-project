@@ -9,6 +9,9 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "allowJs": true, //允许有js
+    "allowSyntheticDefaultImports": true, //允许引用没有默认导出的模块
+    "outDir": "./", //将输出结构重定向到目录
     "lib": [
       "esnext",
       "dom"
@@ -21,10 +24,17 @@
     },
   },
   "include": [
+    "src/**/*.js",
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
-    "src/**/*.vue"
+    "src/**/*.vue",
+    "public/config.js",
+    "src/jslibs/*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
   ],
   "references": [
     {

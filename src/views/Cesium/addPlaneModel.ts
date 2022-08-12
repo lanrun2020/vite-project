@@ -20,7 +20,7 @@ const getHeading = (pointA: object, pointB: object) => {
 }
 
 // 获取流动曲线上多个连续点
-const generateCurve = (startPoint: object, endPoint: object, length: number, height: number = 0) => {
+const generateCurve = (startPoint: object, endPoint: object, length: number, height = 0) => {
   const addPointCartesian = new Cesium.Cartesian3();
   Cesium.Cartesian3.add(startPoint, endPoint, addPointCartesian); // 将两个笛卡尔坐标按照分量求和，addPointCartesian是两点(x,y,z)相加后返回的结果(x,y,z)
   const midPointCartesian = new Cesium.Cartesian3();
@@ -39,7 +39,7 @@ const generateCurve = (startPoint: object, endPoint: object, length: number, hei
     times: [0.0, 0.5, 1], // 曲线变化参数，严格递增，times.length必须等于points.length,最后一个值,与下面的evaluate()的参数相关（参数区间在0~1）
     points: [startPoint, midPoint, endPoint], // 控制点,points.length必须 ≥ 2
   });
-  let curvePoints: Array<object> = [spline.evaluate(0)];
+  const curvePoints: Array<object> = [spline.evaluate(0)];
   for (let i = 2, len = length; i <= len - 2; i++) {
     curvePoints.push(spline.evaluate(i / len)); // 传时间参数，返回曲线上给定时间点的新实例,时间段划分越多，曲线越平滑
   }
@@ -82,7 +82,7 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
     //Set timeline to simulation bounds
     viewer.timeline.zoomTo(start, stop);
 
-    let property = computeCirclularFlight(points, start)
+    const property = computeCirclularFlight(points, start)
 
     //Populate it with data
     if (entities?.length) return
@@ -121,7 +121,7 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
       5000 - radarH / 2
     );
     const points2 = generateCurve(startPoint2, endPoint2, 50, radarH / 2) //获取路径上的点
-    let property2 = computeCirclularFlight(points2, start)
+    const property2 = computeCirclularFlight(points2, start)
     entities.push(viewer.entities.add({
       position: property2,
       cylinder: {

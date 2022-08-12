@@ -8,9 +8,9 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from "@vue/reactivity";
+import { reactive } from "vue";
 import ExportExcel from "@/components/ExportExcel.vue";
-const tableData:Array<{date:string,name:string,address:string}> = reactive([
+const tableData: Array<{ date: string, name: string, address: string }> = reactive([
   {
     date: '2016-05-03',
     name: 'Tom',

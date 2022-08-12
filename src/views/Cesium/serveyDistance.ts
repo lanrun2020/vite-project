@@ -4,15 +4,15 @@ import { getDistance, getMidPoint } from "./util";
 let Points: Array<{ lng: number, lat: number }> = []
 let cartesian = null;
 let handler: any
-let num: number = 0
-let entity: Array<Object> = []
-let length: number = 0
+let num = 0
+let entity: Array<any> = []
+let length = 0
 let activeEntity: any
 let activeShapePoints: any = []
 const serveyDistance = (viewer: any, active: boolean) => {
   if (active) {
-    let scene = viewer.scene
-    let ellipsoid = scene.globe.ellipsoid;
+    const scene = viewer.scene
+    const ellipsoid = scene.globe.ellipsoid;
     activeEntity = viewer.entities.add({
       polyline: {
         positions: activeShapePoints,
@@ -26,9 +26,12 @@ const serveyDistance = (viewer: any, active: boolean) => {
     handler.setInputAction((event: any) => {
       cartesian = viewer.camera.pickEllipsoid(event.position, ellipsoid);
       if (cartesian) {
-        let cartographic = ellipsoid.cartesianToCartographic(cartesian);
+        const cartographic = ellipsoid.cartesianToCartographic(cartesian);
         const longitude = Cesium.Math.toDegrees(cartographic.longitude);
         const latitude = Cesium.Math.toDegrees(cartographic.latitude);
+        // 地形高度(下面两个二选一就行)
+        const height2 = viewer.scene.globe.getHeight(cartographic)
+        console.log(height2);
         activeShapePoints.push(cartesian)
         num++
         addPoint(viewer, longitude, latitude)
@@ -98,11 +101,11 @@ const addPoint = (viewer: any, longitude: number, latitude: number) => {
 }
 const computeDistance = (viewer: any) => {
   if (num > 1) {
-    let start = Cesium.Cartographic.fromDegrees(Points[num - 2].lng, Points[num - 2].lat)
-    let end = Cesium.Cartographic.fromDegrees(Points[num - 1].lng, Points[num - 1].lat)
+    const start = Cesium.Cartographic.fromDegrees(Points[num - 2].lng, Points[num - 2].lat)
+    const end = Cesium.Cartographic.fromDegrees(Points[num - 1].lng, Points[num - 1].lat)
     // let geodesic = new Cesium.EllipsoidGeodesic();
     // geodesic.setEndPoints(start, end);
-    let distance = getDistance(start, end)
+    const distance = getDistance(start, end)
     length += distance
     entity?.push(viewer.entities.add({
       label: {

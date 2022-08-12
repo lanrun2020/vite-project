@@ -1,6 +1,6 @@
 // 追踪扫描 （追踪飞机模型）
 import Cesium from "@/utils/importCesium"
-import { computeCirclularFlight, calcPoints, getHeading, getPitch, getRoutePoints } from './util'
+import { calcPoints, getHeading, getPitch, getRoutePoints } from './util'
 let entities: Array<object> = []
 let onTickcallback1: Function
 
@@ -37,11 +37,11 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
         ),
       },
       orientation: new Cesium.CallbackProperty(() => {
-        let h = getHeading(startPoint, endPoint)
-        let hpr = new Cesium.HeadingPitchRoll(
+        const h = getHeading(startPoint, endPoint)
+        const hpr = new Cesium.HeadingPitchRoll(
           Cesium.Math.toRadians(90), Cesium.Math.toRadians(90), Cesium.Math.toRadians(0)
         )
-        let p = getPitch(startPoint, endPoint)
+        const p = getPitch(startPoint, endPoint)
         hpr.pitch = hpr.pitch - p;
         hpr.heading = hpr.heading + h
         return Cesium.Transforms.headingPitchRollQuaternion(startPoint, hpr);
@@ -62,8 +62,8 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
         minimumPixelSize: 60,
       },
       orientation: new Cesium.CallbackProperty(() => {
-        let h = getHeading(startPoint2, endPoint)
-        let hpr = new Cesium.HeadingPitchRoll(
+        const h = getHeading(startPoint2, endPoint)
+        const hpr = new Cesium.HeadingPitchRoll(
           Cesium.Math.toRadians(180), Cesium.Math.toRadians(0), Cesium.Math.toRadians(0)
         )
         hpr.heading = hpr.heading + h

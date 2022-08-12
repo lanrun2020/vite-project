@@ -104,7 +104,7 @@ const generateCurve = (startPoint: any, endPoint: any) => {
     times: [0.0, 0.5, 1], // 曲线变化参数，严格递增，times.length必须等于points.length,最后一个值,与下面的evaluate()的参数相关（参数区间在0~1）
     points: [startPoint, midPoint, endPoint], // 控制点,points.length必须 ≥ 2
   });
-  let curvePoints: Array<any> = [];
+  const curvePoints: Array<any> = [];
   for (let i = 0, len = 200; i <= len; i++) {
     curvePoints.push(spline.evaluate(i / len)); // 传时间参数，返回曲线上给定时间点的新实例,时间段划分越多，曲线越平滑
   }

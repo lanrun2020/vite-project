@@ -1,7 +1,7 @@
 // 人口统计柱状图 模拟
 import Cesium from "@/utils/importCesium"
 
-let entity: Array<object> = []
+const entity: Array<object> = []
 let primitive: object
 let primitives: any
 export const addCylinder = (viewer: any, active: boolean) => {
@@ -15,7 +15,7 @@ export const addCylinder = (viewer: any, active: boolean) => {
     //   }
     // })
 
-    let points = Array(10000).fill('').map((any, i) => {
+    const points = Array(10000).fill('').map((any, i) => {
       return {
         lon: 100 + Math.random() * 100 - 50,
         lat: Math.random() * 160 - 80,
@@ -52,9 +52,9 @@ const addCylinderItem = (point: { lon: number, lat: number, num: number }) => {
   //   return prev + curr;
   // });
   const r = Math.random()
-  var center = Cesium.Cartesian3.fromDegrees(point.lon, point.lat, point.num * 1000)
-  var modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center);
-  let instance = new Cesium.GeometryInstance({
+  const center = Cesium.Cartesian3.fromDegrees(point.lon, point.lat, point.num * 1000)
+  const modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+  const instance = new Cesium.GeometryInstance({
     geometry: new Cesium.CylinderGeometry({
       length: point.num * 2000,
       topRadius: 5000.0,

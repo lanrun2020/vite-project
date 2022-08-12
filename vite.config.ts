@@ -1,17 +1,21 @@
 import { defineConfig } from 'vite'
 import cesium from 'vite-plugin-cesium';
 import vue from '@vitejs/plugin-vue'
+import eslintPlugin from 'vite-plugin-eslint'
 // 配置别名需要的路径模块
 import { resolve } from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), cesium()],
+  plugins: [vue(), cesium(), eslintPlugin({
+    include: ['src/**/*.js', 'src/**/*.vue', 'src/*.js', 'src/*.vue']
+  })],
   // 配置别名
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
       '~': resolve(__dirname, 'public')
-    }
+    },
+    extensions: [".js", ".ts", ".tsx", ".jsx"],
   },
   server: {
     cors: true,

@@ -3,15 +3,14 @@ import Cesium from "@/utils/importCesium"
 let Points: Array<{ lng: number, lat: number }> = []
 let cartesian = null;
 let handler: any
-let num: number = 0
+let num = 0
 let entity: Array<Object> = []
-let length: number = 0
 let activeEntity: any
 let activeShapePoints: any = []
 const serveyArea = (viewer: any, active: boolean) => {
   if (active) {
-    let scene = viewer.scene
-    let ellipsoid = scene.globe.ellipsoid;
+    const scene = viewer.scene
+    const ellipsoid = scene.globe.ellipsoid;
     activeEntity = viewer.entities.add({
       polygon: {
         hierarchy: new Cesium.PolygonHierarchy(activeShapePoints),
@@ -25,7 +24,7 @@ const serveyArea = (viewer: any, active: boolean) => {
     handler.setInputAction((event: any) => {
       cartesian = viewer.camera.pickEllipsoid(event.position, ellipsoid);
       if (cartesian) {
-        let cartographic = ellipsoid.cartesianToCartographic(cartesian);
+        const cartographic = ellipsoid.cartesianToCartographic(cartesian);
         const longitude = Cesium.Math.toDegrees(cartographic.longitude);
         const latitude = Cesium.Math.toDegrees(cartographic.latitude);
         activeShapePoints.push(cartesian)
@@ -70,7 +69,6 @@ const serveyArea = (viewer: any, active: boolean) => {
         activeShapePoints = []
         num = 0
         Points = []
-        length = 0
       }
     }, Cesium.ScreenSpaceEventType.RIGHT_CLICK)
   } else {

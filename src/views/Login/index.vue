@@ -31,7 +31,7 @@ const params = reactive({
   password: "",
 });
 
-
+// eslint-disable-next-line @typescript-eslint/ban-types
 const validatePass = (rule: object, value: string, callback: Function) => {
   if (value === '') {
     callback(new Error('请输入密码'))
@@ -39,6 +39,7 @@ const validatePass = (rule: object, value: string, callback: Function) => {
     callback()
   }
 }
+// eslint-disable-next-line @typescript-eslint/ban-types
 const validateUserName = (rule: object, value: string, callback: Function) => {
   if (value === '') {
     callback(new Error('请输入用户名'))
