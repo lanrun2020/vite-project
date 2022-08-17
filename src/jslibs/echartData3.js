@@ -3037,7 +3037,7 @@ const getEchartsOption = () => {
   }
   let option = {
     animation: false,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     GLMap: {},
     legend: {
       show: false,

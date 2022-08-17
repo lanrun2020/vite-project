@@ -1,7 +1,90 @@
 import echarts from '@/utils/importEcharts'
-import RegisterCoordinateSystem from "./RegisterCoordinateSystem";
+import Cesium from "@/utils/importCesium"
 
-export class EchartsLayer {
+class RegisterCoordinateSystem {
+    dimensions = ["lng", "lat"]
+    radians = Cesium.Math.toRadians(80)
+    constructor(glMap, api) {
+        this._GLMap = glMap;
+        this._api = api;
+        this._mapOffset = [0, 0];
+        this.dimensions = ['lng', 'lat'];
+    }
+
+    setMapOffset (mapOffset) {
+        this._mapOffset = mapOffset;
+    }
+
+    getMap () {
+        return this._GLMap;
+    }
+
+    fixLat (lat) {
+        return lat >= 90 ? 89.99999999999999 : lat <= -90 ? -89.99999999999999 : lat
+    }
+
+    dataToPoint (coords) {
+        coords[1] = this.fixLat(coords[1]);
+        let position = Cesium.Cartesian3.fromDegrees(coords[0], coords[1]);
+        if (!position) {
+            return [];
+        }
+        let coordinates = this._GLMap.cartesianToCanvasCoordinates(position);
+        if (!coordinates) {
+            return [];
+        }
+        if (this._GLMap.mode === Cesium.SceneMode.SCENE3D) {
+            const pointA = position
+            const pointB = this._GLMap.camera.position
+            const transform = Cesium.Transforms.eastNorthUpToFixedFrame(pointA);
+            const positionvector = Cesium.Cartesian3.subtract(pointB, pointA, new Cesium.Cartesian3());
+            const vector = Cesium.Matrix4.multiplyByPointAsVector(Cesium.Matrix4.inverse(transform, new Cesium.Matrix4()), positionvector, new Cesium.Cartesian3());
+            const direction = Cesium.Cartesian3.normalize(vector, new Cesium.Cartesian3());
+            if (direction.z<0) return [];
+        }
+        const point = [coordinates.x - this._mapOffset[0], coordinates.y - this._mapOffset[1]]
+        return point
+    }
+
+    pointToData (pixel) {
+        let mapOffset = this._mapOffset,
+            coords = this._bmap.project([pixel[0] + pixel[0], pixel[1] + pixel[1]]);
+        const position = [coords.lng, coords.lat];
+        return position;
+    }
+
+    getViewRect () {
+        let api = this._api;
+        return new echarts.graphic.BoundingRect(0, 0, api.getWidth(), api.getHeight())
+    }
+
+    getRoamTransform () {
+        return echarts.matrix.create();
+    }
+
+    create (echartModel, api) {
+        this._api = api;
+        let registerCoordinateSystem;
+        echartModel.eachComponent("GLMap", function (seriesModel) {
+            let painter = api.getZr().painter;
+            if (painter) {
+                try {
+                    let glMap = echarts.glMap;
+                    registerCoordinateSystem = new RegisterCoordinateSystem(glMap, api);
+                    registerCoordinateSystem.setMapOffset(seriesModel.__mapOffset || [0, 0]);
+                    seriesModel.coordinateSystem = registerCoordinateSystem;
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        })
+        echartModel.eachSeries(function (series) {
+            "GLMap" === series.get("coordinateSystem") && (series.coordinateSystem = registerCoordinateSystem);
+        })
+    }
+}
+
+export default class EchartsLayer {
     constructor(viewer, option) {
         this._viewer = viewer;
         this._isRegistered = false;
@@ -25,8 +108,10 @@ export class EchartsLayer {
         container.style.pointerEvents = "none";
         this._viewer.container.appendChild(container);
         this._echartsContainer = container;
-        echarts.glMap = scene;
-        this._register();
+        if(!echarts.glMap){
+            echarts.glMap = scene;
+            this._register();
+        }
         return echarts.init(container);
     }
     _register () {

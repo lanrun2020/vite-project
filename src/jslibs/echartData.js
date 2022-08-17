@@ -255,11 +255,9 @@ const getEchartsOption = () => {
         symbolSize: 3
       },
       lineStyle: {
-        normal: {
-          color: color[i],
-          width: 0,
-          curveness: 0.2
-        }
+        color: color[i],
+        width: 0,
+        curveness: 0.2
       },
       data: convertData(item[1])
     }, {
@@ -277,12 +275,10 @@ const getEchartsOption = () => {
         symbolSize: 15
       },
       lineStyle: {
-        normal: {
-          color: color[i],
-          width: 1,
-          opacity: 0.6,
-          curveness: 0.2
-        }
+        color: color[i],
+        width: 1,
+        opacity: 0.6,
+        curveness: 0.2
       },
       data: convertData(item[1])
     }, {
@@ -294,20 +290,18 @@ const getEchartsOption = () => {
         brushType: 'stroke'
       },
       label: {
-        normal: {
-          show: true,
-          position: 'right',
-          formatter: '{b}'
-        }
+        show: true,
+        position: 'right',
+        formatter: '{b}'
       },
       symbolSize: function (val) {
         return val[2] / 8;
       },
       itemStyle: {
-        normal: {
-          color: color[i],
-        },
-        emphasis: {
+        color: color[i]
+      },
+      emphasis: {
+        itemStyle:{
           areaColor: '#2B91B7'
         }
       },

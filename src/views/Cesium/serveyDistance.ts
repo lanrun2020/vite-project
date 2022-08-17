@@ -29,9 +29,9 @@ const serveyDistance = (viewer: any, active: boolean) => {
         const cartographic = ellipsoid.cartesianToCartographic(cartesian);
         const longitude = Cesium.Math.toDegrees(cartographic.longitude);
         const latitude = Cesium.Math.toDegrees(cartographic.latitude);
-        // 地形高度(下面两个二选一就行)
-        const height2 = viewer.scene.globe.getHeight(cartographic)
-        console.log(height2);
+        // 地形高度
+        // const height2 = viewer.scene.globe.getHeight(cartographic) // 点击点高度
+        // console.log(height2);
         activeShapePoints.push(cartesian)
         num++
         addPoint(viewer, longitude, latitude)

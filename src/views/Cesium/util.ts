@@ -18,8 +18,6 @@ const computeCirclularFlight = (Points: Array<object>, start: object) => {
     );
     property.addSample(time, Points[i]);
   }
-  console.log(property);
-
   return property;
 }
 // 根据第一个点 偏移距离 角度 求取第二个点的坐标

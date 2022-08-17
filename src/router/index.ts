@@ -34,6 +34,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'cesium',
         component: () => import('../views/Cesium/index.vue'),
+      },
+      {
+        path:'flightPath',
+        component: () => import('../views/Echarts/flightPath.vue'),
       }
     ],
   },

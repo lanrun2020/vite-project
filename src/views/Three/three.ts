@@ -66,7 +66,7 @@ export default class ThreeJs2 {
       ); //首先，获取到纹理
       const material1 = new THREE.MeshBasicMaterial({ map: texture })//side 镜像翻转
       const material = [material1, material1, material1, material1, material1, material1]; //然后创建一个phong材质来处理着色，并传递给纹理映射
-      let cube1 = new THREE.Mesh(geometry, material); //网格模型对象Mesh
+      const cube1 = new THREE.Mesh(geometry, material); //网格模型对象Mesh
       cube1.position.set(40, 0, 0)
       this.scene.add(cube1); //网格模型添加到场景中
 
@@ -75,7 +75,7 @@ export default class ThreeJs2 {
         metalness: 1 //金属度 非金属0 金属1
       });
 
-      let cube2 = new THREE.Mesh(new THREE.BoxGeometry(15, 15, 15), material2);
+      const cube2 = new THREE.Mesh(new THREE.BoxGeometry(15, 15, 15), material2);
       cube2.position.set(-40, 0, 0)
       this.scene.add(cube2);
     }
@@ -95,20 +95,20 @@ export default class ThreeJs2 {
       });//材质对象
       const sphereMaterial3 = new THREE.MeshPhongMaterial({ color: 0xdddddd, specular: 0x009900, shininess: 30, flatShading: true })
       // 球体网格模型
-      let geometry = new THREE.SphereGeometry(10, 60, 60); //球半径，后面两个参数经纬度细分数，控制球表面精度
-      let mesh = new THREE.Mesh(geometry, sphereMaterial3); //网格模型对象Mesh
+      const geometry = new THREE.SphereGeometry(10, 60, 60); //球半径，后面两个参数经纬度细分数，控制球表面精度
+      const mesh = new THREE.Mesh(geometry, sphereMaterial3); //网格模型对象Mesh
       mesh.translateY(90); //球体网格模型沿Y轴正方向平移120
       this.scene.add(mesh);
 
-      let cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256);
+      const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256);
       cubeRenderTarget.texture.type = THREE.HalfFloatType;
       this.cubeCamera = new THREE.CubeCamera(1, 1000, cubeRenderTarget);
-      let material3 = new THREE.MeshStandardMaterial({ //网格标准材质
+      const material3 = new THREE.MeshStandardMaterial({ //网格标准材质
         envMap: cubeRenderTarget.texture,
         roughness: 0.01,
         metalness: 1
       });
-      let sphere2 = new THREE.Mesh(new THREE.IcosahedronGeometry(15, 15), material3); //20面几何体 (半径，精细度)，精细度大于0时，将添加更多的顶点
+      const sphere2 = new THREE.Mesh(new THREE.IcosahedronGeometry(15, 15), material3); //20面几何体 (半径，精细度)，精细度大于0时，将添加更多的顶点
       sphere2.position.set(0, 0, 0)
       this.scene.add(sphere2);
 
@@ -117,14 +117,14 @@ export default class ThreeJs2 {
       // textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
       // textureEquirec.encoding = THREE.sRGBEncoding;
       const geometry5 = new THREE.IcosahedronGeometry(400, 15);
-      let sphereMaterial5 = new THREE.MeshStandardMaterial({
+      const sphereMaterial5 = new THREE.MeshStandardMaterial({
         // color: 0x000000,
         opacity: 0.1,
         transparent: true,
         roughness: 0,
         metalness: 1
       });
-      let sphereMesh = new THREE.Mesh(geometry, sphereMaterial5);
+      const sphereMesh = new THREE.Mesh(geometry, sphereMaterial5);
       sphereMesh.position.set(0, 0, 30)
       this.scene.add(sphereMesh);
     }
@@ -144,7 +144,7 @@ export default class ThreeJs2 {
     this.controls.update()
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
-    let mixerUpdateDelta = this.clock.getDelta();
+    const mixerUpdateDelta = this.clock.getDelta();
     if (mixer) {
       mixer.update(mixerUpdateDelta);
     }
@@ -163,7 +163,7 @@ export default class ThreeJs2 {
       // scene.add(ambient);
 
       // 点光源
-      var point = new THREE.PointLight(0xffffff);
+      const point = new THREE.PointLight(0xffffff);
       point.position.set(100, 100, 100); //点光源位置
       // 通过add方法插入场景中，不插入的话，渲染的时候不会获取光源的信息进行光照计算
       this.scene.add(point); //点光源添加到场景中
@@ -175,7 +175,7 @@ export default class ThreeJs2 {
       directionalLight.position.normalize();
       this.scene.add(directionalLight);
 
-      let pointLight = new THREE.PointLight(0xffffff, 1);
+      const pointLight = new THREE.PointLight(0xffffff, 1);
       pointLight.position.set(300, 300, 300);
       this.scene.add(pointLight);
 
@@ -215,7 +215,7 @@ export default class ThreeJs2 {
   addSolider () {
     const loader = new GLTFLoader();
     loader.load(`/model/Soldier.glb`, function (gltf) {
-      let model = gltf.scene;
+      const model = gltf.scene;
       model.scale.set(12, 12, 12)
       model.position.set(0, 0, 40)
       that.scene.add(model);

@@ -35,6 +35,7 @@ import { addSatellite2 } from "./addSatellite2";
 import { addEcharts } from "./addEcharts";
 import { addCity } from "./addCity";
 import { addLoad } from "./addLoad";
+import { addAirLine } from "./addAirLine";
 
 let viewer: any;
 let toolList: Array<{ title: string; value: number }> = [
@@ -117,6 +118,10 @@ let toolList: Array<{ title: string; value: number }> = [
   {
     title: "城市道路",
     value: 19,
+  },
+  {
+    title: "飞机航线2",
+    value: 20,
   }
 ];
 onMounted(async () => {
@@ -148,7 +153,7 @@ const toolChecked = (active: boolean, value: number) => {
     case 6: //扇形雷达扫描
       addScanWall(viewer, active);
       break;
-    case 7: //直飞
+    case 7: //飞机航线
       addPlaneModel(viewer, active);
       break;
     case 8: //流动管道
@@ -187,6 +192,9 @@ const toolChecked = (active: boolean, value: number) => {
     case 19: //城市道路
       addLoad(viewer, active);
       break;
+    case 20: //飞机航线2
+      addAirLine(viewer, active);
+      break;
     default: break;
   }
 };
@@ -217,7 +225,7 @@ const initCesium = () => {
   viewer.clock.shouldAnimate = true
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
 
-  viewer.scene.globe.depthTestAgainstTerrain = false; //几何图形是否有高程遮挡效果
+  viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
   // var layer = new Cesium.UrlTemplateImageryProvider({
   //   url: "http://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
   //   minimumLevel: 4,

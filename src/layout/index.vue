@@ -41,6 +41,19 @@
             <span>Cesium</span>
           </template>
         </el-menu-item>
+         <el-sub-menu index="/echarts">
+          <template v-slot:title>
+            <el-icon>
+              <IconMenu />
+            </el-icon>
+            <span>Echarts</span>
+          </template>
+          <el-menu-item-group>
+            <el-menu-item index="/flightPath">
+              example1
+            </el-menu-item>
+          </el-menu-item-group>
+        </el-sub-menu>
       </el-menu>
 
       <el-container>

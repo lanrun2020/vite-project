@@ -33,6 +33,9 @@ export default class PolylineTrailLinkMaterialProperty {
   }
   equals(other: object) {
     return this === other
+      ||
+      (other instanceof PolylineTrailLinkMaterialProperty &&
+        Cesium.Property.equals(this._color, other._color))
   }
   conbineProp() {
     Object.defineProperties(PolylineTrailLinkMaterialProperty.prototype, {

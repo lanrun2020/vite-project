@@ -23,7 +23,6 @@ export const addCity = (viewer: any, active: boolean) => {
         tilesetPrimitive = data
         primitive.add(tilesetPrimitive)
         loadTilesShader(tilesetPrimitive)
-        console.log(tilesetPrimitive);
         viewer.zoomTo(
           tilesetPrimitive,
           new Cesium.HeadingPitchRange(
