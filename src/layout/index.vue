@@ -31,6 +31,9 @@
             <el-menu-item index="/orbit">
               Orbit
             </el-menu-item>
+            <el-menu-item index="/water">
+              Water
+            </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
         <el-menu-item index="/cesium">
@@ -50,7 +53,7 @@
           </template>
           <el-menu-item-group>
             <el-menu-item index="/flightPath">
-              example1
+              flightPath
             </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>

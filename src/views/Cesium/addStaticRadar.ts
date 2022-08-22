@@ -4,26 +4,19 @@ import Cesium from "@/utils/importCesium"
 let model: any = null
 export const addStaticRadar = (viewer: any, active: boolean) => {
   if (active) {
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(103.8, 30, 200000),
-      duration: 1.6,
-      orientation: {
-        // 指向
-        heading: Cesium.Math.toRadians(0),
-        // 视角
-        pitch: Cesium.Math.toRadians(-45),
-        roll: 0
-      }
-    });
-    if (model) return
+    if (model) {
+      viewer.flyTo(model)
+      return
+    }
     model = viewer.entities.add({
       id: "model1",
-      position: Cesium.Cartesian3.fromDegrees(104, 32, 0),
+      position: Cesium.Cartesian3.fromDegrees(103.955572, 30.559105, 443),
       model: {
         uri: `/model/radar_static.gltf`,
-        scale: 20,
+        scale: 0.01,
       },
     });
+    viewer.flyTo(model)
   } else {
     if (model) {
       viewer.entities.remove(model);

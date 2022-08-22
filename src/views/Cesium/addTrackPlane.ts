@@ -6,7 +6,10 @@ let onTickcallback1: Function
 
 export const addTrackPlane = (viewer: any, active: boolean) => {
   if (active) {
-    if (entities.length) return
+    if (entities.length){
+      viewer.flyTo(entities)
+      return
+    }
     const startPoint = Cesium.Cartesian3.fromDegrees(
       103,
       32,
@@ -95,6 +98,7 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
     viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
     //Set timeline to simulation bounds
     viewer.timeline.zoomTo(start, stop);
+    viewer.flyTo(entities)
   } else {
     if (entities.length) {
       entities.forEach((entity) => {

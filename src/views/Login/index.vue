@@ -99,20 +99,17 @@ const login = (formEl: any) => {
 .login-page {
   width: 100vw;
   height: 100vh;
-  // background: url('@/assets/login-bgimg.jpg') no-repeat fixed center;
   background-size: 100%;
+  display: grid;
+  place-items: center;
 }
 
 .login-box {
   background-color: #fff0;
   border: 1px solid rgb(58, 133, 146, 0.5);
   border-radius: 5px;
-  padding: 20px;
+  padding: 50px;
   width: 400px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translateY(-50%);
 }
 
 .el-input__wrapper {

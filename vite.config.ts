@@ -22,7 +22,12 @@ export default defineConfig({
     open: false,
     host: '0.0.0.0',
     port: 3015,
-    proxy: {}
+    proxy: {
+      '/map': {
+        target: 'http://localhost:8081/map',
+        changeOrigin: true,
+      }
+    }
   },
   css: {
     // css预处理器

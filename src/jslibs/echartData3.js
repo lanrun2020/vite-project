@@ -3035,6 +3035,7 @@ const getEchartsOption = () => {
       ],
     },],
   }
+  const path = 'path://M30.9,53.2C16.8,53.2,5.3,41.7,5.3,27.6S16.8,2,30.9,2C45,2,56.4,13.5,56.4,27.6S45,53.2,30.9,53.2z M30.9,3.5C17.6,3.5,6.8,14.4,6.8,27.6c0,13.3,10.8,24.1,24.101,24.1C44.2,51.7,55,40.9,55,27.6C54.9,14.4,44.1,3.5,30.9,3.5z M36.9,35.8c0,0.601-0.4,1-0.9,1h-1.3c-0.5,0-0.9-0.399-0.9-1V19.5c0-0.6,0.4-1,0.9-1H36c0.5,0,0.9,0.4,0.9,1V35.8z M27.8,35.8 c0,0.601-0.4,1-0.9,1h-1.3c-0.5,0-0.9-0.399-0.9-1V19.5c0-0.6,0.4-1,0.9-1H27c0.5,0,0.9,0.4,0.9,1L27.8,35.8L27.8,35.8z'
   let option = {
     animation: false,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
@@ -3042,8 +3043,8 @@ const getEchartsOption = () => {
     legend: {
       show: false,
       orient: 'vertical',
-      top: 'bottom',
-      left: 'right',
+      top: '0',
+      left: '0',
       data: ['地点', '线路'],
       textStyle: {
         color: '#fff',
@@ -3058,7 +3059,7 @@ const getEchartsOption = () => {
         brushType: 'stroke',
       },
       label: {
-        show: false,
+        show: true,
         position: 'right',
         formatter: '{b}',
       },
@@ -3074,12 +3075,13 @@ const getEchartsOption = () => {
       coordinateSystem: 'GLMap',
       zlevel: 2,
       large: true,
-      effect: {
+      effect: { //线特效配置
         show: true,
-        constantSpeed: 30,
+        period:8,//特效时长
+        // constantSpeed: 50, //特效速度，像素每秒
         symbol: 'pin',
-        symbolSize: 3,
-        trailLength: 0,
+        symbolSize: 5,
+        trailLength: 2,
       },
       lineStyle: {
         color: new echarts.graphic.LinearGradient(
@@ -3100,7 +3102,7 @@ const getEchartsOption = () => {
         curveness: 0.1,
       },
       data: allData.moveLines,
-    },],
+    }]
   }
   return option
 }

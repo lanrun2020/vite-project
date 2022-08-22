@@ -7,12 +7,10 @@ const defaultPoint = { lng: 125, lat: 30 }
 export const addScanEllipse = (viewer: any, active: boolean, point: { lng: number, lat: number } = defaultPoint) => {
   if (active) {
     let rotation = Cesium.Math.toRadians(0);
-    // 旋转圆（扫描效果）
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(point.lng, point.lat, 1000000),
-      duration: 1.6
-    });
-    if (entities?.length) return
+    if (entities?.length) {
+      viewer.flyTo(entities)
+      return
+    }
     entities.push(viewer.entities.add({
       position: Cesium.Cartesian3.fromDegrees(point.lng, point.lat),
       ellipse: {
@@ -33,6 +31,7 @@ export const addScanEllipse = (viewer: any, active: boolean, point: { lng: numbe
         }, false),
       },
     }));
+    viewer.flyTo(entities)
   } else {
     if (entities?.length) {
       entities.forEach((entity) => {

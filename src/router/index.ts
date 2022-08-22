@@ -32,6 +32,10 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/Three/Orbit.vue'),
       },
       {
+        path: 'water',
+        component: () => import('../views/Three/waterPlane.vue'),
+      },
+      {
         path: 'cesium',
         component: () => import('../views/Cesium/index.vue'),
       },

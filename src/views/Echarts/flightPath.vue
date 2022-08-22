@@ -25,25 +25,50 @@ const init = async () => {
   const gs: any = []
   const time: any = []
   await axios.get('/flydata.json').then((res) => {
-    const track = res.data['CCA4516'].track;
-    track.forEach((item: any) => {
+    const track = res?.data['CCA4516']?.track || [];
+    track.length&&track.forEach((item: any) => {
       alt.push(item.alt * 30)
       gs.push(item.gs)
       const t = getTime(item.timestamp * 1000)
       time.push(t)
     })
   })
-  console.log(alt.length);
-  
-
 
   option = {
     xAxis: {
       type: 'category',
-      data: time
+      data: time,
+      axisPointer: {
+        snap: true,
+        lineStyle: {
+          color: '#7581BD',
+          width: 2
+        },
+        label: {
+          show: true,
+          formatter: function (params:{value?:string}) {
+            return echarts.format.formatTime('yyyy-MM-dd', params.value);
+          },
+          backgroundColor: '#7581BD'
+        },
+        handle: {
+          show: true,
+          color: '#7581BD'
+        }
+      },
     },
     yAxis: [{
-      type: 'value'
+      type: 'value',
+      name: '高度',
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: 'rgba(0, 0, 180, 0.4)'
+        }
+      },
+      axisLabel: {
+        formatter: '{value} m'
+      }
     },
     {
       type: 'value',

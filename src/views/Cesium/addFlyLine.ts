@@ -23,18 +23,10 @@ const createFlyLine = (viewer: any, start: { longitude: number, latitude: number
     start.latitude,
     0
   ); // Cartesian3.fromDegrees经纬度转为笛卡尔坐标位置
-  viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(start.longitude, start.latitude - 5, 500000),
-    duration: 1.6,
-    orientation: {
-      // 指向
-      heading: Cesium.Math.toRadians(0),
-      // 视角
-      pitch: Cesium.Math.toRadians(-45),
-      roll: 0
-    }
-  });
-  if (entities?.length) return
+  if (entities?.length){
+    viewer.flyTo(entities)
+    return
+  }
   // 终点与飞行线
   const material = new Cesium.PolylineMaterialProperty({
     color: new Cesium.Color(0.0, 1.0, 0.0, 1.0),
@@ -83,6 +75,7 @@ const createFlyLine = (viewer: any, start: { longitude: number, latitude: number
       material: material2,
     },
   }));
+  viewer.flyTo(entities)
 };
 // 获取流动曲线上多个连续点
 const generateCurve = (startPoint: any, endPoint: any) => {

@@ -14,18 +14,17 @@ export const addSpreadEllipse = (
   n = 3
 ) => {
   if (active) {
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(position.lng,position.lat, 1000000),
-      duration: 1.6
-    });
-    if(entities?.length) return
+    if(entities?.length) {
+      viewer.flyTo(entities)
+      return
+    }
     for (let i = 0; i < n; i++) {
       addEllipse(viewer, position, (i / n) * maxr, maxr, speed);
     }
+    viewer.flyTo(entities)
   } else {
     destroyEntities(viewer)
   }
-
 };
 // 创建扩散圆
 const addEllipse = (

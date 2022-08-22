@@ -1,26 +1,18 @@
 // 人造卫星
 import Cesium from "@/utils/importCesium"
+import { number } from "echarts"
 import radarMaterialsProperty from "./RadarMaterial2"
-let entities: Array<object> | null = null
+let entities: Array<object>  = []
 let primitives: any
 const radarMaterial = new radarMaterialsProperty({ color: new Cesium.Color(.1, 1, 0, 0.8), repeat: 1, thickness: 0.8, gradual: true, gradualValue: 0.6 })
 const radarMaterial2 = new radarMaterialsProperty({ color: new Cesium.Color(.1, 1, 0, 1), repeat: 10, thickness: 0.2 })
 
 export const addSatellite = (viewer: any, active: boolean) => {
   if (active) {
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(116, 24.5, 1200000),
-      duration: 1.6,
-      orientation: {
-        // 指向
-        heading: Cesium.Math.toRadians(-30),
-        // 视角
-        pitch: Cesium.Math.toRadians(-55),
-        roll: 0
-      }
-    });
-
-    if (entities?.length) return
+    if (entities?.length) {
+      viewer.flyTo(entities)
+      return
+    }
     entities = []
     const entity1 = viewer.entities.add({
       position: Cesium.Cartesian3.fromDegrees(110.0, 30.0, 200000),
@@ -72,39 +64,10 @@ export const addSatellite = (viewer: any, active: boolean) => {
         ),
       },
     }));
-
-    entities.push(viewer.entities.add({
-      id: "satellite",
-      position: Cesium.Cartesian3.fromDegrees(110.0, 30.0, 400000),
-      model: {
-        uri: `/model/satellite.glb`,
-        scale: 300000,
-        minimumPixelSize: 50,
-      },
-      viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
-    }))
-
-    entities.push(viewer.entities.add({
-      id: "satellite2",
-      position: Cesium.Cartesian3.fromDegrees(114.0, 34.0, 400000),
-      model: {
-        uri: `/model/satellite.glb`,
-        scale: 300000,
-        minimumPixelSize: 50,
-      },
-      viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
-    }))
-
-    entities.push(viewer.entities.add({
-      id: "satellite3",
-      position: Cesium.Cartesian3.fromDegrees(115.0, 30.0, 400000),
-      model: {
-        uri: `/model/satellite.glb`,
-        scale: 300000,
-        minimumPixelSize: 50,
-      },
-      viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
-    }))
+    const points = [{lat:30,lng:110},{lat:34,lng:114},{lat:30,lng:115},{lat:30,lng:118}]
+    points.forEach((item)=>{
+      entities.push(addModel(viewer,`/model/satellite.glb`,{lat:item.lat,lng:item.lng,height:400000}))
+    })
 
     const center = Cesium.Cartesian3.fromDegrees(115, 30, 200000)
     const modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(center);
@@ -143,7 +106,7 @@ export const addSatellite = (viewer: any, active: boolean) => {
     primitives = viewer.scene.primitives.add(new Cesium.PrimitiveCollection())
     primitives.add(primitive2)
     primitives.add(primitive1)
-
+    viewer.flyTo(entities)
   } else {
     if (entities?.length) {
       entities.forEach((item) => {
@@ -151,9 +114,18 @@ export const addSatellite = (viewer: any, active: boolean) => {
       })
       radarMaterial.close()
       radarMaterial2.close()
-      // radarMaterials.setPosition({close:true})
       primitives.removeAll()
-      entities = null
+      entities = []
     }
   }
+}
+const addModel = (viewer:any,uri:string,option:{lat?:number,lng?:number,height?:number}) => {
+  return viewer.entities.add({
+    position: Cesium.Cartesian3.fromDegrees(option.lng||110, option.lat||30, option.height||400000),
+    model: {
+      uri,
+      scale: 300000,
+      minimumPixelSize: 50,
+    }
+  })
 }

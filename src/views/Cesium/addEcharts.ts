@@ -1,7 +1,7 @@
-// import { option } from './echartsData' //散点图
+import { option } from './echartsData' //散点图
 // import option from '@/jslibs/echartData.js' //飞机航线
 // import option from '@/jslibs/echartData2.js' //道路
-import option from '@/jslibs/echartData3.js' //迁徙线
+// import option from '@/jslibs/echartData3.js' //迁徙线
 import Cesium from '@/utils/importCesium'
 import EchartsLayer from '@/jslibs/cesium_echartslayer.js'
 

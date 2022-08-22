@@ -1,23 +1,13 @@
 // 动态墙
 import Cesium from "@/utils/importCesium"
 import { chengdu } from "./geo"
-let entity: Array<object> | null = null
+let entity: Array<object> = []
 const arr = new Array(chengdu.length / 2).fill('3000')
 export const addWall = (viewer: any, active: boolean) => {
   if (active) {
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(104.188587, 30.619864, 15000),
-      duration: 1.6,
-      orientation: {
-        // 指向
-        heading: Cesium.Math.toRadians(-30),
-        // 视角
-        pitch: Cesium.Math.toRadians(-55),
-        roll: 0
-      }
-    });
-
-    if (entity?.length) return
+    if (entity?.length) {
+      viewer.flyTo(entity)
+      return}
     entity = []
     entity?.push(viewer.entities.add({
       name: "Green wall from surface with outline",
@@ -37,12 +27,13 @@ export const addWall = (viewer: any, active: boolean) => {
         // outline: false,
       }
     }))
+    viewer.flyTo(entity)
   } else {
     if (entity?.length) {
       entity.forEach((item) => {
         viewer.entities.remove(item)
       })
-      entity = null
+      entity = []
     }
   }
 }

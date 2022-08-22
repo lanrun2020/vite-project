@@ -4,18 +4,10 @@ let entities: Array<any> = []
 export const addScanWall = (viewer: any, active: boolean) => {
   if (active) {
     // 雷达扫描
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(114, 26, 500000),
-      duration: 1.6,
-      orientation: {
-        // 指向
-        heading: Cesium.Math.toRadians(0),
-        // 视角
-        pitch: Cesium.Math.toRadians(-45),
-        roll: 0
-      }
-    });
-    if (entities?.length) return
+    if (entities?.length) {
+      viewer.flyTo(entities)
+      return
+    }
     entities.push(viewer.entities.add({
       id: "scan",
       name: "Scan",
@@ -48,6 +40,7 @@ export const addScanWall = (viewer: any, active: boolean) => {
         material: Cesium.Color.AQUAMARINE.withAlpha(0.5),
       },
     }));
+    viewer.flyTo(entities)
   } else {
     if (entities?.length) {
       entities.forEach((entity) => {

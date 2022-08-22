@@ -1,7 +1,7 @@
 // 流动管道
 import Cesium from "@/utils/importCesium"
 import redimg from '../../assets/newredLine.png'
-let entity: Array<object> | null = null
+let entity: Array<object> = []
 const computeCircle = (radius: number) => {
   const positions: Array<object> = [];
   for (let i = 0; i < 360; i++) {
@@ -18,19 +18,10 @@ const computeCircle = (radius: number) => {
 
 export const addTude = (viewer: any, active: boolean) => {
   if (active) {
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(113, 28.5, 600000),
-      duration: 1.6,
-      orientation: {
-        // 指向
-        heading: Cesium.Math.toRadians(-30),
-        // 视角
-        pitch: Cesium.Math.toRadians(-55),
-        roll: 0
-      }
-    });
-
-    if (entity?.length) return
+    if (entity?.length) {
+      viewer.flyTo(entity)
+      return
+    }
     entity = []
     entity?.push(viewer.entities.add({
       name: "Red tube with rounded corners",
@@ -46,8 +37,8 @@ export const addTude = (viewer: any, active: boolean) => {
           34.0,
           3000,
         ]),
-        // cornerType: Cesium.CornerType.MITERED, // 拐角样式 
-        // cornerType: Cesium.CornerType.ROUNDED, // 拐角样式 
+        // cornerType: Cesium.CornerType.MITERED, // 拐角样式
+        // cornerType: Cesium.CornerType.ROUNDED, // 拐角样式
         shape: computeCircle(6000.0),
         material: new Cesium.PolylineTrailLinkMaterialProperty({
           color: Cesium.Color.BLUE,
@@ -57,12 +48,13 @@ export const addTude = (viewer: any, active: boolean) => {
         }),
       },
     }));
+    viewer.flyTo(entity)
   } else {
     if (entity?.length) {
       entity.forEach((item) => {
         viewer.entities.remove(item)
       })
-      entity = null
+      entity = []
     }
   }
 }
