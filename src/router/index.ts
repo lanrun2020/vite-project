@@ -36,12 +36,20 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/Three/waterPlane.vue'),
       },
       {
+        path: 'chinaMap',
+        component: () => import('../views/Three/chinaMap.vue'),
+      },
+      {
         path: 'cesium',
         component: () => import('../views/Cesium/index.vue'),
       },
       {
-        path:'flightPath',
+        path: 'flightPath',
         component: () => import('../views/Echarts/flightPath.vue'),
+      },
+      {
+        path: 'china',
+        component: () => import('../views/Echarts/chinaMap.vue'),
       }
     ],
   },

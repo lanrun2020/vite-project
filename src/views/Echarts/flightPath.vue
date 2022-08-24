@@ -3,7 +3,8 @@
 </template>
 
 <script setup lang="ts">
-import * as echarts from 'echarts';
+// import * as echarts from 'echarts';
+import * as echarts from 'echarts'
 import { onMounted } from 'vue';
 import axios from "axios";
 
@@ -26,7 +27,7 @@ const init = async () => {
   const time: any = []
   await axios.get('/flydata.json').then((res) => {
     const track = res?.data['CCA4516']?.track || [];
-    track.length&&track.forEach((item: any) => {
+    track.length && track.forEach((item: any) => {
       alt.push(item.alt * 30)
       gs.push(item.gs)
       const t = getTime(item.timestamp * 1000)
@@ -46,7 +47,7 @@ const init = async () => {
         },
         label: {
           show: true,
-          formatter: function (params:{value?:string}) {
+          formatter: function (params: { value?: string }) {
             return echarts.format.formatTime('yyyy-MM-dd', params.value);
           },
           backgroundColor: '#7581BD'

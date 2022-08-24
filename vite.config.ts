@@ -23,10 +23,10 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 3015,
     proxy: {
-      '/map': {
-        target: 'http://localhost:8081/map',
-        changeOrigin: true,
-      }
+      // '/map': {
+      //   target: 'http://localhost:8081/map',
+      //   changeOrigin: true,
+      // }
     }
   },
   css: {

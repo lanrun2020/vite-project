@@ -34,6 +34,9 @@
             <el-menu-item index="/water">
               Water
             </el-menu-item>
+            <el-menu-item index="/chinaMap">
+              chinaMap
+            </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
         <el-menu-item index="/cesium">
@@ -44,7 +47,7 @@
             <span>Cesium</span>
           </template>
         </el-menu-item>
-         <el-sub-menu index="/echarts">
+        <el-sub-menu index="/echarts">
           <template v-slot:title>
             <el-icon>
               <IconMenu />
@@ -54,6 +57,9 @@
           <el-menu-item-group>
             <el-menu-item index="/flightPath">
               flightPath
+            </el-menu-item>
+            <el-menu-item index="/china">
+              china
             </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
