@@ -3,7 +3,6 @@ import * as T from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 const THREE = T
 let that: any
-let mixer: any
 export default class chinaMap {
   private dom!: HTMLElement
   private scene!: THREE.Scene
@@ -11,16 +10,17 @@ export default class chinaMap {
   private renderer!: THREE.WebGLRenderer
   private controls: any
   private requestId: any
-  private clock!: THREE.Clock
   private group = new THREE.Group()
   private lineGroup = new THREE.Group()
   private offsetX = 104
   private offsetY = 29
   private bgColor = 0x131A2C
-  private worldGeometry = {}
-  private globalID = null
   private raycaster
-  private previousObj = { material: [{ color: new THREE.Color(0x0000ff) }] };
+  private previousObj = null
+  private previousObj2 = null
+  private preCenter:any
+  private distance = [55,15,5]
+  private level = 0
   private options = {
     depth: 1, // 定义图形拉伸的深度，默认100
     steps: 0, // 拉伸面方向分为多少级，默认为1
@@ -46,7 +46,7 @@ export default class chinaMap {
     this.raycaster = new THREE.Raycaster()
   }
   // 设置透视相机
-  setCamera () {
+  setCamera() {
     // 第二参数就是 长度和宽度比 默认采用浏览器  返回以像素为单位的窗口的内部宽度和高度
     this.camera = new THREE.PerspectiveCamera(
       75,
@@ -58,7 +58,7 @@ export default class chinaMap {
   }
 
   // 设置渲染器
-  setRenderer () {
+  setRenderer() {
     this.renderer = new THREE.WebGLRenderer();
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
@@ -67,7 +67,7 @@ export default class chinaMap {
   }
 
   // 设置控制器
-  setControls () {
+  setControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement) //轨道控制器
     this.controls.update();
     this.controls.enableDamping = true; // 阻尼（惯性）是否启用
@@ -79,22 +79,23 @@ export default class chinaMap {
   }
 
   // 渲染
-  render () {
+  render() {
     if (this.renderer && this.scene && this.camera) {
       this.renderer.render(this.scene, this.camera);
     }
   }
 
   // 动画
-  animate () {
+  animate() {
     this.requestId = requestAnimationFrame(() => this.animate());
     this.controls.update()
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     this.render();
   }
+
   // 设置光源
-  setLight () {
+  setLight() {
     if (this.scene) {
       // 环境光
       const ambient = new THREE.AmbientLight(0xbbbbbb);
@@ -106,7 +107,7 @@ export default class chinaMap {
   }
 
   // 监听窗口变化，重新设置画布大小
-  onWindowResize () {
+  onWindowResize() {
     if (that.dom && that.dom.offsetWidth) {
       that.camera.aspect = that.dom.offsetWidth / that.dom.offsetHeight;
       that.camera.updateProjectionMatrix();
@@ -114,31 +115,24 @@ export default class chinaMap {
     }
   }
 
-  setScene () {
+  setScene() {
     this.scene = new THREE.Scene();
     // this.scene.background = new THREE.Color(0xcccccc); //背景颜色
     // scene.fog = new THREE.FogExp2(0xcccccc, 0.002); //雾效果
 
     // Grid 添加网格辅助对象
-    // const helper = new THREE.GridHelper(1000, 50, 0x303030, 0x303030); //长度1000 划分为50份
-    // helper.position.x = -120;
-    // helper.position.z = -30
-    // this.scene.add(helper);
+    const helper = new THREE.GridHelper(100, 30, 0x303030, 0x303030); //长度1000 划分为50份
+    helper.rotation.x = Math.PI/2
+    this.scene.add(helper);
   }
 
-  setWeight (action: any, weight: number) {
-    action.enabled = true;
-    action.setEffectiveTimeScale(1);
-    action.setEffectiveWeight(weight);
-    action.play()
-  }
   // 停止渲染
-  stop () {
+  stop() {
     window.removeEventListener('resize', this.onWindowResize)
     this.dom.addEventListener('mousemove', this.handleMousemove)
     cancelAnimationFrame(this.requestId)
   }
-  drawShape (posArr: any) {
+  drawShape(posArr: any) {
     const shape = new THREE.Shape();
     shape.moveTo(posArr[0][0] - this.offsetX, posArr[0][1] - this.offsetY);
     posArr.forEach((item: any) => {
@@ -148,21 +142,21 @@ export default class chinaMap {
   }
 
   //绘制多边形
-  drawExtrude (shapeObj: any) {
+  drawExtrude(shapeObj: any, code: string) {
     const geometry = new THREE.ExtrudeGeometry(shapeObj, this.options); //挤压几何体
-    const material1 = new THREE.MeshPhongMaterial({
+    const material1 = new THREE.MeshPhongMaterial({ // 镜面高光材质
       color: this.bgColor, // 多面体面颜色
       specular: this.bgColor //材质高光颜色
     });
     const material2 = new THREE.MeshBasicMaterial({
-      color: 0x008bfb // 多面体侧边颜色
+      color: 0x008bfb // 侧面颜色
     });
     const shapeGeometryObj = new THREE.Mesh(geometry, [material1, material2]);
-    shapeGeometryObj.name = 'board';
+    shapeGeometryObj.name = code;
     this.group.add(shapeGeometryObj);
   }
   //绘制边界线
-  drawLine (posArr: any) {
+  drawLine(posArr: any) {
     const geometry1 = new THREE.BufferGeometry();
     const geometry2 = new THREE.BufferGeometry();
     const points1: any = []
@@ -191,19 +185,24 @@ export default class chinaMap {
     }
   }
 
-
-  async drawMap () {
+  async drawMap() {
     await axios.get('/chinaMap/china.json').then((res) => {
+      this.scene.remove(this.group)
+      this.scene.remove(this.lineGroup)
+      this.group = new THREE.Group()
+      this.lineGroup = new THREE.Group()
+      this.controls.target = new THREE.Vector3(0, 0, 0)
       const features = res.data.features
       features.forEach((worldItem: any, worldItemIndex: number) => {
         worldItem.geometry.coordinates.forEach((worldChildItem: any) => {
           worldChildItem.forEach((countryItem: any) => { //每个版块的点数组
-            this.drawExtrude(this.drawShape(countryItem)) //传递数据画出地图的shape，返回结果再传到drawExtrude方法得到ExtrudeGeometry网格
+            this.drawExtrude(this.drawShape(countryItem), worldItem.properties.adcode) //传递数据画出地图的shape，返回结果再传到drawExtrude方法得到ExtrudeGeometry网格
             this.drawLine(countryItem); //传递数据画出地图边线
           });
         });
       });
-
+      that.camera.position.x =  0
+      that.camera.position.y =  0
       this.group.scale.y = 1.2; //group里面包含所有版块网格
       this.scene.add(this.group);
       this.lineGroup.scale.y = 1.2; //lineGruop里面包含所有线的网格
@@ -211,28 +210,89 @@ export default class chinaMap {
     })
   }
 
-  handleMousemove (event: any) {
+  async drawMap2(code: string,num:number) {
+    if(this.level === 0&&num===-1){
+      return
+    }
+    if(this.level===2&&num===1){
+      return
+    }
+    this.level += num
+    that.camera.position.z = that.distance[that.level]
+    if(num === -1){
+      if(this.level === 0){
+        this.drawMap()
+        return
+      }else{
+        code = code.toString().slice(0,(this.level)*2).padEnd(6,'0')
+      }
+    }
+    await axios.get(`https://geo.datav.aliyun.com/areas_v3/bound/${code}_full.json`).then((res) => {
+      this.scene.remove(this.group)
+      this.scene.remove(this.lineGroup)
+      this.group = new THREE.Group()
+      this.lineGroup = new THREE.Group()
+      const features = res.data.features
+      features.forEach((worldItem: any, worldItemIndex: number) => {
+        worldItem.geometry.coordinates.forEach((worldChildItem: any) => {
+          worldChildItem.forEach((countryItem: any) => { //每个版块的点数组
+            this.drawExtrude(this.drawShape(countryItem), worldItem.properties.adcode) //传递数据画出地图的shape，返回结果再传到drawExtrude方法得到ExtrudeGeometry网格
+            this.drawLine(countryItem); //传递数据画出地图边线
+          });
+        });
+      });
+      that.camera.position.x =  that.preCenter.x
+      that.camera.position.y =  that.preCenter.y
+      this.group.scale.y = 1.2; //group里面包含所有版块网格
+      this.scene.add(this.group);
+      this.lineGroup.scale.y = 1.2; //lineGruop里面包含所有线的网格
+      this.scene.add(this.lineGroup);
+    }).catch((error) => {
+      console.log(error);
+    })
+  }
+
+  handleMousemove(event: any) {
     event.preventDefault();
     const mouse = new THREE.Vector2(0, 0);
     mouse.x = ((event.clientX - that.dom.offsetLeft) / that.dom.offsetWidth) * 2 - 1;
     mouse.y = - ((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1;
     that.raycaster.setFromCamera(mouse, that.camera);
     const intersects = that.raycaster.intersectObjects(that.group.children);
-    that.previousObj.material[0].color = new THREE.Color(that.bgColor);
-    if (that.previousObj.geometry) {
-      that.previousObj.position.set(0, 0, 0)
+    if (that.previousObj) {
+      that.previousObj.material[0].color = new THREE.Color(that.bgColor);
+      that.previousObj.scale.set(1, 1, 1)
     }
     if (intersects[0] && intersects[0].object) {
       intersects[0].object.material[0].color = new THREE.Color(0xffaa00);
       that.previousObj = intersects[0].object; //previousObj保存悬浮的对象，鼠标移开后恢复颜色。
-      that.previousObj.position.set(0, 0, 0.2)
+      that.previousObj.scale.set(1, 1, 1.5)
+    }
+  }
+
+  handleClick(event: any) {
+    event.preventDefault();
+    if(event.type === 'contextmenu' && that.previousObj2){
+      that.controls.target = that.preCenter
+      that.drawMap2(that.previousObj2.name,-1)
+      return
+    }
+    const mouse = new THREE.Vector2(0, 0);
+    mouse.x = ((event.clientX - that.dom.offsetLeft) / that.dom.offsetWidth) * 2 - 1;
+    mouse.y = - ((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1;
+    that.raycaster.setFromCamera(mouse, that.camera);
+    const intersects = that.raycaster.intersectObjects(that.group.children);
+    if (intersects[0] && intersects[0].object) {
+      that.previousObj2 = intersects[0].object
+      that.preCenter = that.controls.target
+      that.controls.target = that.previousObj2.geometry.boundingSphere.center
+      that.drawMap2(that.previousObj2.name,1)
     }
   }
   // 初始化
-  async init () {
+  async init() {
     // 第一步新建一个场景
     this.setScene();
-    this.clock = new THREE.Clock();
     this.setRenderer();
     this.setCamera();
     this.setLight();
@@ -240,6 +300,8 @@ export default class chinaMap {
     await this.drawMap();
     window.addEventListener('resize', this.onWindowResize);
     this.dom.addEventListener('mousemove', this.handleMousemove, false)
+    this.dom.addEventListener('click', this.handleClick, false)
+    this.dom.addEventListener('contextmenu', this.handleClick, false)
     this.animate();
   }
 }

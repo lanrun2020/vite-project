@@ -3,21 +3,21 @@ import Cesium from "@/utils/importCesium"
 import { computeCirclularFlight } from './util'
 let entities: Array<object> = []
 // 根据两个坐标点,获取Heading(朝向)
-const getHeading = (pointA: object, pointB: object) => {
-  //建立以点A为原点，X轴为east,Y轴为north,Z轴朝上的坐标系
-  const transform = Cesium.Transforms.eastNorthUpToFixedFrame(pointA);
-  //向量AB
-  const positionvector = Cesium.Cartesian3.subtract(pointB, pointA, new Cesium.Cartesian3());
-  //因transform是将A为原点的eastNorthUp坐标系中的点转换到世界坐标系的矩阵
-  //AB为世界坐标中的向量
-  //因此将AB向量转换为A原点坐标系中的向量，需乘以transform的逆矩阵。
-  const vector = Cesium.Matrix4.multiplyByPointAsVector(Cesium.Matrix4.inverse(transform, new Cesium.Matrix4()), positionvector, new Cesium.Cartesian3());
-  //归一化
-  const direction = Cesium.Cartesian3.normalize(vector, new Cesium.Cartesian3());
-  //heading
-  const heading = Math.atan2(direction.y, direction.x) - Cesium.Math.PI_OVER_TWO;
-  return Cesium.Math.TWO_PI - Cesium.Math.zeroToTwoPi(heading);
-}
+// const getHeading = (pointA: object, pointB: object) => {
+//   //建立以点A为原点，X轴为east,Y轴为north,Z轴朝上的坐标系
+//   const transform = Cesium.Transforms.eastNorthUpToFixedFrame(pointA);
+//   //向量AB
+//   const positionvector = Cesium.Cartesian3.subtract(pointB, pointA, new Cesium.Cartesian3());
+//   //因transform是将A为原点的eastNorthUp坐标系中的点转换到世界坐标系的矩阵
+//   //AB为世界坐标中的向量
+//   //因此将AB向量转换为A原点坐标系中的向量，需乘以transform的逆矩阵。
+//   const vector = Cesium.Matrix4.multiplyByPointAsVector(Cesium.Matrix4.inverse(transform, new Cesium.Matrix4()), positionvector, new Cesium.Cartesian3());
+//   //归一化
+//   const direction = Cesium.Cartesian3.normalize(vector, new Cesium.Cartesian3());
+//   //heading
+//   const heading = Math.atan2(direction.y, direction.x) - Cesium.Math.PI_OVER_TWO;
+//   return Cesium.Math.TWO_PI - Cesium.Math.zeroToTwoPi(heading);
+// }
 
 // 获取流动曲线上多个连续点
 const generateCurve = (startPoint: object, endPoint: object, length: number, height = 0) => {
@@ -98,7 +98,7 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
         }),
       }
     }))
-    entities.push(viewer.entities.add({
+    const plane = viewer.entities.add({
       id: "modelPlane",
       position: property,
       model: {
@@ -108,7 +108,26 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
       },
       viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
       orientation: new Cesium.VelocityOrientationProperty(property),
-    }))
+    })
+    entities.push(plane)
+    const render = () => {
+      const res = plane.position.getValue(viewer.clock.currentTime,new Cesium.Cartesian3())
+      const orientation = plane.orientation.getValue(viewer.clock.currentTime,new Cesium.Quaternion())
+      // viewer.camera.position = res
+      const hpr = Cesium.HeadingPitchRoll.fromQuaternion(orientation);
+      // hpr.heading += Cesium.Math.toRadians(180),
+      hpr.pitch += Cesium.Math.toRadians(-145),
+      hpr.roll += 400000
+      // console.log(hpr);
+      // console.log(res);
+      // console.log(viewer.camera);
+      //
+      viewer.camera.setView({
+        destination:res,
+        orientation:hpr
+      })
+      requestAnimationFrame(render)
+    }
     const radarH = 10000 //雷达高度
     const startPoint2 = Cesium.Cartesian3.fromDegrees(
       103.95223,
@@ -137,6 +156,7 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
         )
       },
     }))
+    render()
   } else {
     if (entities?.length) {
       entities.forEach((entity) => {
