@@ -1,7 +1,10 @@
 // 飞机航线
 import Cesium from "@/utils/importCesium"
-import { computeCirclularFlight } from './util'
+import { equal } from "assert";
+import CallbackProperty from "cesium/Source/DataSources/CallbackProperty";
+import { computeCirclularFlight, getHeading } from './util'
 let entities: Array<object> = []
+let renderId:any
 // 根据两个坐标点,获取Heading(朝向)
 // const getHeading = (pointA: object, pointB: object) => {
 //   //建立以点A为原点，X轴为east,Y轴为north,Z轴朝上的坐标系
@@ -27,8 +30,7 @@ const generateCurve = (startPoint: object, endPoint: object, length: number, hei
   Cesium.Cartesian3.divideByScalar(addPointCartesian, 2, midPointCartesian); // midPointCartesian是点(x,y,z)除以2后返回的结果(x,y,z)
   const midPointCartographic =
     Cesium.Cartographic.fromCartesian(midPointCartesian); // Cartographic.fromCartesian将笛卡尔位置转换为经纬度弧度值
-  midPointCartographic.height =
-    Cesium.Cartesian3.distance(startPoint, endPoint) / 50 - height; // 将起始点、终点两个坐标点之间的距离除x,设置为此中间点的高度
+  midPointCartographic.height = height || 6000; // 将起始点、终点两个坐标点之间的距离除x,设置为此中间点的高度
   const midPoint = new Cesium.Cartesian3();
   Cesium.Ellipsoid.WGS84.cartographicToCartesian(
     midPointCartographic,
@@ -53,13 +55,16 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
     const startPoint = Cesium.Cartesian3.fromDegrees(
       103.95223,
       30.57428,
-      5000
+      100
     );
     const endPoint = Cesium.Cartesian3.fromDegrees(
       116.410745,
       39.510251,
-      5000
+      // 121.557468,
+      // 31.203037,
+      100
     );
+    // 121.557468纬度:31.203037
     // viewer.camera.flyTo({
     //   destination: Cesium.Cartesian3.fromDegrees(103, 26, 500000),
     //   duration: 1.6,
@@ -71,7 +76,17 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
     //       roll: 0
     //     }
     // });
-    const points = generateCurve(startPoint, endPoint, 50) //获取路径上的点
+    const points = generateCurve(startPoint, endPoint, 50,15000) //获取路径上的点
+    
+    const pointsLine = generateCurve(Cesium.Cartesian3.fromDegrees(
+      103.95223,
+      30.57428,
+      100
+    ), Cesium.Cartesian3.fromDegrees(
+      115.410745,
+      39.510251,
+      100
+    ), 40, 5000)
     const start = Cesium.JulianDate.now()
     const stop = Cesium.JulianDate.addSeconds(start, points.length, new Cesium.JulianDate())
     //时间段循环
@@ -83,70 +98,122 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
     viewer.timeline.zoomTo(start, stop);
 
     const property = computeCirclularFlight(points, start)
-
+    const propertyLine = computeCirclularFlight(pointsLine, start)
     //Populate it with data
     if (entities?.length) return
     entities.push(viewer.entities.add({
       id: "Blueline",
       name: "Blue dashed line",
       polyline: {
-        positions: points,
+        positions: pointsLine,
         width: 3,
         material: new Cesium.PolylineMaterialProperty({
           color: new Cesium.Color(0.0, 0.0, 1.0, 1.0),
-          repeat: 5
+          repeat: 10
         }),
       }
     }))
     const plane = viewer.entities.add({
       id: "modelPlane",
       position: property,
+      // model: {
+      //   uri: `/model/ufo.glb`,
+      //   scale: 0,
+      //   minimumPixelSize: 60,
+      // },
+      orientation:new Cesium.VelocityOrientationProperty(property)
+      // viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
+      // orientation: new Cesium.HeadingPitchRoll(
+      //   Cesium.Math.toRadians(0),
+      //   Cesium.Math.toRadians(0),
+      //   Cesium.Math.toRadians(0),
+      // ),
+    })
+    const plane2 = viewer.entities.add({
+      id: "modelPlane2",
+      position: propertyLine,
       model: {
-        uri: `/model/CesiumAir.glb`,
+        uri: `/model/ufo.glb`,
         scale: 2,
         minimumPixelSize: 60,
       },
-      viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
-      orientation: new Cesium.VelocityOrientationProperty(property),
+      orientation:new Cesium.VelocityOrientationProperty(propertyLine)
     })
     entities.push(plane)
+    entities.push(plane2)
+
+    let current:any
+    current = Cesium.clone(startPoint)
+    // plane.orientation = new Cesium.VelocityOrientationProperty(plane.position)
+    // console.log(plane.position)
+    // plane.model.alignedAxis = new Cesium.VelocityVectorProperty(plane.position, true)
+    // viewer.trackedEntity = plane
+    // viewer.trackedEntity.viewFrom = new Cesium.Cartesian3(-2000, 0, 1000)
     const render = () => {
-      const res = plane.position.getValue(viewer.clock.currentTime,new Cesium.Cartesian3())
-      const orientation = plane.orientation.getValue(viewer.clock.currentTime,new Cesium.Quaternion())
+      let res = plane.position.getValue(viewer.clock.currentTime,new Cesium.Cartesian3())
+      let quaternion = plane.orientation.getValue(viewer.clock.currentTime,new Cesium.Quaternion())
+      if(!quaternion || !res){
+        viewer.clock.currentTime = viewer.clock.startTime
+        quaternion = plane.orientation.getValue(viewer.clock.startTime,new Cesium.Quaternion())
+        res = plane.position.getValue(viewer.clock.currentTime,new Cesium.Cartesian3())
+      }
+      
       // viewer.camera.position = res
-      const hpr = Cesium.HeadingPitchRoll.fromQuaternion(orientation);
-      // hpr.heading += Cesium.Math.toRadians(180),
-      hpr.pitch += Cesium.Math.toRadians(-145),
-      hpr.roll += 400000
+      // const hpr = Cesium.HeadingPitchRoll.fromQuaternion(quaternion);
+      // console.log(Cesium.Math.toDegrees(hpr.heading));
+
+      // hpr.heading += Cesium.Math.toRadians(0),
+      // hpr.pitch += Cesium.Math.toRadians(180),
+      // hpr.roll += Cesium.Math.toRadians(90),
       // console.log(hpr);
       // console.log(res);
       // console.log(viewer.camera);
       //
-      viewer.camera.setView({
+      let transform = Cesium.Transforms.eastNorthUpToFixedFrame(res);
+      transform = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromQuaternion(quaternion),res);
+      // viewer.camera.lookAtTransform(transform, new Cesium.HeadingPitchRange(Cesium.Math.toRadians(-90.0),Cesium.Math.toRadians(0.0),-10.0))
+      // console.log(startPoint,res);
+      // console.log(Cesium.Cartesian3.equals(current,res));
+      
+      viewer.camera.flyTo({
         destination:res,
-        orientation:hpr
-      })
-      requestAnimationFrame(render)
+        duration:0.0,
+        orientation:{
+          heading: Cesium.Cartesian3.equals(current,res)?Cesium.Math.toRadians(0):getHeading(current,res),
+          pitch: Cesium.Math.toRadians(0),
+          roll: 0
+      }})
+      current = Cesium.clone(res)
+      // viewer.camera.setView({
+      //   destination:res,
+        // orientation:new Cesium.HeadingPitchRoll(
+        //   hpr.heading + Cesium.Math.toRadians(-90),
+        //   hpr.pitch + Cesium.Math.toRadians(-45),
+        //   Cesium.Math.toRadians(0),
+        // )
+      // })
+      // console.log(hpr);
+      renderId = requestAnimationFrame(render)
     }
-    const radarH = 10000 //雷达高度
+    const radarH = 5000 //雷达高度
     const startPoint2 = Cesium.Cartesian3.fromDegrees(
       103.95223,
       30.57428,
-      5000 - radarH / 2
-    );
+      0
+    )
     const endPoint2 = Cesium.Cartesian3.fromDegrees(
-      116.410745,
+      115.410745,
       39.510251,
-      5000 - radarH / 2
-    );
-    const points2 = generateCurve(startPoint2, endPoint2, 50, radarH / 2) //获取路径上的点
+      0
+    )
+    const points2 = generateCurve(startPoint2, endPoint2, 40, 2500) //获取路径上的点
     const property2 = computeCirclularFlight(points2, start)
     entities.push(viewer.entities.add({
       position: property2,
       cylinder: {
         length: radarH,
         topRadius: 0.0,
-        bottomRadius: 4000.0,
+        bottomRadius: 2000.0,
         material: new Cesium.RadarScanMaterialProperty(
           new Cesium.Color(.1, 1, 0, 0.9),
           10000,// 循环时长
@@ -162,6 +229,7 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
       entities.forEach((entity) => {
         viewer.entities.remove(entity)
       })
+      cancelAnimationFrame(renderId)
       entities = []
     }
   }

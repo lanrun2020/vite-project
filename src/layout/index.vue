@@ -89,9 +89,9 @@ import {
 import { onMounted, ref } from "vue";
 import Header from './child/header.vue';
 onMounted(() => {
-  if (!localStorage.getItem('token')) {
-    router.push('/login')
-  }
+  // if (!localStorage.getItem('token')) {
+  //   router.push('/login')
+  // }
 })
 let isCollapse = ref(false)
 // eslint-disable-next-line @typescript-eslint/ban-types
