@@ -16,6 +16,17 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/Home/index.vue'),
       },
       {
+        path: 'cesium',
+        component: () => import('../views/Cesium/index.vue'),
+      },
+    ],
+  },
+  {
+    path: '/threejs',
+    component: () => import('../layout/index.vue'),
+    redirect: 'example1',
+    children: [
+      {
         path: 'example1',
         component: () => import('../views/Three/example1.vue'),
       },
@@ -39,10 +50,13 @@ const routes: Array<RouteRecordRaw> = [
         path: 'chinaMap',
         component: () => import('../views/Three/chinaMap.vue'),
       },
-      {
-        path: 'cesium',
-        component: () => import('../views/Cesium/index.vue'),
-      },
+    ],
+  },
+  {
+    path: '/echarts',
+    component: () => import('../layout/index.vue'),
+    redirect: 'flightPath',
+    children: [
       {
         path: 'flightPath',
         component: () => import('../views/Echarts/flightPath.vue'),
@@ -51,6 +65,21 @@ const routes: Array<RouteRecordRaw> = [
         path: 'china',
         component: () => import('../views/Echarts/chinaMap.vue'),
       }
+    ],
+  },
+  {
+    path: '/animation',
+    component: () => import('../layout/index.vue'),
+    redirect: 'example1',
+    children: [
+      {
+        path: 'example1',
+        component: () => import('../views/Animation/example1.vue'),
+      },
+      {
+        path: 'example2',
+        component: () => import('../views/Animation/example2.vue'),
+      },
     ],
   },
 ]

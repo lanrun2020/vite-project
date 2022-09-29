@@ -19,22 +19,22 @@
             <span>Three.js</span>
           </template>
           <el-menu-item-group>
-            <el-menu-item index="/example1">
+            <el-menu-item index="/threejs/example1">
               example1
             </el-menu-item>
-            <el-menu-item index="/example2">
+            <el-menu-item index="/threejs/example2">
               example2
             </el-menu-item>
-            <el-menu-item index="/example3">
+            <el-menu-item index="/threejs/example3">
               example3
             </el-menu-item>
-            <el-menu-item index="/orbit">
+            <el-menu-item index="/threejs/orbit">
               Orbit
             </el-menu-item>
-            <el-menu-item index="/water">
+            <el-menu-item index="/threejs/water">
               Water
             </el-menu-item>
-            <el-menu-item index="/chinaMap">
+            <el-menu-item index="/threejs/chinaMap">
               chinaMap
             </el-menu-item>
           </el-menu-item-group>
@@ -55,11 +55,27 @@
             <span>Echarts</span>
           </template>
           <el-menu-item-group>
-            <el-menu-item index="/flightPath">
+            <el-menu-item index="/echarts/flightPath">
               flightPath
             </el-menu-item>
-            <el-menu-item index="/china">
+            <el-menu-item index="/echarts/china">
               china
+            </el-menu-item>
+          </el-menu-item-group>
+        </el-sub-menu>
+        <el-sub-menu index="/animation">
+          <template v-slot:title>
+            <el-icon>
+              <IconMenu />
+            </el-icon>
+            <span>Animation</span>
+          </template>
+          <el-menu-item-group>
+            <el-menu-item index="/animation/example1">
+              example1
+            </el-menu-item>
+            <el-menu-item index="/animation/example2">
+              example2
             </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
