@@ -21,35 +21,35 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
       100000
     )
     let heading = 0
-    // entities.push(viewer.entities.add({
-    //   position: new Cesium.CallbackProperty(() => {
-    //     return Cesium.Cartesian3.midpoint(startPoint, endPoint, new Cesium.Cartesian3())
-    //   }, false),
-    //   cylinder: {
-    //     length: new Cesium.CallbackProperty(() => {
-    //       return Cesium.Cartesian3.distance(startPoint, endPoint)
-    //     }, false),
-    //     topRadius: 50000,
-    //     bottomRadius: 0,
-    //     material: new Cesium.RadarScanMaterialProperty(
-    //       new Cesium.Color(.1, 1, 0, 0.6),
-    //       30000,// 循环时长
-    //       6.0,//速度
-    //       20,//圈数
-    //       .2,//环高
-    //     ),
-    //   },
-    //   orientation: new Cesium.CallbackProperty(() => {
-    //     const h = getHeading(startPoint, endPoint)
-    //     const hpr = new Cesium.HeadingPitchRoll(
-    //       Cesium.Math.toRadians(90), Cesium.Math.toRadians(90), Cesium.Math.toRadians(0)
-    //     )
-    //     const p = getPitch(startPoint, endPoint)
-    //     hpr.pitch = hpr.pitch - p;
-    //     hpr.heading = hpr.heading + h
-    //     return Cesium.Transforms.headingPitchRollQuaternion(startPoint, hpr);
-    //   }, false),
-    // }))
+    entities.push(viewer.entities.add({
+      position: new Cesium.CallbackProperty(() => {
+        return Cesium.Cartesian3.midpoint(startPoint, endPoint, new Cesium.Cartesian3())
+      }, false),
+      cylinder: {
+        length: new Cesium.CallbackProperty(() => {
+          return Cesium.Cartesian3.distance(startPoint, endPoint)
+        }, false),
+        topRadius: 50000,
+        bottomRadius: 0,
+        material: new Cesium.RadarScanMaterialProperty(
+          new Cesium.Color(.1, 1, 0, 0.6),
+          30000,// 循环时长
+          6.0,//速度
+          20,//圈数
+          .2,//环高
+        ),
+      },
+      orientation: new Cesium.CallbackProperty(() => {
+        const h = getHeading(startPoint, endPoint)
+        const hpr = new Cesium.HeadingPitchRoll(
+          Cesium.Math.toRadians(90), Cesium.Math.toRadians(90), Cesium.Math.toRadians(0)
+        )
+        const p = getPitch(startPoint, endPoint)
+        hpr.pitch = hpr.pitch - p;
+        hpr.heading = hpr.heading + h
+        return Cesium.Transforms.headingPitchRollQuaternion(startPoint, hpr);
+      }, false),
+    }))
     const startPoint2 = Cesium.Cartesian3.fromDegrees(
       105,
       32,
@@ -61,8 +61,8 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
       }, false),
       model: {
         uri: `/model/CesiumAir.glb`,
-        scale: 0,
-        minimumPixelSize: 10,
+        scale: 150,
+        minimumPixelSize: 50,
       },
       orientation: new Cesium.CallbackProperty(() => {
         const h = getHeading(startPoint2, endPoint)
@@ -99,7 +99,7 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
     viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
     //Set timeline to simulation bounds
     viewer.timeline.zoomTo(start, stop);
-    // viewer.flyTo(entities)
+    viewer.flyTo(entities)
     const render = () => {
       const res = plane.position.getValue(viewer.clock.currentTime,new Cesium.Cartesian3())
       // const t = new Cesium.Cartesian3()
@@ -117,8 +117,8 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
       // hpr2.pitch = hpr.pitch + Cesium.Math.toRadians(90.0)
       let transform = Cesium.Transforms.eastNorthUpToFixedFrame(res);
       transform = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromQuaternion(quaternion),res);
-      viewer.camera.lookAtTransform(transform, new Cesium.Cartesian3(0.1, 0, 0))
-        renderId = requestAnimationFrame(render)
+      // viewer.camera.lookAtTransform(transform, new Cesium.Cartesian3(0.1, 0, 0))
+      renderId = requestAnimationFrame(render)
     }
     render()
   } else {
