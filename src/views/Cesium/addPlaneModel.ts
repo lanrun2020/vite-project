@@ -1,26 +1,8 @@
 // 飞机航线
 import Cesium from "@/utils/importCesium"
-import { equal } from "assert";
-import CallbackProperty from "cesium/Source/DataSources/CallbackProperty";
 import { computeCirclularFlight, getHeading } from './util'
 let entities: Array<object> = []
-let renderId:any
-// 根据两个坐标点,获取Heading(朝向)
-// const getHeading = (pointA: object, pointB: object) => {
-//   //建立以点A为原点，X轴为east,Y轴为north,Z轴朝上的坐标系
-//   const transform = Cesium.Transforms.eastNorthUpToFixedFrame(pointA);
-//   //向量AB
-//   const positionvector = Cesium.Cartesian3.subtract(pointB, pointA, new Cesium.Cartesian3());
-//   //因transform是将A为原点的eastNorthUp坐标系中的点转换到世界坐标系的矩阵
-//   //AB为世界坐标中的向量
-//   //因此将AB向量转换为A原点坐标系中的向量，需乘以transform的逆矩阵。
-//   const vector = Cesium.Matrix4.multiplyByPointAsVector(Cesium.Matrix4.inverse(transform, new Cesium.Matrix4()), positionvector, new Cesium.Cartesian3());
-//   //归一化
-//   const direction = Cesium.Cartesian3.normalize(vector, new Cesium.Cartesian3());
-//   //heading
-//   const heading = Math.atan2(direction.y, direction.x) - Cesium.Math.PI_OVER_TWO;
-//   return Cesium.Math.TWO_PI - Cesium.Math.zeroToTwoPi(heading);
-// }
+let renderId: any
 
 // 获取流动曲线上多个连续点
 const generateCurve = (startPoint: object, endPoint: object, length: number, height = 0) => {
@@ -60,24 +42,9 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
     const endPoint = Cesium.Cartesian3.fromDegrees(
       116.410745,
       39.510251,
-      // 121.557468,
-      // 31.203037,
       100
     );
-    // 121.557468纬度:31.203037
-    // viewer.camera.flyTo({
-    //   destination: Cesium.Cartesian3.fromDegrees(103, 26, 500000),
-    //   duration: 1.6,
-    //   orientation: {
-    //     // 指向
-    //       heading: Cesium.Math.toRadians(0),
-    //       // 视角
-    //       pitch: Cesium.Math.toRadians(-45),
-    //       roll: 0
-    //     }
-    // });
-    const points = generateCurve(startPoint, endPoint, 50,15000) //获取路径上的点
-    
+    const points = generateCurve(startPoint, endPoint, 50,15000) //ufo轨迹点集合，获取路径上的点
     const pointsLine = generateCurve(Cesium.Cartesian3.fromDegrees(
       103.95223,
       30.57428,
@@ -86,7 +53,7 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
       115.410745,
       39.510251,
       100
-    ), 40, 5000)
+    ), 40, 5000) //相机轨迹点集合
     const start = Cesium.JulianDate.now()
     const stop = Cesium.JulianDate.addSeconds(start, points.length, new Cesium.JulianDate())
     //时间段循环
@@ -116,18 +83,7 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
     const plane = viewer.entities.add({
       id: "modelPlane",
       position: property,
-      // model: {
-      //   uri: `/model/ufo.glb`,
-      //   scale: 0,
-      //   minimumPixelSize: 60,
-      // },
       orientation:new Cesium.VelocityOrientationProperty(property)
-      // viewFrom: new Cesium.Cartesian3(-170.0, 0.0, 0.0),
-      // orientation: new Cesium.HeadingPitchRoll(
-      //   Cesium.Math.toRadians(0),
-      //   Cesium.Math.toRadians(0),
-      //   Cesium.Math.toRadians(0),
-      // ),
     })
     const plane2 = viewer.entities.add({
       id: "modelPlane2",
@@ -144,12 +100,7 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
 
     let current:any
     current = Cesium.clone(startPoint)
-    // plane.orientation = new Cesium.VelocityOrientationProperty(plane.position)
-    // console.log(plane.position)
-    // plane.model.alignedAxis = new Cesium.VelocityVectorProperty(plane.position, true)
-    // viewer.trackedEntity = plane
-    // viewer.trackedEntity.viewFrom = new Cesium.Cartesian3(-2000, 0, 1000)
-    const render = () => {
+    const render = () => { // 更新相机位置
       let res = plane.position.getValue(viewer.clock.currentTime,new Cesium.Cartesian3())
       let quaternion = plane.orientation.getValue(viewer.clock.currentTime,new Cesium.Quaternion())
       if(!quaternion || !res){
@@ -157,24 +108,8 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
         quaternion = plane.orientation.getValue(viewer.clock.startTime,new Cesium.Quaternion())
         res = plane.position.getValue(viewer.clock.currentTime,new Cesium.Cartesian3())
       }
-      
-      // viewer.camera.position = res
-      // const hpr = Cesium.HeadingPitchRoll.fromQuaternion(quaternion);
-      // console.log(Cesium.Math.toDegrees(hpr.heading));
-
-      // hpr.heading += Cesium.Math.toRadians(0),
-      // hpr.pitch += Cesium.Math.toRadians(180),
-      // hpr.roll += Cesium.Math.toRadians(90),
-      // console.log(hpr);
-      // console.log(res);
-      // console.log(viewer.camera);
-      //
       let transform = Cesium.Transforms.eastNorthUpToFixedFrame(res);
       transform = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromQuaternion(quaternion),res);
-      // viewer.camera.lookAtTransform(transform, new Cesium.HeadingPitchRange(Cesium.Math.toRadians(-90.0),Cesium.Math.toRadians(0.0),-10.0))
-      // console.log(startPoint,res);
-      // console.log(Cesium.Cartesian3.equals(current,res));
-      
       viewer.camera.flyTo({
         destination:res,
         duration:0.0,
@@ -184,32 +119,20 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
           roll: 0
       }})
       current = Cesium.clone(res)
-      // viewer.camera.setView({
-      //   destination:res,
-        // orientation:new Cesium.HeadingPitchRoll(
-        //   hpr.heading + Cesium.Math.toRadians(-90),
-        //   hpr.pitch + Cesium.Math.toRadians(-45),
-        //   Cesium.Math.toRadians(0),
-        // )
-      // })
-      // console.log(hpr);
       renderId = requestAnimationFrame(render)
     }
     const radarH = 5000 //雷达高度
-    const startPoint2 = Cesium.Cartesian3.fromDegrees(
-      103.95223,
-      30.57428,
-      0
-    )
-    const endPoint2 = Cesium.Cartesian3.fromDegrees(
-      115.410745,
-      39.510251,
-      0
-    )
-    const points2 = generateCurve(startPoint2, endPoint2, 40, 2500) //获取路径上的点
-    const property2 = computeCirclularFlight(points2, start)
+    // ufo下方的波形扫描动画
     entities.push(viewer.entities.add({
-      position: property2,
+      position: new Cesium.CallbackProperty(() => {
+        const currentPosition = plane2.position.getValue(viewer.clock.currentTime,new Cesium.Cartesian3())
+        if(currentPosition){
+          const currentCartographic = Cesium.Cartographic.fromCartesian(currentPosition)
+          return Cesium.Cartesian3.fromDegrees(Cesium.Math.toDegrees(currentCartographic.longitude),Cesium.Math.toDegrees(currentCartographic.latitude),currentCartographic.height-2500)
+        }else{
+          return  Cesium.Cartesian3.fromDegrees(0,0,0)
+        }
+      }, false),
       cylinder: {
         length: radarH,
         topRadius: 0.0,

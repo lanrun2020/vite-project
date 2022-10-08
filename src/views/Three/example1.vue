@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <div id="demo"></div>
-  </div>
+  <div id="demo"></div>
 </template>
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
@@ -24,6 +22,6 @@ const init = () => {
 <style>
 #demo {
   width: 100%;
-  height: calc(100vh - 80px);
+  height: 100%;
 }
 </style>

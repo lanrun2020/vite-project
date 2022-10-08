@@ -23,15 +23,15 @@ const activeChange = () => {
 <style lang="scss" scoped>
 .tool-item {
   display: inline-block;
-  border: 1px solid rgb(72, 155, 153);
-  margin: 5px;
-  padding: 6px 10px;
+  border-bottom: 1px solid rgba(72, 155, 154, 0.524);
+  // margin: 5px;
+  padding: 12px 10px;
   color: rgb(189, 189, 189);
   cursor: pointer;
 }
 
 .tool-item-active {
-  background-color: rgb(0, 132, 203);
+  background-color: rgb(3, 96, 146);
   color: #fff;
 }
 </style>

@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <div id="demo4"></div>
-  </div>
+  <div id="demo4"></div>
 </template>
 <script setup lang="ts">
 import { onMounted, reactive, watch } from "vue";
@@ -260,6 +258,6 @@ const render = () => {
 <style>
 #demo4 {
   width: 100%;
-  height: calc(100vh - 80px);
+  height: 100%;
 }
 </style>

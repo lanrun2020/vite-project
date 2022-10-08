@@ -1,8 +1,6 @@
 <template>
-  <div>
-    <div id="cesiumContainer">
-      <toolbox :toolList="toolList" @toolChecked="toolChecked" @finishPolygon="reset"></toolbox>
-    </div>
+  <div id="cesiumContainer">
+    <toolbox :toolList="toolList" @toolChecked="toolChecked" @finishPolygon="reset"></toolbox>
   </div>
 </template>
 
@@ -271,7 +269,7 @@ const initCesium = () => {
   overflow: hidden;
   position: relative;
   width: 100%;
-  height: calc(100vh - 70px);
+  height: 100%;
 }
 
 /* 隐藏Cesium地图图标 */

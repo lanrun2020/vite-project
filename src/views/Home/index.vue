@@ -1,29 +1,31 @@
 <template>
-  <!-- <div class='top-scroll'>{{ message }}</div> -->
-  <h1>num1:{{ num1 }}</h1>
-  <h1>num2:{{ num2 }}</h1>
-  <h1>sum:{{ sum }}</h1>
-  <el-button @click="num1++">num1++</el-button>
-  <el-button @click="num2++">num2++</el-button>
-  <my-marker></my-marker>
-  <h1>count:{{ count }}</h1>
-  <h1>nested.count:{{ nested.count.value }}</h1>
-  <el-button @click="count++">count++</el-button>
-  <el-button @click="test">测试</el-button>
-  <el-button @click="test2">测试2</el-button>
-  <el-button @click="test3">测试3</el-button>
-  <el-table :data="tableData" border :span-method="objectSpanMethod" style="width: 100%; margin-top: 20px">
-    <el-table-column prop="id" label="ID" width="180">
-    </el-table-column>
-    <el-table-column prop="name" label="姓名">
-    </el-table-column>
-    <el-table-column prop="amount1" label="数值 1（元）">
-    </el-table-column>
-    <el-table-column prop="amount2" label="数值 2（元）">
-    </el-table-column>
-    <el-table-column prop="amount3" label="数值 3（元）">
-    </el-table-column>
-  </el-table>
+  <div id="home">
+    <!-- <div class='top-scroll'>{{ message }}</div> -->
+    <h1>num1:{{ num1 }}</h1>
+    <h1>num2:{{ num2 }}</h1>
+    <h1>sum:{{ sum }}</h1>
+    <el-button @click="num1++">num1++</el-button>
+    <el-button @click="num2++">num2++</el-button>
+    <my-marker></my-marker>
+    <h1>count:{{ count }}</h1>
+    <h1>nested.count:{{ nested.count.value }}</h1>
+    <el-button @click="count++">count++</el-button>
+    <el-button @click="test">测试</el-button>
+    <el-button @click="test2">测试2</el-button>
+    <el-button @click="test3">测试3</el-button>
+    <el-table :data="tableData" border :span-method="objectSpanMethod" style="width: 100%; margin-top: 20px">
+      <el-table-column prop="id" label="ID" width="180">
+      </el-table-column>
+      <el-table-column prop="name" label="姓名">
+      </el-table-column>
+      <el-table-column prop="amount1" label="数值 1（元）">
+      </el-table-column>
+      <el-table-column prop="amount2" label="数值 2（元）">
+      </el-table-column>
+      <el-table-column prop="amount3" label="数值 3（元）">
+      </el-table-column>
+    </el-table>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -175,5 +177,9 @@ const test3 = async () => {
       transform: translate3d(-100%, 0, 0);
     }
   }
+}
+#home{
+  height: 100%;
+  padding: 10px;
 }
 </style>

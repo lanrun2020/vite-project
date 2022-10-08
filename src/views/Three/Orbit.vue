@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <div id="demo5"></div>
-  </div>
+  <div id="demo5"></div>
 </template>
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
@@ -141,6 +139,6 @@ const animation = (msTime: any) => {
 <style>
 #demo5 {
   width: 100%;
-  height: calc(100vh - 80px);
+  height: 100%;
 }
 </style>
