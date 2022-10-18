@@ -50,6 +50,10 @@ const routes: Array<RouteRecordRaw> = [
         path: 'chinaMap',
         component: () => import('../views/Three/chinaMap.vue'),
       },
+      {
+        path: 'computerAttack',
+        component: () => import('../views/Three/computerAttack.vue'),
+      },
     ],
   },
   {
@@ -79,6 +83,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'example2',
         component: () => import('../views/Animation/example2.vue'),
+      },
+      {
+        path: 'example3',
+        component: () => import('../views/Animation/example3.vue'),
       },
     ],
   },

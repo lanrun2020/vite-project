@@ -37,6 +37,9 @@
             <el-menu-item index="/threejs/chinaMap">
               chinaMap
             </el-menu-item>
+            <el-menu-item index="/threejs/computerAttack">
+              computerAttack
+            </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
         <el-menu-item index="/cesium">
@@ -76,6 +79,9 @@
             </el-menu-item>
             <el-menu-item index="/animation/example2">
               example2
+            </el-menu-item>
+            <el-menu-item index="/animation/example3">
+              example3
             </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
