@@ -70,12 +70,13 @@ export default class computerAttack {
     this.controls.screenSpacePanning = false; //定义平移时如何平移相机的位置。如果为 true，则相机在屏幕空间中平移。否则，相机会在与相机向上方向正交的平面中平移。OrbitControls 默认为 true；MapControls 为 false。
     this.controls.minDistance = 5; //移动最小距离
     this.controls.maxDistance = 400; //移动最大距离
-    this.controls.maxPolarAngle = Math.PI; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
+    this.controls.maxPolarAngle = Math.PI / 2.3; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
   }
 
   // 渲染
   render() {
     if (this.renderer && this.labelRenderer && this.scene && this.camera) {
+      // if (this.camera.position.y<0){this.camera.position.set(this.camera.position.x,0,this.camera.position.z)}
       this.renderer.render(this.scene, this.camera);
       this.labelRenderer.render(this.scene, this.camera);
     }
@@ -120,16 +121,16 @@ export default class computerAttack {
     // const helper = new THREE.GridHelper(100, 50, 0x303030, 0x303030); //长度1000 划分为50份
     // this.scene.add(helper);
     const axesHelper = new THREE.AxesHelper(500); //辅助三维坐标系
-    // this.scene.add(axesHelper)
+    this.scene.add(axesHelper)
 
-    // const rgbeLoader = new RGBELoader();
-    // //资源较大，使用异步加载
-    // rgbeLoader.loadAsync(`/model/home.hdr`).then((texture) => {
-    //   texture.mapping = THREE.EquirectangularReflectionMapping;
-    //   //将加载的材质texture设置给背景和环境
-    //   this.scene.background = texture;
-    //   this.scene.environment = texture;
-    // });
+    const rgbeLoader = new RGBELoader();
+    //资源较大，使用异步加载
+    rgbeLoader.loadAsync(`/model/home.hdr`).then((texture) => {
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+      //将加载的材质texture设置给背景和环境
+      this.scene.background = texture;
+      this.scene.environment = texture;
+    });
   }
 
   addModel() {
@@ -241,7 +242,7 @@ export default class computerAttack {
   // 创建地板
   setFloor() {
     if (this.scene) {
-      const geometry = new THREE.BoxGeometry(50, 0.2, 50); //创建一个立方体几何对象Geometry
+      const geometry = new THREE.BoxGeometry(50, 2, 50); //创建一个立方体几何对象Geometry
       const texture = new THREE.TextureLoader().load(
         floorImg
       ); //首先，获取到纹理
@@ -252,13 +253,56 @@ export default class computerAttack {
       texture.repeat.set(6, 6);
       // 偏移效果
       // texture.offset = new THREE.Vector2(0.5, 0.5)
-      const material1 = new THREE.MeshBasicMaterial({ map: texture })//side 镜像翻转
-      const material = [material1, material1, material1, material1, material1, material1]; //然后创建一个phong材质来处理着色，并传递给纹理映射
+      // const material1 = new THREE.MeshBasicMaterial({ map: texture })//side 镜像翻转
+      const material1 = new THREE.MeshStandardMaterial({
+        roughness: 0.2,//粗糙度 0平滑镜面反射  1完全漫反射
+        metalness: 1 //金属度 非金属0 金属1
+      });
+
+      const material2 = new THREE.MeshStandardMaterial({
+        roughness: 0.05,//粗糙度 0平滑镜面反射  1完全漫反射
+        metalness: 1 //金属度 非金属0 金属1
+      });
+      // const material2 = new THREE.MeshBasicMaterial({
+      //   color: 0x37ffed // 侧面颜色
+      // });
+      const texture2 = new THREE.Texture( this.generateTexture() );
+      const cubeMaterial3 = new THREE.MeshPhongMaterial( { color: 0xccddff, envMap: texture2, refractionRatio: 0.98, reflectivity: 0.9 } );
+				const cubeMaterial2 = new THREE.MeshPhongMaterial( { color: 0xccfffd, envMap: texture2, refractionRatio: 0.985 } );
+				const cubeMaterial1 = new THREE.MeshLambertMaterial( { map: texture2, transparent: true } )
+      const material = [material2, material2, cubeMaterial1, material2, material2, material2]; //然后创建一个phong材质来处理着色，并传递给纹理映射
       const cube1 = new THREE.Mesh(geometry, material); //网格模型对象Mesh
       // cube1.material.map.repeat.set(20,20)
       cube1.position.set(0, 0, 0)
       this.scene.add(cube1); //网格模型添加到场景中
     }
+  }
+  generateTexture() {
+
+    const canvas = document.createElement( 'canvas' );
+    canvas.width = 256;
+    canvas.height = 256;
+    const context = canvas.getContext( '2d' )!;
+    const image = context.getImageData( 0, 0, 256, 256 );
+
+    let x = 0, y = 0;
+
+    for ( let i = 0, j = 0, l = image.data.length; i < l; i += 4, j ++ ) {
+
+      x = j % 256;
+      y = ( x === 0 ) ? y + 1 : y;
+
+      image.data[ i ] = 255;
+      image.data[ i + 1 ] = 255;
+      image.data[ i + 2 ] = 255;
+      image.data[ i + 3 ] = Math.floor( x ^ y );
+
+    }
+
+    context.putImageData( image, 0, 0 );
+
+    return canvas;
+
   }
 
   // 停止渲染
