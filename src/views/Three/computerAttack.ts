@@ -1,5 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import * as T from "three";
-import floorImg from '../../assets/dalishi.jpg'
+import * as d3 from "d3"
+import floorImg from '../../assets/woodFloor2.jpg'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
@@ -7,6 +10,7 @@ import {
   CSS2DRenderer,
   CSS2DObject
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js"
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { InitFlyLine } from "@/utils/flyLine";
 import pointPng from '@/assets/point.png';
@@ -70,7 +74,7 @@ export default class computerAttack {
     this.controls.screenSpacePanning = false; //定义平移时如何平移相机的位置。如果为 true，则相机在屏幕空间中平移。否则，相机会在与相机向上方向正交的平面中平移。OrbitControls 默认为 true；MapControls 为 false。
     this.controls.minDistance = 5; //移动最小距离
     this.controls.maxDistance = 400; //移动最大距离
-    this.controls.maxPolarAngle = Math.PI / 2.3; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
+    this.controls.maxPolarAngle = Math.PI / 2; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
   }
 
   // 渲染
@@ -97,11 +101,21 @@ export default class computerAttack {
   setLight() {
     if (this.scene) {
       // 环境光
-      const ambient = new THREE.AmbientLight(0xbbbbbb);
+      const ambient = new THREE.AmbientLight(0xbbbbbb,0.1);
       this.scene.add(ambient);
       const directionalLight = new THREE.DirectionalLight(0x666666);
       directionalLight.position.set(10, -50, 300);
       this.scene.add(directionalLight);
+
+      const pointLight = new THREE.PointLight( 0xffffff, 1 );
+			pointLight.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0xffffff } ) ) );
+      pointLight.position.set(0,50,0)
+			this.scene.add( pointLight );
+
+      // const rectLight3 = new THREE.RectAreaLight( 0xAFFFFF, 10, 50, 10 );
+			// 	rectLight3.position.set( 0, 0, 25 );
+			// 	this.scene.add( rectLight3 );
+			// 	this.scene.add( new RectAreaLightHelper( rectLight3 ) );
     }
   }
 
@@ -120,8 +134,8 @@ export default class computerAttack {
     // Grid 添加网格辅助对象
     // const helper = new THREE.GridHelper(100, 50, 0x303030, 0x303030); //长度1000 划分为50份
     // this.scene.add(helper);
-    const axesHelper = new THREE.AxesHelper(500); //辅助三维坐标系
-    this.scene.add(axesHelper)
+    // const axesHelper = new THREE.AxesHelper(500); //辅助三维坐标系
+    // this.scene.add(axesHelper)
 
     const rgbeLoader = new RGBELoader();
     //资源较大，使用异步加载
@@ -134,23 +148,364 @@ export default class computerAttack {
   }
 
   addModel() {
+    
+    const res = [
+      {
+        "default_gateway": "192.168.0.1",
+        "role": "instance",
+        "os": "linux",
+        "emulation": "kvm",
+        "ip": "2390|192.168.0.66,2391|192.168.8.40",
+        "to_node": "网络_n80wipyf",
+        "netmask": "255.255.255.0",
+        "name": "kail0.66/8.40",
+        "y_coordinates": -12.99999999999784,
+        "id": 419,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": -99.9999999999966,
+        "ram": 1024
+      },
+      {
+        "role": "instance",
+        "os": "linux",
+        "emulation": "kvm",
+        "ip": "2390|192.168.0.66,2391|192.168.8.40",
+        "to_node": "8网段",
+        "netmask": "255.255.255.0",
+        "name": "kail0.66/8.40",
+        "y_coordinates": -12.99999999999784,
+        "id": 419,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": -99.9999999999966,
+        "ram": 1024
+      },
+      {
+        "default_gateway": "192.168.8.1",
+        "role": "instance",
+        "os": "linux",
+        "emulation": "docker",
+        "ip": "2392|192.168.8.2,2393|192.168.30.3",
+        "to_node": "8网段",
+        "netmask": "255.255.255.0",
+        "name": "8.2/30.3",
+        "y_coordinates": -15,
+        "id": 420,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "default_gateway": "192.168.30.1",
+        "role": "instance",
+        "os": "linux",
+        "emulation": "docker",
+        "ip": "2392|192.168.8.2,2393|192.168.30.3",
+        "to_node": "30网段",
+        "netmask": "255.255.255.0",
+        "name": "8.2/30.3",
+        "y_coordinates": -15,
+        "id": 420,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "default_gateway": "192.168.8.1",
+        "role": "instance",
+        "os": "linux",
+        "emulation": "docker",
+        "ip": "2394|192.168.8.11,2395|192.168.30.7",
+        "to_node": "8网段",
+        "netmask": "255.255.255.0",
+        "name": "8.11/30.7",
+        "y_coordinates": -15,
+        "id": 421,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "default_gateway": "192.168.30.1",
+        "role": "instance",
+        "os": "linux",
+        "emulation": "docker",
+        "ip": "2394|192.168.8.11,2395|192.168.30.7",
+        "to_node": "30网段",
+        "netmask": "255.255.255.0",
+        "name": "8.11/30.7",
+        "y_coordinates": -15,
+        "id": 421,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "default_gateway": "192.168.40.1",
+        "role": "instance",
+        "os": "xp",
+        "emulation": "docker",
+        "ip": "2396|192.168.40.6",
+        "to_node": "40网段",
+        "netmask": "255.255.255.0",
+        "name": "40.6",
+        "y_coordinates": -15,
+        "id": 422,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "default_gateway": "192.168.40.1",
+        "role": "instance",
+        "os": "xp",
+        "emulation": "docker",
+        "ip": "2397|192.168.40.9",
+        "to_node": "40网段",
+        "netmask": "255.255.255.0",
+        "name": "40.9",
+        "y_coordinates": -15,
+        "id": 423,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "default_gateway": "192.168.30.1",
+        "role": "instance",
+        "os": "win7",
+        "emulation": "docker",
+        "ip": "2398|192.168.30.6,2399|192.168.40.5",
+        "to_node": "30网段",
+        "netmask": "255.255.255.0",
+        "name": "30.6/40.5",
+        "y_coordinates": -15,
+        "id": 424,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "role": "instance",
+        "os": "win7",
+        "emulation": "docker",
+        "ip": "2398|192.168.30.6,2399|192.168.40.5",
+        "to_node": "40网段",
+        "netmask": "255.255.255.0",
+        "name": "30.6/40.5",
+        "y_coordinates": -15,
+        "id": 424,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "default_gateway": "192.168.30.1",
+        "role": "instance",
+        "os": "win7",
+        "emulation": "docker",
+        "ip": "2400|192.168.30.8,2401|192.168.40.8",
+        "to_node": "30网段",
+        "netmask": "255.255.255.0",
+        "name": "30.8/40.8",
+        "y_coordinates": -15,
+        "id": 425,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "role": "instance",
+        "os": "win7",
+        "emulation": "docker",
+        "ip": "2400|192.168.30.8,2401|192.168.40.8",
+        "to_node": "40网段",
+        "netmask": "255.255.255.0",
+        "name": "30.8/40.8",
+        "y_coordinates": -15,
+        "id": 425,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "default_gateway": "192.168.30.1",
+        "role": "instance",
+        "os": "xp",
+        "emulation": "docker",
+        "ip": "2402|192.168.30.11,2403|192.168.40.11",
+        "to_node": "30网段",
+        "netmask": "255.255.255.0",
+        "name": "30.11/40.11",
+        "y_coordinates": -15,
+        "id": 426,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "role": "instance",
+        "os": "xp",
+        "emulation": "docker",
+        "ip": "2402|192.168.30.11,2403|192.168.40.11",
+        "to_node": "40网段",
+        "netmask": "255.255.255.0",
+        "name": "30.11/40.11",
+        "y_coordinates": -15,
+        "id": 426,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": 68,
+        "ram": 1024
+      },
+      {
+        "os": "",
+        "emulation": "",
+        "name": "8网段",
+        "y_coordinates": -86,
+        "id": 427,
+        "category": "Switch",
+        "to_node": "8.2",
+        "x_coordinates": -62
+      },
+      {
+        "os": "",
+        "emulation": "",
+        "name": "8网段",
+        "y_coordinates": -86,
+        "id": 427,
+        "category": "Switch",
+        "to_node": "8.11",
+        "x_coordinates": -62
+      },
+      {
+        "os": "",
+        "emulation": "",
+        "name": "30网段",
+        "y_coordinates": -90,
+        "id": 428,
+        "category": "Switch",
+        "to_node": "30.6",
+        "x_coordinates": 40
+      },
+      {
+        "os": "",
+        "emulation": "",
+        "name": "30网段",
+        "y_coordinates": -90,
+        "id": 428,
+        "category": "Switch",
+        "to_node": "30.8",
+        "x_coordinates": 40
+      },
+      {
+        "os": "",
+        "emulation": "",
+        "name": "30网段",
+        "y_coordinates": -90,
+        "id": 428,
+        "category": "Switch",
+        "to_node": "30.11",
+        "x_coordinates": 40
+      },
+      {
+        "os": "",
+        "emulation": "",
+        "name": "40网段",
+        "y_coordinates": -90,
+        "id": 429,
+        "category": "Switch",
+        "to_node": "40.6",
+        "x_coordinates": 40
+      },
+      {
+        "os": "",
+        "emulation": "",
+        "name": "40网段",
+        "y_coordinates": -90,
+        "id": 429,
+        "category": "Switch",
+        "to_node": "40.9",
+        "x_coordinates": 40
+      }
+    ]
+    const links = []
+    const newlinks = []
+    const nodes = []
+    res.forEach((item) => {
+      const copy_id = item.id
+      item.id = item.name
+      item.copy_id = copy_id
+      const index = nodes.filter((node)=>{
+        return node.copy_id === copy_id
+      })
+      links.push({
+        source:item.id,
+        target:item.to_node
+      })
+      if(!index.length){
+        nodes.push(item)
+      }
+    })
+    links.forEach((link) => {
+      const index = nodes.filter((node)=>{
+        return node.name === link.target
+      })
+      if(index.length) {
+        newlinks.push(link)
+      }
+    })
+    const force = d3.forceSimulation().nodes(nodes).force("link",d3.forceLink(newlinks).id(d => d.id)).alpha(0).alphaDecay(1) 
+    console.log(force)
+    newlinks.forEach((link)=>{
+      this.addLine(link.source.x,link.source.y,link.target.x,link.target.y)
+    })
+    let model = null
+    let model2 = null
     const loader = new GLTFLoader();
     loader.load(`/model/class6.glb`, function (gltf: any) {
-      const model = gltf.scene;
-      // model.scale.set(1, 1, 1)
-      model.position.set(-20, 0, -19.2)
-      let start = 1
-      for (let i = 0; i < 5; i++) {
-        for (let j = 0; j < 5; j++) {
+      model = gltf.scene;
+      nodes.forEach((node)=>{
+        if(node.category === 'Host'){
           const mc = model.clone()
-          mc.translateX(i * 10)
-          mc.translateZ(j * 10)
-          that.addLabel(mc, 'IP:192.168.2.' + start++)
+          mc.position.set(node.x, -1, node.y)
+          that.addLabel(mc, 'IP:' + node.name)
           that.group.add(mc)
         }
-      }
-      that.scene.add(that.group)
+      })
+      // model.scale.set(1, 1, 1)
     });
+    loader.load(`/model/router2.glb`,function(gltf: any){
+      model2 = gltf.scene;
+      // model2.scale.set(5, 5, 5)
+      nodes.forEach((node)=>{
+        if(node.category === 'Switch'){
+          const mc = model2.clone()
+          mc.position.set(node.x, 2, node.y)
+          that.addLabel(mc, 'IP:' + node.name)
+          that.group.add(mc)
+        }
+      })
+    })
+    // nodes.map((node)=>{
+    //   const mc = node.category === 'Host' ? model.clone() : model2.clone()
+    //     mc.position.set(node.x, 0, node.y)
+    //     that.addLabel(mc, 'IP:' + node.name)
+    //     that.group.add(mc)
+    // })
+    that.scene.add(that.group)
   }
 
   addLabel(object: THREE.Mesh, text: string) {
@@ -162,25 +517,21 @@ export default class computerAttack {
     object.add(earthLabel);
   }
 
-  addFlyline() {
+  addFlyline(x1,y1,x2,y2) {
     // 平滑曲线
     const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-20, 2, -20),
-      new THREE.Vector3(-10, 10, -10),
-      new THREE.Vector3(0, 2, 0),
-      new THREE.Vector3(10, 10, 10),
-      new THREE.Vector3(20, 2, 20),
-      new THREE.Vector3(0, 10, 20),
-      new THREE.Vector3(-20, 2, 20)
+      new THREE.Vector3(x1, 2, y1),
+      new THREE.Vector3((x1+x2)/2, 5, (y1+y2)/2),
+      new THREE.Vector3(x2, 2, y2),
     ]);
     // curve.getPoints(pointCount);
-    const allPoints = curve.getPoints(2500);
+    const allPoints = curve.getPoints(500);
     //制作飞线动画
     const flyMesh = this.flyManager.addFly({
       curve: allPoints, //飞线飞线其实是N个点构成的
       color: "rgba(255,255,255,1)", //点的颜色
       width: 0.1, //点的半径
-      length: 1250, //飞线的长度（点的个数）
+      length: 500, //飞线的长度（点的个数）
       speed: 15, //飞线的速度
       repeat: Infinity, //循环次数
     });
@@ -208,20 +559,16 @@ export default class computerAttack {
     this.scene.add(flyMesh);
   }
 
-  addLine() {
+  addLine(x1,y1,x2,y2) {
     // 三维2次贝赛尔曲线
     // const curve2 = new THREE.QuadraticBezierCurve3(new THREE.Vector3(-20, 2, -20),
     //   new THREE.Vector3(0, 20, 0),
     //   new THREE.Vector3(20, 2, 20)
     // );
     const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-20, 2, -20),
-      new THREE.Vector3(-10, 10, -10),
-      new THREE.Vector3(0, 2, 0),
-      new THREE.Vector3(10, 10, 10),
-      new THREE.Vector3(20, 2, 20),
-      new THREE.Vector3(0, 10, 20),
-      new THREE.Vector3(-20, 2, 20)
+      new THREE.Vector3(x1, 2, y1),
+      new THREE.Vector3((x1+x2)/2, 2, (y1+y2)/2),
+      new THREE.Vector3(x2, 2, y2),
     ]);
     //getPoints是基类Curve的方法，返回一个vector3对象作为元素组成的数组
     const points = curve.getPoints(100); //分段数100，返回101个顶点
@@ -242,7 +589,7 @@ export default class computerAttack {
   // 创建地板
   setFloor() {
     if (this.scene) {
-      const geometry = new THREE.BoxGeometry(50, 2, 50); //创建一个立方体几何对象Geometry
+      const geometry = new THREE.BoxGeometry(100, 2, 100); //创建一个立方体几何对象Geometry
       const texture = new THREE.TextureLoader().load(
         floorImg
       ); //首先，获取到纹理
@@ -250,33 +597,34 @@ export default class computerAttack {
       texture.wrapS = THREE.repeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
       // uv两个方向纹理重复数量
-      texture.repeat.set(6, 6);
+      texture.repeat.set(15, 15);
       // 偏移效果
       // texture.offset = new THREE.Vector2(0.5, 0.5)
-      // const material1 = new THREE.MeshBasicMaterial({ map: texture })//side 镜像翻转
-      const material1 = new THREE.MeshStandardMaterial({
-        roughness: 0.2,//粗糙度 0平滑镜面反射  1完全漫反射
-        metalness: 1 //金属度 非金属0 金属1
-      });
+      const material1 = new THREE.MeshBasicMaterial({ map: texture })//side 镜像翻转
+      // const material1 = new THREE.MeshStandardMaterial({
+      //   roughness: 0.2,//粗糙度 0平滑镜面反射  1完全漫反射
+      //   metalness: 1 //金属度 非金属0 金属1
+      // });
 
-      const material2 = new THREE.MeshStandardMaterial({
-        roughness: 0.05,//粗糙度 0平滑镜面反射  1完全漫反射
-        metalness: 1 //金属度 非金属0 金属1
-      });
+      // const material2 = new THREE.MeshStandardMaterial({
+      //   roughness: 0.05,//粗糙度 0平滑镜面反射  1完全漫反射
+      //   metalness: 1 //金属度 非金属0 金属1
+      // });
       // const material2 = new THREE.MeshBasicMaterial({
       //   color: 0x37ffed // 侧面颜色
       // });
       const texture2 = new THREE.Texture( this.generateTexture() );
       const cubeMaterial3 = new THREE.MeshPhongMaterial( { color: 0xccddff, envMap: texture2, refractionRatio: 0.98, reflectivity: 0.9 } );
-				const cubeMaterial2 = new THREE.MeshPhongMaterial( { color: 0xccfffd, envMap: texture2, refractionRatio: 0.985 } );
-				const cubeMaterial1 = new THREE.MeshLambertMaterial( { map: texture2, transparent: true } )
-      const material = [material2, material2, cubeMaterial1, material2, material2, material2]; //然后创建一个phong材质来处理着色，并传递给纹理映射
+			const cubeMaterial2 = new THREE.MeshPhongMaterial( { color: 0xccfffd, envMap: texture2, refractionRatio: 0.985 } );
+			const material2 = new THREE.MeshPhongMaterial( { color: 0x000000, specular: 0x666666, emissive: 0x000000, shininess: 10, opacity: 0.1, transparent: true } )
+      const material = [material2, material2, material1, material2, material2, material2]; //然后创建一个phong材质来处理着色，并传递给纹理映射
       const cube1 = new THREE.Mesh(geometry, material); //网格模型对象Mesh
       // cube1.material.map.repeat.set(20,20)
-      cube1.position.set(0, 0, 0)
+      cube1.position.set(0, -2, 0)
       this.scene.add(cube1); //网格模型添加到场景中
     }
   }
+  // 创建canvas贴图
   generateTexture() {
 
     const canvas = document.createElement( 'canvas' );
@@ -298,9 +646,8 @@ export default class computerAttack {
       image.data[ i + 3 ] = Math.floor( x ^ y );
 
     }
-
     context.putImageData( image, 0, 0 );
-
+    // this.dom.appendChild(canvas)
     return canvas;
 
   }
@@ -341,9 +688,9 @@ export default class computerAttack {
     this.setLight();
     this.setControls();
     this.addModel();
-    this.addLine();
-    this.addFlyline();
-    this.addFlyline2();
+    // this.addLine();
+    // this.addFlyline();
+    // this.addFlyline2();
     this.setFloor();
     this.animate();
     window.addEventListener('resize', this.onWindowResize);
