@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div id="graph"></div>
     <div id="computerAttack"></div>
   </div>
 </template>
@@ -25,12 +26,15 @@ const init = () => {
   position: relative;
 }
 .computer-box-label{
-  width: 120px;
-  height: 30px;
+  /* width: 120px; */
+  /* height: 30px; */
+  padding: 5px;
   font-size: 12px;
-  color: rgb(0, 220, 224);
+  color: rgb(255, 255, 255);
   border: 1px solid rgba(0, 83, 91, 0.083);
-  background-color: rgba(0, 58, 55, 0.018);
+  background-color: rgb(0, 0, 0);
 }
-
+#graph{
+  display: none;
+}
 </style>
