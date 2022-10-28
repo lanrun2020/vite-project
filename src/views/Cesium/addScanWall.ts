@@ -8,7 +8,7 @@ export const addScanWall = (viewer: any, active: boolean) => {
       viewer.flyTo(entities)
       return
     }
-    entities.push(viewer.entities.add({
+    const entity = viewer.entities.add({
       id: "scan",
       name: "Scan",
       position: Cesium.Cartesian3.fromDegrees(114, 30),
@@ -26,7 +26,13 @@ export const addScanWall = (viewer: any, active: boolean) => {
         outlineColor: Cesium.Color.BLUE.withAlpha(0.2),
         outlineWidth: 1,
       },
-    }));
+    })
+    entities.push(entity)
+    console.log(entity);
+    setTimeout(()=>{
+      entity.ellipsoid.outlineColor = Cesium.Color.RED.withAlpha(1),
+      console.log(entity);
+    },6000)
     let heading = 0;
     entities.push(viewer.entities.add({
       id: "wall",

@@ -24,8 +24,10 @@ const init = () => {
   width: 100%;
   height: calc(100vh - 80px);
   position: relative;
+  /* color: #00fdf5; */
+  background-image: linear-gradient(90deg,rgb(0, 31, 84), rgb(0, 73, 150),rgb(0, 31, 84));
 }
-.computer-box-label{
+.computer-box-label2{
   /* width: 120px; */
   /* height: 30px; */
   padding: 5px;
@@ -34,6 +36,24 @@ const init = () => {
   border: 1px solid rgba(0, 83, 91, 0.083);
   background-color: rgb(0, 0, 0);
 }
+.computer-box-label{
+  color: rgb(0, 255, 255);
+  width: 100px;
+  font-size: 14px;
+  padding: 15px;
+  background: url('@/assets/msg-bg.png') no-repeat;
+  background-size: cover;
+}
+/* .computer-box-label::after {
+    content: "";
+    width: calc(100% + 22px);
+    height: 39px;
+    background-position: 0 0;
+    position: absolute;
+    bottom: -40px;
+    left: -22px;
+    background: url('@/assets/corner.png') no-repeat;
+} */
 #graph{
   display: none;
 }

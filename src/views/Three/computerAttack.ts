@@ -3,7 +3,7 @@
 import * as T from "three";
 import * as d3 from "d3";
 import ForceGraph from 'force-graph';
-import floorImg from '../../assets/floorMarble.jpg'
+import floorImg from '../../assets/floor5.jpeg'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
@@ -18,7 +18,7 @@ import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import pointPng from '@/assets/point.png';
-import arrow1 from '@/assets/arrow1.jpg';
+import arrow1 from '@/assets/666.png';
 const THREE = T
 let that: any
 export default class computerAttack {
@@ -39,6 +39,7 @@ export default class computerAttack {
   private requestId: any
   private flyManager: InitFlyLine
   private texture: any
+  private selectNodeId:null
   constructor(dom: HTMLElement) {
     this.clock = new THREE.Clock()
     that = this
@@ -47,23 +48,25 @@ export default class computerAttack {
       texture: pointPng,
     })
     this.raycaster = new THREE.Raycaster() //光线投射 光线投射用于进行鼠标拾取（在三维空间中计算出鼠标移过了什么物体）。
-    
     this.init()
   }
   // 设置透视相机
   setCamera() {
     this.camera = new THREE.PerspectiveCamera(50, this.dom.offsetWidth / this.dom.offsetHeight, 0.1, 4000);
-    this.camera.position.set(0, 18, 32); //(x,y,z)
+    this.camera.position.set(0, 24, 32); //(x,y,z)
     this.scene.add(this.camera);
   }
 
   // 设置渲染器
   setRenderer() {
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({
+      alpha:true,
+    });
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     // this.renderer.setPixelRatio( window.devicePixelRatio );
-    this.renderer.setClearColor(0x041336);
+    // this.renderer.setClearColor(0xdddddd);
+    this.renderer.setClearAlpha(0.0);
     this.labelRenderer = new CSS2DRenderer(); //新建CSS2DRenderer
     this.labelRenderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     this.labelRenderer.domElement.style.position = 'absolute';
@@ -83,9 +86,9 @@ export default class computerAttack {
     this.controls.enableDamping = true; // 阻尼（惯性）是否启用
     this.controls.dampingFactor = 0.05; // 阻尼系数
     this.controls.screenSpacePanning = false; //定义平移时如何平移相机的位置。如果为 true，则相机在屏幕空间中平移。否则，相机会在与相机向上方向正交的平面中平移。OrbitControls 默认为 true；MapControls 为 false。
-    this.controls.minDistance = 5; //移动最小距离
-    this.controls.maxDistance = 400; //移动最大距离
-    this.controls.maxPolarAngle = Math.PI / 2; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
+    this.controls.minDistance = 2; //移动最小距离
+    this.controls.maxDistance = 300; //移动最大距离
+    this.controls.maxPolarAngle = Math.PI / 2.1 ; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
   }
 
   // 渲染
@@ -104,7 +107,6 @@ export default class computerAttack {
   // 动画
   animate() {
     // console.log(this.clock.getElapsedTime());
-    
     this.requestId = requestAnimationFrame(() => this.animate());
     this.controls.update()
     // 设置画布的大小
@@ -118,21 +120,32 @@ export default class computerAttack {
   setLight() {
     if (this.scene) {
       // 环境光
-      const ambient = new THREE.AmbientLight(0xbbbbbb, 0.1);
+      const ambient = new THREE.AmbientLight(0xffffff, 1);
       this.scene.add(ambient);
-      const directionalLight = new THREE.DirectionalLight(0x666666);
-      directionalLight.position.set(10, -50, 300);
+      const directionalLight = new THREE.DirectionalLight(0xffffff);
+      directionalLight.position.set(0, 0, 100);
       this.scene.add(directionalLight);
 
-      // const pointLight = new THREE.PointLight( 0xffffff, 1 );
-      // pointLight.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0xffffff } ) ) );
-      // pointLight.position.set(0,50,0)
-      // this.scene.add( pointLight );
+      const pointLight = new THREE.PointLight( 0xffffff, 1 );
+      // pointLight.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ) ) );
+      pointLight.position.set(-50,5,-100)
+      this.scene.add( pointLight );
+      const pointLight2 = new THREE.PointLight( 0xffffff, 1 );
+      // pointLight2.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ) ) );
+      pointLight2.position.set(50,5,-100)
+      this.scene.add( pointLight2 );
 
       // const rectLight3 = new THREE.RectAreaLight( 0xAFFFFF, 10, 50, 10 );
-      // 	rectLight3.position.set( 0, 0, 25 );
-      // 	this.scene.add( rectLight3 );
-      // 	this.scene.add( new RectAreaLightHelper( rectLight3 ) );
+      // rectLight3.position.set( 0, 0, 25 );
+      // this.scene.add( rectLight3 );
+      // this.scene.add( new RectAreaLightHelper( rectLight3 ) );
+       // 环境光
+      //  const ambient = new THREE.AmbientLight(0xbbbbbb);
+      //  this.scene.add(ambient);
+      //  const directionalLight = new THREE.DirectionalLight(0x666666);
+      //  directionalLight.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ) ) );
+      //  directionalLight.position.set(0, 20, 20);
+      //  this.scene.add(directionalLight);
     }
   }
 
@@ -151,17 +164,17 @@ export default class computerAttack {
     // Grid 添加网格辅助对象
     // const helper = new THREE.GridHelper(100, 50, 0x303030, 0x303030); //长度1000 划分为50份
     // this.scene.add(helper);
-    // const axesHelper = new THREE.AxesHelper(500); //辅助三维坐标系
-    // this.scene.add(axesHelper)
+    const axesHelper = new THREE.AxesHelper(500); //辅助三维坐标系
+    this.scene.add(axesHelper)
 
-    const rgbeLoader = new RGBELoader();
-    //资源较大，使用异步加载
-    rgbeLoader.loadAsync(`/model/home.hdr`).then((texture) => {
-      texture.mapping = THREE.EquirectangularReflectionMapping;
-      //将加载的材质texture设置给背景和环境
-      this.scene.background = texture;
-      this.scene.environment = texture;
-    });
+    // const rgbeLoader = new RGBELoader();
+    // //资源较大，使用异步加载
+    // rgbeLoader.loadAsync(`/model/home.hdr`).then((texture) => {
+    //   texture.mapping = THREE.EquirectangularReflectionMapping;
+    //   //将加载的材质texture设置给背景和环境
+    //   this.scene.background = texture;
+    //   this.scene.environment = texture;
+    // });
   }
 
   addModel() {
@@ -460,6 +473,13 @@ export default class computerAttack {
     const links = []
     const newlinks = []
     const nodes = []
+    // const loader2 = new GLTFLoader();
+    // loader2.load(`/model/class6.glb`, function (gltf: any) {
+    //   const model = gltf.scene;
+    //   // model.rotation.y = Math.PI / 2
+    //   // that.addLabel(model, 'computer', 1)
+    //   that.group.add(model)
+    // })
     res.forEach((item) => {
       const copy_id = item.id
       item.id = item.name
@@ -488,40 +508,66 @@ export default class computerAttack {
 
     // const force = d3.forceSimulation().nodes(nodes).force("link",d3.forceLink(newlinks).id(d => d.id)).force("x",d3.forceX()).force("y",d3.forceY()).force('charge',d3.forceManyBody()).stop()
     // force.tick(100)
-    const graph = ForceGraph()(document.getElementById('graph')).graphData({ nodes, links: newlinks }).warmupTicks(100)
+    const graph = ForceGraph()(document.getElementById('graph')).graphData({ nodes, links: newlinks }).warmupTicks(300)
     // console.log(nodes,newlinks);
     setTimeout(() => {
-      // const zoomNumY = 1
-      // const zoomNumX = 1
-      const zoomNumY = 4
-      const zoomNumX = 2.8
+      const zoomNumY = 1
+      const zoomNumX = 1
+      // const zoomNumY = 3.6
+      // const zoomNumX = 3
       let model = null
       let model2 = null
       const loader = new GLTFLoader();
-      loader.load(`/model/computer.glb`, function (gltf: any) {
+      loader.load(`/model/999.glb`, function (gltf: any) {
         model = gltf.scene;
         model.scale.set(2, 2, 2)
         // model.rotation
-        model.rotation.y = Math.PI / 2
+        // model.rotation.y = Math.PI / 2
         nodes.forEach((node) => {
           if (node.category === 'Host') {
-            const mc = model.clone()
-            mc.position.set(node.y / zoomNumY, 0, node.x / zoomNumX)
-            that.addLabel(mc, node.name, 1.1)
-            that.group.add(mc)
+            // const mc = model.clone()
+            // mc.information = node
+            // mc.position.set(node.y / zoomNumY + 0.2, 0.8, node.x / zoomNumX + 0.2)
+            // that.group.add(mc)
+            const mroot = model.clone()
+            mroot.position.set(node.y, 0, node.x)
+            mroot.information = node
+            const bbox = new THREE.Box3().setFromObject(mroot)
+            const cent = bbox.getCenter(new THREE.Vector3())
+            const size = bbox.getSize(new THREE.Vector3())
+            const maxAxis = Math.max(size.x, size.y, size.z)
+            mroot.scale.multiplyScalar(10.0 / maxAxis) // 模型加载为2个单位大小
+            bbox.setFromObject(mroot)
+            bbox.getCenter(cent)
+            bbox.getSize(size)
+            mroot.position.copy(cent)
+            mroot.position.y -= (size.y * 0.5);
+            that.scene.add(mroot)
+            that.addLabel(mroot, node.name, 1)
           }
         })
       });
-      loader.load(`/model/router2.glb`, function (gltf: any) {
+      loader.load(`/model/router6.glb`, function (gltf: any) {
         model2 = gltf.scene;
-        // model2.scale.set(2,2,2)
+        model2.scale.set(2,2,2)
         model2.rotation.y = Math.PI / 2
         nodes.forEach((node) => {
           if (node.category === 'Switch') {
-            const mc = model2.clone()
-            mc.position.set(node.y / zoomNumY, 1, node.x / zoomNumX)
-            that.addLabel(mc, node.name, 0.6)
-            that.group.add(mc)
+            const mroot = model2.clone()
+            mroot.position.set(node.y, 0, node.x)
+            mroot.information = node
+            const bbox = new THREE.Box3().setFromObject(mroot)
+            const cent = bbox.getCenter(new THREE.Vector3())
+            const size = bbox.getSize(new THREE.Vector3())
+            const maxAxis = Math.max(size.x, size.y, size.z)
+            mroot.scale.multiplyScalar(10.0 / maxAxis) // 模型加载为2个单位大小
+            bbox.setFromObject(mroot)
+            bbox.getCenter(cent)
+            bbox.getSize(size)
+            mroot.position.copy(cent)
+            mroot.position.y += (size.y * 0.5);
+            that.scene.add(mroot)
+            that.addLabel(mroot, node.name, 1)
           }
         })
       })
@@ -529,7 +575,7 @@ export default class computerAttack {
         this.addLine(link.source.y / zoomNumY, link.source.x / zoomNumX, link.target.y / zoomNumY, link.target.x / zoomNumX)
       })
       that.scene.add(that.group)
-    }, 0)
+    }, 100)
   }
 
   addLabel(object: THREE.Mesh, text: string, height) {
@@ -537,7 +583,7 @@ export default class computerAttack {
     div.className = "computer-box-label";
     div.textContent = text;
     const earthLabel = new CSS2DObject(div);
-    earthLabel.position.set(0, height, 0);
+    earthLabel.position.set(0, height, 1);
     object.add(earthLabel);
   }
 
@@ -584,69 +630,16 @@ export default class computerAttack {
   }
     
   addLine(x1, y1, x2, y2) {
-    const customMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        "s": {
-          type: "f",
-          value: -1.0
-        },
-        "b": {
-          type: "f",
-          value: 1.0
-        }, //bias 颜色最亮的位置
-        "p": {
-          type: "f",
-          value: 1.0
-        }, //power决定了透明度变化速度及方向。
-        glowColor: {
-          type: "c",
-          value: new THREE.Color(0x1DA9FC)
-        }
-      },
-      vertexShader: `varying vec3 vNormal;
-            varying vec3 vPositionNormal;
-            void main()
-            {
-              vNormal = normalize( normalMatrix * normal ); // 转换到视图空间
-              vPositionNormal = normalize(( modelViewMatrix * vec4(position, 1.0) ).xyz);
-              gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-            }`,
-      fragmentShader: `	uniform vec3 glowColor;
-        uniform float b;
-        uniform float p;
-        uniform float s;
-        varying vec3 vNormal;
-        varying vec3 vPositionNormal;
-        void main()
-        {
-          float a = pow( b + s * abs(dot(vNormal, vPositionNormal)), p );
-          gl_FragColor = vec4( glowColor, a );
-        }`,
-      side: THREE.FrontSide,
-      blending: THREE.AdditiveBlending,
-      // transparent: true,
-      opacity: 0.4
-    })
-
     //平滑曲线
     const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(x1, 1, y1),
-      new THREE.Vector3((x1 + x2) / 2, Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 8, (y1 + y2) / 2),
-      new THREE.Vector3(x2, 1, y2),
+      new THREE.Vector3(x1, 4, y1),
+      new THREE.Vector3((x1 + x2) / 2, Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 6, (y1 + y2) / 2),
+      new THREE.Vector3(x2, 4, y2),
     ]);
     //getPoints是基类Curve的方法，返回一个vector3对象作为元素组成的数组
     const points = curve.getPoints(50); //分段数100，返回101个顶点
-    const tubeGeometry = new THREE.TubeGeometry(curve, 1000, 0.05, 100, false); //path路径 tubularSegments分段 radius半径 radialSegments管道横截面分段 close是否闭合
+    const tubeGeometry = new THREE.TubeGeometry(curve, 1000, 0.03, 100, false); //path路径 tubularSegments分段 radius半径 radialSegments管道横截面分段 close是否闭合
     // const material6 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    const textureLoader = new THREE.TextureLoader();
-    this.texture = textureLoader.load(arrow1); //./ZS箭头.svg  ./arrow.jpg
-    // 设置阵列模式为 RepeatWrapping
-    this.texture.wrapS = THREE.RepeatWrapping
-    this.texture.wrapT = THREE.RepeatWrapping
-    this.texture.repeat.x = 2;
-    this.texture.repeat.y = 2;
-    this.texture.offset.y = 0.5;
-
     const tubeMaterial = new THREE.MeshPhongMaterial({
       map: this.texture,
       transparent: true,
@@ -654,17 +647,17 @@ export default class computerAttack {
       side: THREE.DoubleSide,
       //opacity: 0.4,
     });
-   
-    
-    const mesh = new THREE.Mesh(tubeGeometry, this.tubeMaterial2);
-    this.scene.add(mesh);
     const positions = []
     points.forEach((point) => {
       positions.push(point.x, point.y, point.z)
     })
-    // const geometry = new THREE.BufferGeometry()
     const geometry = new LineGeometry();
     geometry.setPositions(positions);
+    const mesh = new THREE.Mesh(tubeGeometry, this.tubeMaterial2);
+    this.scene.add(mesh);
+    // const geometry = new THREE.BufferGeometry()
+    // const geometry = new LineGeometry();
+    // geometry.setPositions(positions);
     // geometry.setFromPoints(points);
     // geometry.setColors(255,0,0)
     const material2 = new THREE.LineBasicMaterial({
@@ -673,8 +666,8 @@ export default class computerAttack {
       opacity: 1
     })
     const matLine = new LineMaterial({
-      color: 0x00ffff,
-      linewidth: 0.002, // in world units with size attenuation, pixels otherwise
+      color: 0x00fdf5,
+      linewidth: 0.02, // in world units with size attenuation, pixels otherwise
       vertexColors: false,
       //resolution:  // to be set by renderer, eventually
       dashed: false,
@@ -682,15 +675,19 @@ export default class computerAttack {
 
     });
     // const lineMaterial = new THREE.LineBasicMaterial({ color: '#ff0000', side: THREE.DoubleSide })
-    // const line = new THREE.Line(geometry, matLine)
-    const line = new Line2(geometry, customMaterial);
+    const line = new THREE.Line(geometry, matLine)
+    // const line = new Line2(geometry, customMaterial);
     // this.scene.add(line)
   }
 
   // 创建地板
   setFloor() {
     if (this.scene) {
-      const geometry = new THREE.BoxGeometry(100, 2, 100); //创建一个立方体几何对象Geometry
+      const radius = 150
+      // const geometry = new THREE.BoxGeometry(200, 2, 200); //创建一个立方体几何对象Geometry
+      const geometry = new THREE.CylinderGeometry( radius, radius - 0.5, 2, 180 );//圆台
+      const geometry2 = new THREE.CylinderGeometry( radius - 1, radius - 1.5, 2, 180 );//圆台
+      const geometry3 = new THREE.RingGeometry( radius - 1.5, radius -1, 180 );//圆环
       const texture = new THREE.TextureLoader().load(
         floorImg
       ); //首先，获取到纹理
@@ -699,30 +696,23 @@ export default class computerAttack {
       texture.wrapT = THREE.RepeatWrapping;
       // uv两个方向纹理重复数量
       texture.repeat.set(15, 15);
-      // 偏移效果
-      // texture.offset = new THREE.Vector2(0.5, 0.5)
-      const material1 = new THREE.MeshBasicMaterial({ map: texture })//side 镜像翻转
-      // const material1 = new THREE.MeshStandardMaterial({
-      //   roughness: 0.2,//粗糙度 0平滑镜面反射  1完全漫反射
-      //   metalness: 1 //金属度 非金属0 金属1
-      // });
+      const material1 = new THREE.MeshBasicMaterial({ map: texture, color: 0xdddddd })//贴图表面
+      const material2 = new THREE.MeshBasicMaterial({ color: 0x666666 })
 
-      // const material2 = new THREE.MeshStandardMaterial({
-      //   roughness: 0.05,//粗糙度 0平滑镜面反射  1完全漫反射
-      //   metalness: 1 //金属度 非金属0 金属1
-      // });
-      // const material2 = new THREE.MeshBasicMaterial({
-      //   color: 0x37ffed // 侧面颜色
-      // });
-      const texture2 = new THREE.Texture(this.generateTexture());
-      const cubeMaterial3 = new THREE.MeshPhongMaterial({ color: 0xccddff, envMap: texture2, refractionRatio: 0.98, reflectivity: 0.9 });
-      const cubeMaterial2 = new THREE.MeshPhongMaterial({ color: 0xccfffd, envMap: texture2, refractionRatio: 0.985 });
-      const material2 = new THREE.MeshPhongMaterial({ color: 0x000000, specular: 0x666666, emissive: 0x000000, shininess: 10, opacity: 0.1, transparent: true })
-      const material = [material2, material2, material1, material2, material2, material2]; //然后创建一个phong材质来处理着色，并传递给纹理映射
-      const cube1 = new THREE.Mesh(geometry, material); //网格模型对象Mesh
-      // cube1.material.map.repeat.set(20,20)
-      cube1.position.set(0, -2, 0)
+      const material4 = new THREE.MeshBasicMaterial({
+        color: 0x00ffff // 发光颜色
+      });
+      // const material = [material2, material2, material1, material3, material2, material2]; //然后创建一个phong材质来处理着色，并传递给纹理映射
+      const cube1 = new THREE.Mesh(geometry, [material4, material1, material2]); //网格模型对象Mesh
+      const cube2 = new THREE.Mesh(geometry2, [material4, material2, material1]); //网格模型对象Mesh
+      const cube3 = new THREE.Mesh(geometry3, material4); //网格模型对象Mesh
+      cube1.position.set(0, -1, 0)
+      cube2.position.set(0, -5, 0)
+      cube3.position.set(0, 0.1, 0)
+      cube3.rotation.x = -Math.PI / 2
       this.scene.add(cube1); //网格模型添加到场景中
+      this.scene.add(cube2); //网格模型添加到场景中
+      this.scene.add(cube3);
     }
   }
   // 创建canvas贴图
@@ -767,21 +757,59 @@ export default class computerAttack {
     mouse.x = ((event.clientX - that.dom.offsetLeft) / that.dom.offsetWidth) * 2 - 1;
     mouse.y = - ((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1;
     that.raycaster.setFromCamera(mouse, that.camera);
+    const intersects = that.raycaster.intersectObjects(that.group.children)
+    if (intersects.length > 0) {
+      that.dom.style.cursor= "pointer"
+      if(intersects[0].object) {
+        const info = that.getInfo(intersects[0].object)
+        // console.log(info);
+        if(that.selectNodeId === info.id){
+          // console.log('none');
+        }else{
+          that.selectNodeId = info.id
+          // console.log('发起请求');
+        }
+      }
+    }else{
+      that.dom.style.cursor= "default"
+    }
   }
 
   handleMouseDown(event: any) {
-    let vector = new THREE.Vector3((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1, 0.5);
+    let vector = new THREE.Vector3(((event.clientX - that.dom.offsetLeft)  / that.dom.offsetWidth) * 2 - 1, -((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1, 0.5);
     vector = vector.unproject(that.camera); // 将屏幕的坐标转换成三维场景中的坐标
     that.raycaster = new THREE.Raycaster(that.camera.position, vector.sub(that.camera.position).normalize());
     const intersects = that.raycaster.intersectObjects(that.group.children);
+    // if (that.previousObj){
+      // that.previousObj.material = new THREE.MeshPhongMaterial({ color: 0x000000, specular: 0x666666, emissive: 0x000000, shininess: 10, opacity: 1, transparent: true })
+    // }
     if (intersects.length > 0) {
-      // intersects[0].object.material = material2
+      if(intersects[0].object){
+        const info = that.getInfo(intersects[0].object)
+        console.log(info);
+      }
+    }
+  }
+
+  getInfo(obj) {
+    if(obj && obj.parent){
+      if(obj.parent.information){
+        return obj.parent.information
+      } else {
+        return that.getInfo(obj.parent)
+      }
     }
   }
 
 
   // 初始化
   async init() {
+    const textureLoader = new THREE.TextureLoader();
+    this.texture = textureLoader.load(arrow1); //./ZS箭头.svg  ./arrow.jpg
+    // 设置阵列模式为 RepeatWrapping
+    this.texture.wrapS = THREE.RepeatWrapping
+    this.texture.wrapT = THREE.RepeatWrapping
+
     // 第一步新建一个场景
     const tubeShader = {
       vertexshader: `
@@ -790,12 +818,16 @@ export default class computerAttack {
           uniform float u_len;
           attribute float u_index;
           varying vec2 vUv;
+          uniform vec3 color;
+          uniform float u_opacity;
           void main() {
             vUv = uv;
+            // vec4 v_color = vec4(color,u_opacity);
               // if( u_index < time + u_len && u_index > time){
               // }
               vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
               gl_Position = projectionMatrix * mvPosition;
+              // vertexColors = true;
           }
           `,
       fragmentshader: `
@@ -805,10 +837,12 @@ export default class computerAttack {
           uniform vec3 color;
           uniform float isTexture;
           uniform float time;
+          uniform float speed;
+          uniform float repeatX;
           void main() {
               vec4 u_color = vec4(color,u_opacity);
               // gl_FragColor = u_color * texture2D(u_map, vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y));
-              gl_FragColor = u_color * texture2D(u_map, vec2(vUv.x - time * 2.0,vUv.y));
+              gl_FragColor =u_color * texture2D(u_map, vec2(fract(vUv.x * repeatX - time*speed),vUv.y));
 
               // gl_FragColor = vec4(1.0, 1.0, 0, 1.0);
           }`
@@ -816,7 +850,7 @@ export default class computerAttack {
     this.tubeMaterial2 = new THREE.ShaderMaterial({
       uniforms:{
         color: {
-          value: new THREE.Color('red'),
+          value: new THREE.Color(0x00ffff),
           type: "v3"
         },
         time: {
@@ -831,12 +865,20 @@ export default class computerAttack {
           value: this.texture,
           type: "t2"
         },
+        repeatX: {
+          value: 5.0,
+          type: "f"
+        },
+        speed: {
+          value: 1.0,
+          type: "f"
+        },
         u_opacity: {
           value: 1.0,
           type: "f"
+        },
       },
-      },
-      // transparent: true,
+      transparent: true,
       // depthTest: false,
       vertexShader: tubeShader.vertexshader,
       fragmentShader: tubeShader.fragmentshader
