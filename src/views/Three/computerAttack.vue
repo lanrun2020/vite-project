@@ -38,9 +38,9 @@ const init = () => {
 }
 .computer-box-label{
   color: rgb(0, 255, 255);
-  width: 100px;
+  width: 80px;
   font-size: 14px;
-  padding: 15px;
+  padding: 10px;
   background: url('@/assets/msg-bg.png') no-repeat;
   background-size: cover;
 }

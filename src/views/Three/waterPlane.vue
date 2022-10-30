@@ -143,7 +143,7 @@ const animate = () => {
 
   requestAnimationFrame(animate);
   render();
-  stats.update();
+  // stats.update();
 
 }
 

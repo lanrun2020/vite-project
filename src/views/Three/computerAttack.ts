@@ -18,7 +18,7 @@ import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import pointPng from '@/assets/point.png';
-import arrow1 from '@/assets/666.png';
+import arrow1 from '@/assets/arrow7.png';
 const THREE = T
 let that: any
 export default class computerAttack {
@@ -52,7 +52,7 @@ export default class computerAttack {
   }
   // 设置透视相机
   setCamera() {
-    this.camera = new THREE.PerspectiveCamera(50, this.dom.offsetWidth / this.dom.offsetHeight, 0.1, 4000);
+    this.camera = new THREE.PerspectiveCamera(50, this.dom.offsetWidth / this.dom.offsetHeight, 1, 4000);
     this.camera.position.set(0, 24, 32); //(x,y,z)
     this.scene.add(this.camera);
   }
@@ -518,9 +518,9 @@ export default class computerAttack {
       let model = null
       let model2 = null
       const loader = new GLTFLoader();
-      loader.load(`/model/999.glb`, function (gltf: any) {
+      loader.load(`/model/hostN.glb`, function (gltf: any) {
         model = gltf.scene;
-        model.scale.set(2, 2, 2)
+        // model.scale.set(2, 2, 2)
         // model.rotation
         // model.rotation.y = Math.PI / 2
         nodes.forEach((node) => {
@@ -530,48 +530,49 @@ export default class computerAttack {
             // mc.position.set(node.y / zoomNumY + 0.2, 0.8, node.x / zoomNumX + 0.2)
             // that.group.add(mc)
             const mroot = model.clone()
-            mroot.position.set(node.y, 0, node.x)
             mroot.information = node
             const bbox = new THREE.Box3().setFromObject(mroot)
             const cent = bbox.getCenter(new THREE.Vector3())
             const size = bbox.getSize(new THREE.Vector3())
             const maxAxis = Math.max(size.x, size.y, size.z)
-            mroot.scale.multiplyScalar(10.0 / maxAxis) // 模型加载为2个单位大小
+            mroot.scale.multiplyScalar(10.0 / maxAxis) // 模型加载为10个单位大小
             bbox.setFromObject(mroot)
             bbox.getCenter(cent)
             bbox.getSize(size)
-            mroot.position.copy(cent)
-            mroot.position.y -= (size.y * 0.5);
+            mroot.position.copy(cent).multiplyScalar(-1)
+            mroot.position.y += (size.y * 0.5);
+            mroot.position.x = node.y //因为布局位置做了参数交换，界面展示更好看
+            mroot.position.z = node.x
             that.scene.add(mroot)
-            that.addLabel(mroot, node.name, 1)
+            that.addLabel(mroot, node.name, size.y)
           }
         })
       });
-      loader.load(`/model/router6.glb`, function (gltf: any) {
+      loader.load(`/model/routerN.glb`, function (gltf: any) {
         model2 = gltf.scene;
         model2.scale.set(2,2,2)
-        model2.rotation.y = Math.PI / 2
         nodes.forEach((node) => {
           if (node.category === 'Switch') {
             const mroot = model2.clone()
-            mroot.position.set(node.y, 0, node.x)
             mroot.information = node
             const bbox = new THREE.Box3().setFromObject(mroot)
             const cent = bbox.getCenter(new THREE.Vector3())
             const size = bbox.getSize(new THREE.Vector3())
             const maxAxis = Math.max(size.x, size.y, size.z)
-            mroot.scale.multiplyScalar(10.0 / maxAxis) // 模型加载为2个单位大小
+            mroot.scale.multiplyScalar(10.0 / maxAxis)
             bbox.setFromObject(mroot)
             bbox.getCenter(cent)
             bbox.getSize(size)
-            mroot.position.copy(cent)
+            mroot.position.copy(cent).multiplyScalar(-1)
             mroot.position.y += (size.y * 0.5);
+            mroot.position.x = node.y //因为布局位置做了参数交换，界面展示更好看
+            mroot.position.z = node.x
             that.scene.add(mroot)
-            that.addLabel(mroot, node.name, 1)
+            that.addLabel(mroot, node.name, size.y)
           }
         })
       })
-      newlinks.forEach((link,index) => {
+      newlinks.forEach((link) => {
         this.addLine(link.source.y / zoomNumY, link.source.x / zoomNumX, link.target.y / zoomNumY, link.target.x / zoomNumX)
       })
       that.scene.add(that.group)
@@ -583,7 +584,7 @@ export default class computerAttack {
     div.className = "computer-box-label";
     div.textContent = text;
     const earthLabel = new CSS2DObject(div);
-    earthLabel.position.set(0, height, 1);
+    earthLabel.position.set(5, height, 0);
     object.add(earthLabel);
   }
 
@@ -632,13 +633,13 @@ export default class computerAttack {
   addLine(x1, y1, x2, y2) {
     //平滑曲线
     const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(x1, 4, y1),
-      new THREE.Vector3((x1 + x2) / 2, Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 6, (y1 + y2) / 2),
-      new THREE.Vector3(x2, 4, y2),
+      new THREE.Vector3(x1, 0.5, y1),
+      new THREE.Vector3((x1 + x2) / 2, Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 10, (y1 + y2) / 2),
+      new THREE.Vector3(x2, 0.5, y2),
     ]);
     //getPoints是基类Curve的方法，返回一个vector3对象作为元素组成的数组
     const points = curve.getPoints(50); //分段数100，返回101个顶点
-    const tubeGeometry = new THREE.TubeGeometry(curve, 1000, 0.03, 100, false); //path路径 tubularSegments分段 radius半径 radialSegments管道横截面分段 close是否闭合
+    const tubeGeometry = new THREE.TubeGeometry(curve, 1000, 0.05, 100, false); //path路径 tubularSegments分段 radius半径 radialSegments管道横截面分段 close是否闭合
     // const material6 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
     const tubeMaterial = new THREE.MeshPhongMaterial({
       map: this.texture,
@@ -667,7 +668,7 @@ export default class computerAttack {
     })
     const matLine = new LineMaterial({
       color: 0x00fdf5,
-      linewidth: 0.02, // in world units with size attenuation, pixels otherwise
+      linewidth: 0.1, // in world units with size attenuation, pixels otherwise
       vertexColors: false,
       //resolution:  // to be set by renderer, eventually
       dashed: false,
@@ -888,11 +889,11 @@ export default class computerAttack {
     this.setCamera();
     this.setLight();
     this.setControls();
+    this.setFloor();
     this.addModel();
     // this.addLine();
     // this.addFlyline();
     // this.addFlyline2();
-    this.setFloor();
     this.animate();
     window.addEventListener('resize', this.onWindowResize);
     this.dom.addEventListener('mousemove', this.handleMousemove, false)
