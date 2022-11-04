@@ -71,24 +71,24 @@ export default class computerAttack {
     this.labelRenderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     this.labelRenderer.domElement.style.position = 'absolute';
     this.labelRenderer.domElement.style.top = '0';
+    this.labelRenderer.domElement.style.pointerEvents = 'none';
     this.dom.appendChild(this.labelRenderer.domElement);
 
     // 将呈现器的输出添加到HTML元素
-    this.dom.appendChild(this.renderer.domElement);
     this.dom.appendChild(this.renderer.domElement);
   }
 
   // 设置控制器
   setControls() {
-    this.controls = new OrbitControls(this.camera, this.labelRenderer.domElement) //轨道控制器
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement) //轨道控制器
     this.transformControls = new TransformControls(this.camera, this.renderer.domElement)
     this.controls.update();
     this.controls.enableDamping = true; // 阻尼（惯性）是否启用
     this.controls.dampingFactor = 0.05; // 阻尼系数
     this.controls.screenSpacePanning = false; //定义平移时如何平移相机的位置。如果为 true，则相机在屏幕空间中平移。否则，相机会在与相机向上方向正交的平面中平移。OrbitControls 默认为 true；MapControls 为 false。
     this.controls.minDistance = 2; //移动最小距离
-    this.controls.maxDistance = 300; //移动最大距离
-    this.controls.maxPolarAngle = Math.PI / 2.1 ; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
+    this.controls.maxDistance = 2300; //移动最大距离
+    this.controls.maxPolarAngle = Math.PI ; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
   }
 
   // 渲染
@@ -470,6 +470,25 @@ export default class computerAttack {
         "x_coordinates": 40
       }
     ]
+    const arr = new Array(50).fill('').map((item,index)=>{
+      return {
+          "default_gateway": "192.168.2.9",
+          "role": "instance",
+          "os": "linux",
+          "emulation": "kvm",
+          "ip": "2390|192.168.0.66,2391|192.168.8.40",
+          "to_node": "6789",
+          "netmask": "255.255.255.0",
+          "name": "9527"+index,
+          "y_coordinates": -12.99999999999784,
+          "id": 9527+index,
+          "category": "Host",
+          "cpuCount": 2,
+          "x_coordinates": -99.9999999999966,
+          "ram": 1024
+        }
+    })
+    res.push(...arr)
     const links = []
     const newlinks = []
     const nodes = []
@@ -508,7 +527,8 @@ export default class computerAttack {
 
     // const force = d3.forceSimulation().nodes(nodes).force("link",d3.forceLink(newlinks).id(d => d.id)).force("x",d3.forceX()).force("y",d3.forceY()).force('charge',d3.forceManyBody()).stop()
     // force.tick(100)
-    const graph = ForceGraph()(document.getElementById('graph')).graphData({ nodes, links: newlinks }).warmupTicks(300)
+    const graph = ForceGraph()(document.getElementById('graph')).graphData({ nodes, links: newlinks }).warmupTicks(300).d3Force('charge',d3.forceManyBody()) //只使用tick300次布局，以减少布局时长
+    console.log(graph);
     // console.log(nodes,newlinks);
     setTimeout(() => {
       const zoomNumY = 1
@@ -535,22 +555,23 @@ export default class computerAttack {
             const cent = bbox.getCenter(new THREE.Vector3())
             const size = bbox.getSize(new THREE.Vector3())
             const maxAxis = Math.max(size.x, size.y, size.z)
-            mroot.scale.multiplyScalar(10.0 / maxAxis) // 模型加载为10个单位大小
+            const scale = 1
+            mroot.scale.multiplyScalar(10.0 * scale / maxAxis) // 模型加载为10个单位大小
             bbox.setFromObject(mroot)
             bbox.getCenter(cent)
             bbox.getSize(size)
             mroot.position.copy(cent).multiplyScalar(-1)
-            mroot.position.y += (size.y * 0.5);
+            mroot.position.y += (size.y * 0.5); //高度
             mroot.position.x = node.y //因为布局位置做了参数交换，界面展示更好看
             mroot.position.z = node.x
             that.scene.add(mroot)
-            that.addLabel(mroot, node.name, size.y)
+            that.group.add(mroot)
+            that.addLabel(mroot, node.name, size.y/scale, size.x)
           }
         })
       });
       loader.load(`/model/routerN.glb`, function (gltf: any) {
         model2 = gltf.scene;
-        model2.scale.set(2,2,2)
         nodes.forEach((node) => {
           if (node.category === 'Switch') {
             const mroot = model2.clone()
@@ -568,7 +589,8 @@ export default class computerAttack {
             mroot.position.x = node.y //因为布局位置做了参数交换，界面展示更好看
             mroot.position.z = node.x
             that.scene.add(mroot)
-            that.addLabel(mroot, node.name, size.y)
+            that.group.add(mroot)
+            that.addLabel(mroot, node.name, size.y, size.x)
           }
         })
       })
@@ -579,12 +601,18 @@ export default class computerAttack {
     }, 100)
   }
 
-  addLabel(object: THREE.Mesh, text: string, height) {
+  addLabel(object: THREE.Mesh, text: string, height,offsetX) {
     const div = document.createElement("div");
     div.className = "computer-box-label";
+    div.style.cursor= "pointer";
+    div.style.pointerEvents = 'auto';
+    div.addEventListener('click',(event:any)=>{
+      console.log('点击了标签',text);
+      event.stopPropagation() // 阻止事件冒泡
+    })
     div.textContent = text;
     const earthLabel = new CSS2DObject(div);
-    earthLabel.position.set(5, height, 0);
+    earthLabel.position.set(0, height, 0);
     object.add(earthLabel);
   }
 
@@ -629,7 +657,6 @@ export default class computerAttack {
     });
     this.scene.add(flyMesh);
   }
-    
   addLine(x1, y1, x2, y2) {
     //平滑曲线
     const curve = new THREE.CatmullRomCurve3([
@@ -716,33 +743,6 @@ export default class computerAttack {
       this.scene.add(cube3);
     }
   }
-  // 创建canvas贴图
-  generateTexture() {
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 256;
-    const context = canvas.getContext('2d')!;
-    const image = context.getImageData(0, 0, 256, 256);
-
-    let x = 0, y = 0;
-
-    for (let i = 0, j = 0, l = image.data.length; i < l; i += 4, j++) {
-
-      x = j % 256;
-      y = (x === 0) ? y + 1 : y;
-
-      image.data[i] = 255;
-      image.data[i + 1] = 255;
-      image.data[i + 2] = 255;
-      image.data[i + 3] = Math.floor(x ^ y);
-
-    }
-    context.putImageData(image, 0, 0);
-    // this.dom.appendChild(canvas)
-    return canvas;
-
-  }
 
   // 停止渲染
   stop() {
@@ -764,11 +764,11 @@ export default class computerAttack {
       if(intersects[0].object) {
         const info = that.getInfo(intersects[0].object)
         // console.log(info);
-        if(that.selectNodeId === info.id){
+        if(that.selectNodeId === info.id){ //与上次覆盖节点相同，将不会发起请求
           // console.log('none');
-        }else{
+        } else {
           that.selectNodeId = info.id
-          // console.log('发起请求');
+          console.log('发起请求',info.id);
         }
       }
     }else{
@@ -787,7 +787,7 @@ export default class computerAttack {
     if (intersects.length > 0) {
       if(intersects[0].object){
         const info = that.getInfo(intersects[0].object)
-        console.log(info);
+        console.log('点击了节点：',info.id);
       }
     }
   }
@@ -889,7 +889,7 @@ export default class computerAttack {
     this.setCamera();
     this.setLight();
     this.setControls();
-    this.setFloor();
+    // this.setFloor();
     this.addModel();
     // this.addLine();
     // this.addFlyline();

@@ -14,6 +14,8 @@ export const addStaticRadar = (viewer: any, active: boolean) => {
       model: {
         uri: `/model/radar_static.gltf`,
         scale: 0.01,
+        // scale: 150,
+        minimumPixelSize: 60,
       },
     });
     viewer.flyTo(model)
