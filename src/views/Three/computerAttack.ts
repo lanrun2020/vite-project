@@ -40,6 +40,7 @@ export default class computerAttack {
   private flyManager: InitFlyLine
   private texture: any
   private selectNodeId:null
+  private radius: 1000
   constructor(dom: HTMLElement) {
     this.clock = new THREE.Clock()
     that = this
@@ -178,7 +179,7 @@ export default class computerAttack {
   }
 
   addModel() {
-    const res = [
+    let res = [
       {
         "default_gateway": "192.168.0.1",
         "role": "instance",
@@ -470,14 +471,14 @@ export default class computerAttack {
         "x_coordinates": 40
       }
     ]
-    const arr = new Array(50).fill('').map((item,index)=>{
+    const arr = new Array(10).fill('').map((item,index)=>{
       return {
           "default_gateway": "192.168.2.9",
           "role": "instance",
           "os": "linux",
           "emulation": "kvm",
           "ip": "2390|192.168.0.66,2391|192.168.8.40",
-          "to_node": "6789",
+          "to_node": "40网段",
           "netmask": "255.255.255.0",
           "name": "9527"+index,
           "y_coordinates": -12.99999999999784,
@@ -488,7 +489,26 @@ export default class computerAttack {
           "ram": 1024
         }
     })
-    res.push(...arr)
+    // const arr2 = new Array(10).fill('').map((item,index)=>{
+    //   return {
+    //       "default_gateway": "192.168.2.9",
+    //       "role": "instance",
+    //       "os": "linux",
+    //       "emulation": "kvm",
+    //       "ip": "2390|192.168.0.66,2391|192.168.8.40",
+    //       "to_node": "30网段",
+    //       "netmask": "255.255.255.0",
+    //       "name": "9527"+index,
+    //       "y_coordinates": -12.99999999999784,
+    //       "id": 9527+index,
+    //       "category": "Host",
+    //       "cpuCount": 2,
+    //       "x_coordinates": -99.9999999999966,
+    //       "ram": 1024
+    //     }
+    // })
+    // res.push(...arr)
+    
     const links = []
     const newlinks = []
     const nodes = []
@@ -528,17 +548,14 @@ export default class computerAttack {
     // const force = d3.forceSimulation().nodes(nodes).force("link",d3.forceLink(newlinks).id(d => d.id)).force("x",d3.forceX()).force("y",d3.forceY()).force('charge',d3.forceManyBody()).stop()
     // force.tick(100)
     const graph = ForceGraph()(document.getElementById('graph')).graphData({ nodes, links: newlinks }).warmupTicks(300).d3Force('charge',d3.forceManyBody()) //只使用tick300次布局，以减少布局时长
-    console.log(graph);
     // console.log(nodes,newlinks);
     setTimeout(() => {
-      const zoomNumY = 1
-      const zoomNumX = 1
-      // const zoomNumY = 3.6
-      // const zoomNumX = 3
+      const {x,y} = graph.graph2ScreenCoords(0,0)
+      this.radius = x < y ? x/8 : y/8
       let model = null
       let model2 = null
       const loader = new GLTFLoader();
-      loader.load(`/model/hostN.glb`, function (gltf: any) {
+      loader.load(`/model/XM.glb`, function (gltf: any) {
         model = gltf.scene;
         // model.scale.set(2, 2, 2)
         // model.rotation
@@ -555,18 +572,18 @@ export default class computerAttack {
             const cent = bbox.getCenter(new THREE.Vector3())
             const size = bbox.getSize(new THREE.Vector3())
             const maxAxis = Math.max(size.x, size.y, size.z)
-            const scale = 1
-            mroot.scale.multiplyScalar(10.0 * scale / maxAxis) // 模型加载为10个单位大小
+            const Scalar = 10 / maxAxis // 模型加载为10个单位大小,模型加载标量大小
+            mroot.scale.multiplyScalar(Scalar) // 模型加载为10个单位大小
             bbox.setFromObject(mroot)
             bbox.getCenter(cent)
             bbox.getSize(size)
             mroot.position.copy(cent).multiplyScalar(-1)
             mroot.position.y += (size.y * 0.5); //高度
-            mroot.position.x = node.y //因为布局位置做了参数交换，界面展示更好看
+            mroot.position.x = node.y//因为布局位置做了参数交换，界面展示更好看
             mroot.position.z = node.x
             that.scene.add(mroot)
             that.group.add(mroot)
-            that.addLabel(mroot, node.name, size.y/scale, size.x)
+            that.addLabel(mroot, node.name, size.y / Scalar, size.x)
           }
         })
       });
@@ -580,28 +597,29 @@ export default class computerAttack {
             const cent = bbox.getCenter(new THREE.Vector3())
             const size = bbox.getSize(new THREE.Vector3())
             const maxAxis = Math.max(size.x, size.y, size.z)
-            mroot.scale.multiplyScalar(10.0 / maxAxis)
+            const Scalar = 10 / maxAxis // 模型加载为10个单位大小,模型加载标量大小
+            mroot.scale.multiplyScalar(Scalar) // 模型加载为10个单位大小
             bbox.setFromObject(mroot)
             bbox.getCenter(cent)
             bbox.getSize(size)
             mroot.position.copy(cent).multiplyScalar(-1)
             mroot.position.y += (size.y * 0.5);
-            mroot.position.x = node.y //因为布局位置做了参数交换，界面展示更好看
+            mroot.position.x = node.y//因为布局位置做了参数交换，界面展示更好看
             mroot.position.z = node.x
             that.scene.add(mroot)
             that.group.add(mroot)
-            that.addLabel(mroot, node.name, size.y, size.x)
+            that.addLabel(mroot, node.name, size.y / Scalar, size.x)
           }
         })
       })
       newlinks.forEach((link) => {
-        this.addLine(link.source.y / zoomNumY, link.source.x / zoomNumX, link.target.y / zoomNumY, link.target.x / zoomNumX)
+        this.addLine(link.source.y , link.source.x , link.target.y , link.target.x )
       })
       that.scene.add(that.group)
-    }, 100)
+    }, 200)
   }
 
-  addLabel(object: THREE.Mesh, text: string, height,offsetX) {
+  addLabel(object: THREE.Mesh, text: string, height) {
     const div = document.createElement("div");
     div.className = "computer-box-label";
     div.style.cursor= "pointer";
@@ -711,7 +729,7 @@ export default class computerAttack {
   // 创建地板
   setFloor() {
     if (this.scene) {
-      const radius = 150
+      const radius = 1000
       // const geometry = new THREE.BoxGeometry(200, 2, 200); //创建一个立方体几何对象Geometry
       const geometry = new THREE.CylinderGeometry( radius, radius - 0.5, 2, 180 );//圆台
       const geometry2 = new THREE.CylinderGeometry( radius - 1, radius - 1.5, 2, 180 );//圆台
@@ -787,7 +805,7 @@ export default class computerAttack {
     if (intersects.length > 0) {
       if(intersects[0].object){
         const info = that.getInfo(intersects[0].object)
-        console.log('点击了节点：',info.id);
+        console.log('点击了节点：',info);
       }
     }
   }
@@ -889,12 +907,13 @@ export default class computerAttack {
     this.setCamera();
     this.setLight();
     this.setControls();
-    // this.setFloor();
     this.addModel();
     // this.addLine();
     // this.addFlyline();
     // this.addFlyline2();
     this.animate();
+    // this.setFloor();
+
     window.addEventListener('resize', this.onWindowResize);
     this.dom.addEventListener('mousemove', this.handleMousemove, false)
     this.dom.addEventListener('click', this.handleMouseDown, false);
