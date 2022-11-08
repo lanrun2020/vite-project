@@ -6,6 +6,7 @@ import ForceGraph from 'force-graph';
 import floorImg from '../../assets/floor5.jpeg'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import {
   CSS2DRenderer,
@@ -13,12 +14,13 @@ import {
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js"
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { InitFlyLine } from "@/utils/flyLine";
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import pointPng from '@/assets/point.png';
-import arrow1 from '@/assets/arrow7.png';
+import arrow1 from '@/assets/arrow5.png';
 const THREE = T
 let that: any
 export default class computerAttack {
@@ -28,6 +30,7 @@ export default class computerAttack {
   private renderer!: THREE.WebGLRenderer
   private raycaster
   private group = new THREE.Group()
+  private lineGroup = new THREE.Group()
   private labelRenderer: any
   private tubeMaterial2: any
   private beIntersectObject = []
@@ -41,6 +44,8 @@ export default class computerAttack {
   private texture: any
   private selectNodeId:null
   private radius: 1000
+  private dragV3: THREE.Vector3
+  private PModel: any
   constructor(dom: HTMLElement) {
     this.clock = new THREE.Clock()
     that = this
@@ -53,8 +58,8 @@ export default class computerAttack {
   }
   // 设置透视相机
   setCamera() {
-    this.camera = new THREE.PerspectiveCamera(50, this.dom.offsetWidth / this.dom.offsetHeight, 1, 4000);
-    this.camera.position.set(0, 24, 32); //(x,y,z)
+    this.camera = new THREE.PerspectiveCamera(50, this.dom.offsetWidth / this.dom.offsetHeight, 1, 4000); //near值设置为1,值太小模型材质会出现闪烁
+    this.camera.position.set(0, 60, 100); //(x,y,z)
     this.scene.add(this.camera);
   }
 
@@ -83,11 +88,54 @@ export default class computerAttack {
   setControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement) //轨道控制器
     this.transformControls = new TransformControls(this.camera, this.renderer.domElement)
+    this.scene.add(this.transformControls);
+    this.transformControls.addEventListener('mouseDown', () => {
+      // 平移开始时禁用相机控件
+      this.controls.enabled = false;
+    });
+    this.transformControls.addEventListener('change', () => {
+      // 如果界面显示性能不好，则在模型移动完成后（mouseUp事件）调用以下代码
+      // 更新模型位置，移除相关连线
+      const res = this.lineGroup.children.filter((line)=>{
+        return line.sourceId === this.PModel.information.id
+      })
+      const res2 = this.lineGroup.children.filter((line)=>{
+        return line.targetId === this.PModel.information.id
+      })
+      res.forEach((line)=>{
+        this.lineGroup.remove(line) // 移除原来的线
+        this.addLine(this.PModel.position.x,this.PModel.position.z,line.targetX,line.targetY,line.sourceId,line.targetId) // 添加新的连线
+      })
+      res2.forEach((line)=>{
+        this.lineGroup.remove(line)
+        this.addLine(line.sourceX,line.sourceY,this.PModel.position.x,this.PModel.position.z,line.sourceId,line.targetId)
+      })
+    });
+    this.transformControls.addEventListener('mouseUp', () => {
+      // 平移结束时启用相机控件
+      this.controls.enabled = true;
+      // // 更新模型位置，移除相关连线
+      // const res = this.lineGroup.children.filter((line)=>{
+      //   return line.sourceId === this.PModel.information.id
+      // })
+      // const res2 = this.lineGroup.children.filter((line)=>{
+      //   return line.targetId === this.PModel.information.id
+      // })
+      // res.forEach((line)=>{
+      //   this.lineGroup.remove(line) // 移除原来的线
+      //   this.addLine(this.PModel.position.x,this.PModel.position.z,line.targetX,line.targetY,line.sourceId,line.targetId) // 添加新的连线
+      // })
+      // res2.forEach((line)=>{
+      //   this.lineGroup.remove(line)
+      //   this.addLine(line.sourceX,line.sourceY,this.PModel.position.x,this.PModel.position.z,line.sourceId,line.targetId)
+      // })
+    });
+    // 指定某个对象绑定到transformControls上，比如点击物体时可将物体绑定
     this.controls.update();
     this.controls.enableDamping = true; // 阻尼（惯性）是否启用
     this.controls.dampingFactor = 0.05; // 阻尼系数
     this.controls.screenSpacePanning = false; //定义平移时如何平移相机的位置。如果为 true，则相机在屏幕空间中平移。否则，相机会在与相机向上方向正交的平面中平移。OrbitControls 默认为 true；MapControls 为 false。
-    this.controls.minDistance = 2; //移动最小距离
+    this.controls.minDistance = 0; //移动最小距离
     this.controls.maxDistance = 2300; //移动最大距离
     this.controls.maxPolarAngle = Math.PI ; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
   }
@@ -111,7 +159,7 @@ export default class computerAttack {
     this.requestId = requestAnimationFrame(() => this.animate());
     this.controls.update()
     // 设置画布的大小
-    this.flyManager.animation()
+    // this.flyManager.animation()
     // this.time = this.clock.getElapsedTime()
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     this.render();
@@ -166,7 +214,7 @@ export default class computerAttack {
     // const helper = new THREE.GridHelper(100, 50, 0x303030, 0x303030); //长度1000 划分为50份
     // this.scene.add(helper);
     const axesHelper = new THREE.AxesHelper(500); //辅助三维坐标系
-    this.scene.add(axesHelper)
+    // this.scene.add(axesHelper)
 
     // const rgbeLoader = new RGBELoader();
     // //资源较大，使用异步加载
@@ -179,7 +227,14 @@ export default class computerAttack {
   }
 
   addModel() {
-    let res = [
+    const options = [{
+      type:'Host',
+      url:`/model/XM.glb`
+    },{
+      type:'Switch',
+      url:`/model/routerN.glb`
+    }]
+    const res = [
       {
         "default_gateway": "192.168.0.1",
         "role": "instance",
@@ -471,7 +526,7 @@ export default class computerAttack {
         "x_coordinates": 40
       }
     ]
-    const arr = new Array(10).fill('').map((item,index)=>{
+    const arr = new Array(5).fill('').map((item,index)=>{
       return {
           "default_gateway": "192.168.2.9",
           "role": "instance",
@@ -489,26 +544,26 @@ export default class computerAttack {
           "ram": 1024
         }
     })
-    // const arr2 = new Array(10).fill('').map((item,index)=>{
-    //   return {
-    //       "default_gateway": "192.168.2.9",
-    //       "role": "instance",
-    //       "os": "linux",
-    //       "emulation": "kvm",
-    //       "ip": "2390|192.168.0.66,2391|192.168.8.40",
-    //       "to_node": "30网段",
-    //       "netmask": "255.255.255.0",
-    //       "name": "9527"+index,
-    //       "y_coordinates": -12.99999999999784,
-    //       "id": 9527+index,
-    //       "category": "Host",
-    //       "cpuCount": 2,
-    //       "x_coordinates": -99.9999999999966,
-    //       "ram": 1024
-    //     }
-    // })
+    const arr2 = new Array(5).fill('').map((item,index)=>{
+      return {
+          "default_gateway": "192.168.2.9",
+          "role": "instance",
+          "os": "linux",
+          "emulation": "kvm",
+          "ip": "2390|192.168.0.66,2391|192.168.8.40",
+          "to_node": "8网段",
+          "netmask": "255.255.255.0",
+          "name": "9527"+index,
+          "y_coordinates": -12.99999999999784,
+          "id": 9527+index,
+          "category": "Host",
+          "cpuCount": 2,
+          "x_coordinates": -99.9999999999966,
+          "ram": 1024
+        }
+    })
+    // res.push(...arr2)
     // res.push(...arr)
-    
     const links = []
     const newlinks = []
     const nodes = []
@@ -547,76 +602,65 @@ export default class computerAttack {
 
     // const force = d3.forceSimulation().nodes(nodes).force("link",d3.forceLink(newlinks).id(d => d.id)).force("x",d3.forceX()).force("y",d3.forceY()).force('charge',d3.forceManyBody()).stop()
     // force.tick(100)
-    const graph = ForceGraph()(document.getElementById('graph')).graphData({ nodes, links: newlinks }).warmupTicks(300).d3Force('charge',d3.forceManyBody()) //只使用tick300次布局，以减少布局时长
+    const graph = ForceGraph()(document.getElementById('graph')).graphData({ nodes, links: newlinks }).warmupTicks(300) //只使用tick300次布局，以减少布局时长
     // console.log(nodes,newlinks);
     setTimeout(() => {
-      const {x,y} = graph.graph2ScreenCoords(0,0)
-      this.radius = x < y ? x/8 : y/8
-      let model = null
-      let model2 = null
       const loader = new GLTFLoader();
-      loader.load(`/model/XM.glb`, function (gltf: any) {
-        model = gltf.scene;
-        // model.scale.set(2, 2, 2)
-        // model.rotation
-        // model.rotation.y = Math.PI / 2
-        nodes.forEach((node) => {
-          if (node.category === 'Host') {
-            // const mc = model.clone()
-            // mc.information = node
-            // mc.position.set(node.y / zoomNumY + 0.2, 0.8, node.x / zoomNumX + 0.2)
-            // that.group.add(mc)
-            const mroot = model.clone()
-            mroot.information = node
-            const bbox = new THREE.Box3().setFromObject(mroot)
-            const cent = bbox.getCenter(new THREE.Vector3())
-            const size = bbox.getSize(new THREE.Vector3())
-            const maxAxis = Math.max(size.x, size.y, size.z)
-            const Scalar = 10 / maxAxis // 模型加载为10个单位大小,模型加载标量大小
-            mroot.scale.multiplyScalar(Scalar) // 模型加载为10个单位大小
-            bbox.setFromObject(mroot)
-            bbox.getCenter(cent)
-            bbox.getSize(size)
-            mroot.position.copy(cent).multiplyScalar(-1)
-            mroot.position.y += (size.y * 0.5); //高度
-            mroot.position.x = node.y//因为布局位置做了参数交换，界面展示更好看
-            mroot.position.z = node.x
-            that.scene.add(mroot)
-            that.group.add(mroot)
-            that.addLabel(mroot, node.name, size.y / Scalar, size.x)
-          }
+      // const loader = new FBXLoader()
+      nodes.forEach((node)=>{
+        const {url} = options.find((opt)=>{
+          return opt.type === node.category
         })
-      });
-      loader.load(`/model/routerN.glb`, function (gltf: any) {
-        model2 = gltf.scene;
-        nodes.forEach((node) => {
-          if (node.category === 'Switch') {
-            const mroot = model2.clone()
-            mroot.information = node
-            const bbox = new THREE.Box3().setFromObject(mroot)
-            const cent = bbox.getCenter(new THREE.Vector3())
-            const size = bbox.getSize(new THREE.Vector3())
-            const maxAxis = Math.max(size.x, size.y, size.z)
-            const Scalar = 10 / maxAxis // 模型加载为10个单位大小,模型加载标量大小
-            mroot.scale.multiplyScalar(Scalar) // 模型加载为10个单位大小
-            bbox.setFromObject(mroot)
-            bbox.getCenter(cent)
-            bbox.getSize(size)
-            mroot.position.copy(cent).multiplyScalar(-1)
-            mroot.position.y += (size.y * 0.5);
-            mroot.position.x = node.y//因为布局位置做了参数交换，界面展示更好看
-            mroot.position.z = node.x
-            that.scene.add(mroot)
-            that.group.add(mroot)
-            that.addLabel(mroot, node.name, size.y / Scalar, size.x)
-          }
+        loader.load(url, (gltf) => {
+          const mroot = gltf.scene
+          mroot.information = node
+          const bbox = new THREE.Box3().setFromObject(mroot)
+          const cent = bbox.getCenter(new THREE.Vector3())
+          const size = bbox.getSize(new THREE.Vector3())
+          const maxAxis = Math.max(size.x, size.y, size.z)
+          const Scalar = 10 / maxAxis // 模型加载为10个单位大小,模型加载标量大小
+          mroot.scale.multiplyScalar(Scalar) // 模型加载为10个单位大小
+          bbox.setFromObject(mroot)
+          bbox.getCenter(cent)
+          bbox.getSize(size)
+          mroot.position.copy(cent).multiplyScalar(-1)
+          mroot.position.y += (size.y * 0.5); //高度
+          mroot.position.x = node.y//因为布局位置做了参数交换，界面展示更好看
+          mroot.position.z = node.x
+          that.group.add(mroot)
+          const boxGeometry = new THREE.BoxGeometry(...size)
+          const material = new THREE.MeshBasicMaterial({ color: 0xfff, transparent: true, opacity: 0.1 })
+          const cube1 = new THREE.Mesh(boxGeometry, material)
+          cube1.position.copy(mroot.position)
+          cube1.position.y += size.y * 0.5
+          that.addLabel(mroot, node.name, size.y / Scalar, size.x)
         })
       })
       newlinks.forEach((link) => {
-        this.addLine(link.source.y , link.source.x , link.target.y , link.target.x )
+        this.addLine(link.source.y , link.source.x , link.target.y , link.target.x ,link.source.id,link.target.id)
       })
       that.scene.add(that.group)
+      that.scene.add(that.lineGroup)
+      this.setFloor(150)
     }, 200)
+  }
+
+  addLine(x1, y1, x2, y2, sourceId,targetId) {
+    //平滑曲线
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(x1, 0.5, y1),
+      new THREE.Vector3((x1 + x2) / 2, Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 10, (y1 + y2) / 2),
+      new THREE.Vector3(x2, 0.5, y2),
+    ]);
+    const tubeGeometry = new THREE.TubeGeometry(curve, 50, 0.05, 10, false); //path路径 tubularSegments分段 radius半径 radialSegments管道横截面分段 close是否闭合
+    const mesh = new THREE.Mesh(tubeGeometry, this.tubeMaterial2);
+    mesh.sourceId = sourceId
+    mesh.targetId = targetId
+    mesh.sourceX = x1
+    mesh.sourceY = y1
+    mesh.targetX = x2
+    mesh.targetY = y2
+    this.lineGroup.add(mesh);
   }
 
   addLabel(object: THREE.Mesh, text: string, height) {
@@ -675,61 +719,12 @@ export default class computerAttack {
     });
     this.scene.add(flyMesh);
   }
-  addLine(x1, y1, x2, y2) {
-    //平滑曲线
-    const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(x1, 0.5, y1),
-      new THREE.Vector3((x1 + x2) / 2, Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 10, (y1 + y2) / 2),
-      new THREE.Vector3(x2, 0.5, y2),
-    ]);
-    //getPoints是基类Curve的方法，返回一个vector3对象作为元素组成的数组
-    const points = curve.getPoints(50); //分段数100，返回101个顶点
-    const tubeGeometry = new THREE.TubeGeometry(curve, 1000, 0.05, 100, false); //path路径 tubularSegments分段 radius半径 radialSegments管道横截面分段 close是否闭合
-    // const material6 = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-    const tubeMaterial = new THREE.MeshPhongMaterial({
-      map: this.texture,
-      transparent: true,
-      color: 0x47d8fa,
-      side: THREE.DoubleSide,
-      //opacity: 0.4,
-    });
-    const positions = []
-    points.forEach((point) => {
-      positions.push(point.x, point.y, point.z)
-    })
-    const geometry = new LineGeometry();
-    geometry.setPositions(positions);
-    const mesh = new THREE.Mesh(tubeGeometry, this.tubeMaterial2);
-    this.scene.add(mesh);
-    // const geometry = new THREE.BufferGeometry()
-    // const geometry = new LineGeometry();
-    // geometry.setPositions(positions);
-    // geometry.setFromPoints(points);
-    // geometry.setColors(255,0,0)
-    const material2 = new THREE.LineBasicMaterial({
-      color: 'rgb(27, 180, 176)',
-      transparent: true,
-      opacity: 1
-    })
-    const matLine = new LineMaterial({
-      color: 0x00fdf5,
-      linewidth: 0.1, // in world units with size attenuation, pixels otherwise
-      vertexColors: false,
-      //resolution:  // to be set by renderer, eventually
-      dashed: false,
-      alphaToCoverage: true,
 
-    });
-    // const lineMaterial = new THREE.LineBasicMaterial({ color: '#ff0000', side: THREE.DoubleSide })
-    const line = new THREE.Line(geometry, matLine)
-    // const line = new Line2(geometry, customMaterial);
-    // this.scene.add(line)
-  }
 
   // 创建地板
-  setFloor() {
+  setFloor(radius) {
     if (this.scene) {
-      const radius = 1000
+      // const radius = 476
       // const geometry = new THREE.BoxGeometry(200, 2, 200); //创建一个立方体几何对象Geometry
       const geometry = new THREE.CylinderGeometry( radius, radius - 0.5, 2, 180 );//圆台
       const geometry2 = new THREE.CylinderGeometry( radius - 1, radius - 1.5, 2, 180 );//圆台
@@ -738,7 +733,7 @@ export default class computerAttack {
         floorImg
       ); //首先，获取到纹理
       // 设置阵列模式
-      texture.wrapS = THREE.repeatWrapping;
+      texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
       // uv两个方向纹理重复数量
       texture.repeat.set(15, 15);
@@ -775,18 +770,19 @@ export default class computerAttack {
     const mouse = new THREE.Vector2(0, 0);
     mouse.x = ((event.clientX - that.dom.offsetLeft) / that.dom.offsetWidth) * 2 - 1;
     mouse.y = - ((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1;
+    // console.log(mouse.x);
     that.raycaster.setFromCamera(mouse, that.camera);
     const intersects = that.raycaster.intersectObjects(that.group.children)
     if (intersects.length > 0) {
       that.dom.style.cursor= "pointer"
       if(intersects[0].object) {
-        const info = that.getInfo(intersects[0].object)
-        // console.log(info);
+        const PModel = that.getParent(intersects[0].object)
+        const info = PModel.information
         if(that.selectNodeId === info.id){ //与上次覆盖节点相同，将不会发起请求
           // console.log('none');
         } else {
           that.selectNodeId = info.id
-          console.log('发起请求',info.id);
+          console.log('覆盖节点模型，发起请求',info.id);
         }
       }
     }else{
@@ -798,24 +794,26 @@ export default class computerAttack {
     let vector = new THREE.Vector3(((event.clientX - that.dom.offsetLeft)  / that.dom.offsetWidth) * 2 - 1, -((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1, 0.5);
     vector = vector.unproject(that.camera); // 将屏幕的坐标转换成三维场景中的坐标
     that.raycaster = new THREE.Raycaster(that.camera.position, vector.sub(that.camera.position).normalize());
-    const intersects = that.raycaster.intersectObjects(that.group.children);
-    // if (that.previousObj){
-      // that.previousObj.material = new THREE.MeshPhongMaterial({ color: 0x000000, specular: 0x666666, emissive: 0x000000, shininess: 10, opacity: 1, transparent: true })
-    // }
+    const intersects = that.raycaster.intersectObjects(that.group.children); //false不检测物体的后代
     if (intersects.length > 0) {
-      if(intersects[0].object){
-        const info = that.getInfo(intersects[0].object)
+      if (intersects[0].object) {
+        that.PModel = that.getParent(intersects[0].object)
+        const info = that.PModel.information
+        that.transformControls.attach(that.PModel)
+        that.transformControls.showY = false
         console.log('点击了节点：',info);
       }
+    }else{
+      that.transformControls.detach()
     }
   }
 
-  getInfo(obj) {
+  getParent(obj) {
     if(obj && obj.parent){
       if(obj.parent.information){
-        return obj.parent.information
+        return obj.parent
       } else {
-        return that.getInfo(obj.parent)
+        return that.getParent(obj.parent)
       }
     }
   }
@@ -861,8 +859,9 @@ export default class computerAttack {
           void main() {
               vec4 u_color = vec4(color,u_opacity);
               // gl_FragColor = u_color * texture2D(u_map, vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y));
-              gl_FragColor =u_color * texture2D(u_map, vec2(fract(vUv.x * repeatX - time*speed),vUv.y));
+              // gl_FragColor = u_color * texture2D(u_map, vec2(fract(vUv.x * repeatX - time*speed),vUv.y));
 
+              gl_FragColor =  vec4(color,fract(vUv.x * repeatX - time*speed) * u_opacity * step(0.5,fract(vUv.x * repeatX - time*speed)));
               // gl_FragColor = vec4(1.0, 1.0, 0, 1.0);
           }`
   }
@@ -885,7 +884,7 @@ export default class computerAttack {
           type: "t2"
         },
         repeatX: {
-          value: 5.0,
+          value: 5,
           type: "f"
         },
         speed: {
@@ -893,7 +892,7 @@ export default class computerAttack {
           type: "f"
         },
         u_opacity: {
-          value: 1.0,
+          value: 0.8,
           type: "f"
         },
       },
@@ -908,7 +907,6 @@ export default class computerAttack {
     this.setLight();
     this.setControls();
     this.addModel();
-    // this.addLine();
     // this.addFlyline();
     // this.addFlyline2();
     this.animate();
