@@ -61,8 +61,11 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
       }, false),
       model: {
         uri: `/model/CesiumAir.glb`,
+        size: 10,
         scale: 150,
         minimumPixelSize: 50,
+        // silhouetteColor: Cesium.Color.ORANGE,
+        // silhouetteSize: 2,
       },
       orientation: new Cesium.CallbackProperty(() => {
         const h = getHeading(startPoint2, endPoint)
@@ -73,6 +76,10 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
         return Cesium.Transforms.headingPitchRollQuaternion(startPoint2, hpr);
       }, false),
     })
+    console.log(plane)
+    plane.model.silhouetteSize = 2
+    plane.model.silhouetteColor = Cesium.Color.ORANGE
+
     entities.push(plane)
 
     viewer.clock.onTick.addEventListener(onTickcallback1 = () => {
