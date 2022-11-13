@@ -40,6 +40,12 @@
             <el-menu-item index="/threejs/computerAttack">
               computerAttack
             </el-menu-item>
+            <el-menu-item index="/threejs/simpleScene">
+              simpleScene
+            </el-menu-item>
+            <el-menu-item index="/threejs/materialScene">
+              materialScene
+            </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
         <el-menu-item index="/cesium">
