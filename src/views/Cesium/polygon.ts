@@ -20,8 +20,20 @@ const addPolygon2 = (viewer: any, active: boolean) => {
         addPolygon(viewer, longitude, latitude)
       }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    // 右键多边形构造完成
+    handler.setInputAction((event: any) => {
+      arr2 = []
+      polygonPoints = []
+    }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
   } else {
+    if(primitiveArr.length){
+      primitiveArr.forEach((primitive)=>{
+        viewer.scene.primitives.remove(primitive)
+      })
+      primitiveArr = []
+    }
     handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)//移除事件
+    handler.removeInputAction(Cesium.ScreenSpaceEventType.RIGHT_CLICK)//移除事件
   }
 };
 const addPolygon = (viewer: any, longitude: number, latitude: number) => {
@@ -39,10 +51,10 @@ const addPolygon = (viewer: any, longitude: number, latitude: number) => {
     }
   }
   if (arr2.length > 4) {
-    if (primitiveArr.length > 0) {
-      viewer.scene.primitives.remove(primitiveArr[0])
-      primitiveArr = []
-    }
+    // if (primitiveArr.length > 0) {
+    //   viewer.scene.primitives.remove(primitiveArr[0])
+    //   primitiveArr = []
+    // }
     const primitive = new Cesium.Primitive({
       geometryInstances: new Cesium.GeometryInstance({
         geometry: new Cesium.PolygonGeometry({
@@ -128,9 +140,4 @@ const polygonFilter = (checkPoint: { lat: number, lng: number }, polygonPoints: 
     return true;
   }
 }
-const reset = () => {
-  arr2 = []
-  polygonPoints = []
-  primitiveArr = []
-}
-export { reset, addPolygon2 }
+export { addPolygon2 }

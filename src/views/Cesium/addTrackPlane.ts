@@ -34,7 +34,7 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
         material: new Cesium.RadarScanMaterialProperty(
           new Cesium.Color(.1, 1, 0, 0.6),
           30000,// 循环时长
-          6.0,//速度
+          5,//速度
           20,//圈数
           .2,//环高
         ),

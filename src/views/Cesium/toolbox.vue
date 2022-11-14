@@ -7,10 +7,9 @@
       </el-icon>
     </span>
     <div class="tool-box-content">
-      <toolitem v-for="item in toolList" :key="item.value" :activeIndex="activeIndex" :value="item.value"
-        :label="item.title" @toolChecked="toolChecked"></toolitem>
+      <toolitem v-for="item in toolList" :key="item.value" :value="item.value"
+        :label="item.title" :active="item.active" @toolChecked="toolChecked"></toolitem>
     </div>
-    <el-button v-if="activeIndex === 3" @click="emit('finishPolygon')">完成</el-button>
   </div>
 </template>
 
@@ -20,27 +19,16 @@ import Toolitem from "./toolitem.vue";
 import { DArrowRight, DArrowLeft } from "@element-plus/icons-vue";
 
 let toolActive = ref(true);
-let activeIndex = ref(-1);
 
 //props带默认值的写法
 const props = withDefaults(defineProps<{
-  toolList?: Array<{ value: number, title: string }>;
+  toolList?: Array<{ value: number, title: string, active:boolean }>;
 }>(), { toolList: () => [] });
 
-const emit = defineEmits(["toolChecked", 'finishPolygon']);
-
-//监听
-// watch(activeIndex, () => {
-//   console.log('activeIndex change')
-// })
+const emit = defineEmits(["toolChecked"]);
 
 const toolChecked = (active: boolean, value: number) => {
-  if (active) {
-    activeIndex.value = value;
-  } else {
-    activeIndex.value = -1;
-  }
-  emit("toolChecked", active, value);
+  emit("toolChecked", !active, value);
 };
 </script>
 

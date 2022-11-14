@@ -1,6 +1,7 @@
-// 人造卫星
+// 卫星扫描
 import Cesium from "@/utils/importCesium"
 import { number } from "echarts"
+import { fa } from "element-plus/lib/locale"
 import radarMaterialsProperty from "./RadarMaterial2"
 let entities: Array<object>  = []
 let primitives: any
@@ -15,11 +16,14 @@ export const addSatellite = (viewer: any, active: boolean) => {
     }
     entities = []
     const entity1 = viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(110.0, 30.0, 200000),
+      // position: new Cesium.CallbackProperty(() => {
+      //   return Cesium.Cartesian3.fromDegrees(110, 30.0, 200000)
+      // }, false),
+      position: Cesium.Cartesian3.fromDegrees(110, 30.0, 200000),
       cylinder: {
         length: 400000,
-        topRadius: 0,
-        bottomRadius: 150000,
+        topRadius: 50000,
+        bottomRadius: 0,
         material: new Cesium.RadarScanMaterialProperty(
           new Cesium.Color(.1, 1, 0, 0.8),
           10000,// 循环时长

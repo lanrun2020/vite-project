@@ -88,7 +88,7 @@ export const addAirLine = async (viewer: any, active: boolean) => {
       duration:0.0,
       orientation:{
         heading: Cesium.Cartesian3.equals(current,res)?Cesium.Math.toRadians(0):getHeading(current,res),
-        pitch: Cesium.Math.toRadians(0),
+        pitch: Cesium.Math.toRadians(-10),
         roll: 0
     }})
     current = Cesium.clone(res)
@@ -105,8 +105,6 @@ export const addAirLine = async (viewer: any, active: boolean) => {
     //       Cesium.Math.toRadians(0),
     //     )
     //   })
-      
-      
       // console.log(hpr);
       renderId = requestAnimationFrame(render)
     }

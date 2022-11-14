@@ -1,14 +1,14 @@
 <template>
   <div id="cesiumContainer">
-    <toolbox :toolList="toolList" @toolChecked="toolChecked" @finishPolygon="reset"></toolbox>
+    <toolbox :toolList="toolList" @toolChecked="toolChecked"></toolbox>
   </div>
 </template>
 
 <script setup lang="ts">
 import Toolbox from "./toolbox.vue";
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { fetchCesium } from "@/apis/an-system";
-import { addPolygon2, reset } from "./polygon";
+import { addPolygon2 } from "./polygon";
 import Cesium from '@/utils/importCesium'
 import "./flowLineMaterial";
 import "./RadarMaterial";
@@ -35,98 +35,126 @@ import { addCity } from "./addCity";
 import { addLoad } from "./addLoad";
 import { addAirLine } from "./addAirLine";
 import { addShader } from "./addShader";
+import { addMoveCar } from "./addMoveCar";
 
 let viewer: any;
-let toolList: Array<{ title: string; value: number }> = [
+let toolList: any = ref([
   {
     title: "迁徙线",
     value: 0,
+    active: false,
   },
   {
     title: "扩散扫描",
     value: 1,
+    active: false,
   },
   {
     title: "旋转扫描",
     value: 2,
+    active: false,
   },
   {
     title: "凸多边形",
     value: 3,
+    active: false,
   },
   {
     title: "动态河流",
     value: 4,
+    active: false,
   },
   {
     title: "静态雷达",
     value: 5,
+    active: false,
   },
   {
     title: "雷达扫描",
     value: 6,
+    active: false,
   },
   {
     title: "飞机航线",
     value: 7,
+    active: false,
   },
   {
     title: "流动管道",
     value: 8,
+    active: false,
   },
   {
     title: "人口统计",
     value: 9,
+    active: false,
   },
   {
     title: "点聚合",
     value: 10,
+    active: false,
   },
   {
-    title: "卫星",
+    title: "卫星扫描",
     value: 11,
+    active: false,
   },
   {
     title: "追踪扫描",
     value: 12,
+    active: false,
   },
   {
     title: "动态墙",
     value: 13,
+    active: false,
   },
   {
     title: "测量距离",
     value: 14,
+    active: false,
   },
   {
     title: "测量面积",
     value: 15,
+    active: false,
   },
   {
     title: "环绕卫星",
     value: 16,
+    active: false,
   },
   {
     title: "echarts",
     value: 17,
+    active: false,
   },
   {
     title: "白膜建筑",
     value: 18,
+    active: false,
   },
   {
     title: "城市道路",
     value: 19,
+    active: false,
   },
   {
     title: "飞机航线2",
     value: 20,
+    active: false,
   },
   {
     title: "着色器",
     value: 21,
+    active: false,
+  },
+  {
+    title: "驾驶汽车",
+    value: 22,
+    active: false,
   }
-];
+])
 onMounted(async () => {
   console.log('cesium page')
   let res = await fetchCesium();
@@ -139,6 +167,7 @@ const toolChecked = (active: boolean, value: number) => {
       duration: 1.6,
     });
   }
+  toolList.value[value].active = active
   switch (value) {
     case 0:// 增加迁徙线
       addFlyLine(viewer, active);
@@ -174,7 +203,7 @@ const toolChecked = (active: boolean, value: number) => {
     case 10: //点聚合
       addClustering(viewer, active);
       break;
-    case 11: //卫星
+    case 11: //卫星扫描
       addSatellite(viewer, active);
       break;
     case 12: //追踪扫描
@@ -206,6 +235,9 @@ const toolChecked = (active: boolean, value: number) => {
       break;
     case 21: //着色器
       addShader(viewer, active);
+      break;
+    case 22:
+      addMoveCar(viewer, active);
       break;
     default: break;
   }

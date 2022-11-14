@@ -10,6 +10,7 @@ const endPoint = [
   { longitude: 106, latitude: 31 }
 ]
 export const addFlyLine = (viewer: any, active: boolean) => {
+  console.log(active);
   if (active) {
     createFlyLine(viewer, startPoint, endPoint)
   } else {

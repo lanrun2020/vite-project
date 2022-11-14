@@ -1,22 +1,19 @@
 <template>
-  <div class="tool-item" :class="{ 'tool-item-active': value === activeIndex }" @click="activeChange">
+  <div class="tool-item" :class="{ 'tool-item-active': active }" @click="activeChange">
     {{ label }}
   </div>
 </template>
 
 <script setup lang='ts'>
 import { ref, toRefs } from 'vue'
-let active = false
 const props = defineProps<{
   label: string,
   value: number,
-  activeIndex: number
+  active: boolean,
 }>()
-const { label, activeIndex, value } = toRefs(props)
 const emit = defineEmits(['toolChecked'])
 const activeChange = () => {
-  active = props.value !== props.activeIndex
-  emit('toolChecked', active, props.value)
+  emit('toolChecked', props.active, props.value)
 }
 </script>
 
