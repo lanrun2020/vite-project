@@ -54,6 +54,14 @@ const routes: Array<RouteRecordRaw> = [
         path: 'computerAttack',
         component: () => import('../views/Three/computerAttack.vue'),
       },
+      {
+        path: 'simpleScene',
+        component: () => import('../views/Three/simpleScene.vue'),
+      },
+      {
+        path: 'materialScene',
+        component: () => import('../views/Three/materialScene.vue'),
+      },
     ],
   },
   {
