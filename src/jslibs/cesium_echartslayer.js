@@ -34,13 +34,14 @@ class RegisterCoordinateSystem {
             return [];
         }
         if (this._GLMap.mode === Cesium.SceneMode.SCENE3D) {
-            const pointA = position
-            const pointB = this._GLMap.camera.position
-            const transform = Cesium.Transforms.eastNorthUpToFixedFrame(pointA);
+            const pointA = position // 需要判断的当前点位置
+            const pointB = this._GLMap.camera.position // 相机位置
+            const transform = Cesium.Transforms.eastNorthUpToFixedFrame(pointA); // 已点A为坐标原点建立坐标系，此坐标系相切于地球表面
             const positionvector = Cesium.Cartesian3.subtract(pointB, pointA, new Cesium.Cartesian3());
             const vector = Cesium.Matrix4.multiplyByPointAsVector(Cesium.Matrix4.inverse(transform, new Cesium.Matrix4()), positionvector, new Cesium.Cartesian3());
             const direction = Cesium.Cartesian3.normalize(vector, new Cesium.Cartesian3());
-            if (direction.z<0) return [];
+            // 向量AB(即A点指向相机的方向)在参考坐标系中的值，若z小于0,说明相机在切面下方,此时相机应当看不见A点,则将A点位置返回空[],
+            if (direction.z<0) return []; // 可以试着修改这个判断条件（-1~1），当小于-0.5时，点的位置在地球背侧时，依然能在界面看见这个点，显然不符合逻辑
         }
         const point = [coordinates.x - this._mapOffset[0], coordinates.y - this._mapOffset[1]]
         return point
