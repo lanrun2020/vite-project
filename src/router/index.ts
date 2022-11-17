@@ -19,6 +19,10 @@ const routes: Array<RouteRecordRaw> = [
         path: 'cesium',
         component: () => import('../views/Cesium/index.vue'),
       },
+      {
+        path: 'webgl',
+        component: () => import('../views/WebGL/index.vue'),
+      }
     ],
   },
   {
@@ -62,6 +66,10 @@ const routes: Array<RouteRecordRaw> = [
         path: 'materialScene',
         component: () => import('../views/Three/materialScene.vue'),
       },
+      {
+        path: 'outLine',
+        component: () => import('../views/Three/outLine.vue'),
+      }
     ],
   },
   {

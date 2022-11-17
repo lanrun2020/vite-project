@@ -14,7 +14,8 @@ export default class materialScene {
   private clock!: THREE.Clock
   private flowMaterial: any
   private scanMaterial: any
-  private scanMaterial2: any
+  private scanMaterial3: any
+  private scanMaterial4: any
   constructor(dom: HTMLElement) {
     that = this
     this.dom = dom
@@ -32,7 +33,8 @@ export default class materialScene {
     this.setControls();
     this.addModel();
     this.addCircle();
-    this.addCircle2();
+    this.addCircle3();
+    this.addCylinder();
     window.addEventListener('resize', this.onWindowResize);
     this.animate();
   }
@@ -50,7 +52,10 @@ export default class materialScene {
 
   // 设置渲染器
   setRenderer() {
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({
+      antialias:true,
+      alpha:true
+    });
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     this.renderer.setClearColor(0x041336);
@@ -100,7 +105,8 @@ export default class materialScene {
     this.requestId = requestAnimationFrame(() => this.animate());
     this.flowMaterial.uniforms.time.value = this.clock.getElapsedTime()
     this.scanMaterial.uniforms.time.value = this.clock.getElapsedTime()
-    this.scanMaterial2.uniforms.time.value = this.clock.getElapsedTime()
+    this.scanMaterial3.uniforms.time.value = this.clock.getElapsedTime()
+    this.scanMaterial4.uniforms.time.value = this.clock.getElapsedTime()
     this.controls.update()
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
@@ -124,12 +130,12 @@ export default class materialScene {
 
   addModel() {
     //创建一个立方体
-    const geometry = new THREE.BoxGeometry(50, 2, 10);
+    const geometry = new THREE.BoxGeometry(50, 5, 10);
     const planwG = new THREE.PlaneGeometry(50,5);
-    const basicMaterial = new THREE.MeshBasicMaterial({ color: 0x666666 });
+    const basicMaterial = new THREE.MeshBasicMaterial({ color: 0x666666, side:THREE.DoubleSide});
     this.flowMaterial = this.getMaterial()
     const cube = new THREE.Mesh(geometry, [basicMaterial,basicMaterial,this.flowMaterial,basicMaterial,basicMaterial,basicMaterial]);
-    cube.position.set(0,1,0)
+    cube.position.set(0,3,0)
     const plane = new THREE.Mesh(planwG,this.flowMaterial)
     plane.position.set(0,0.1,10)
     plane.rotation.set(Math.PI/2,0,0)
@@ -137,6 +143,7 @@ export default class materialScene {
     this.scene.add(plane)
   }
 
+  // 扩散扫描 圆
   addCircle() {
     const geometry = new THREE.CircleGeometry( 10, 128, 0, Math.PI*1.8); //半径，分段
     // const material = new THREE.MeshBasicMaterial( { color: 0xffff00 ,side:THREE.DoubleSide } );
@@ -144,20 +151,42 @@ export default class materialScene {
     const circle = new THREE.Mesh( geometry, this.scanMaterial );
     circle.position.set(-25,0.5,-25)
     circle.rotation.x = -Math.PI/2
-    this.scene.add( circle );
+    this.scene.add(circle);
   }
 
-  addCircle2() {
-    const geometry = new THREE.CircleGeometry( 10, 128, 0, Math.PI*1.8); //半径，分段
-    // const material = new THREE.MeshBasicMaterial( { color: 0xffff00 ,side:THREE.DoubleSide } );
-    this.scanMaterial2 = this.getScanMaterial2()
-    const circle = new THREE.Mesh( geometry, this.scanMaterial2 );
-    circle.position.set(25,0.5,-25)
+   // 旋转扫描 圆2
+   addCircle3() {
+    const geometry = new THREE.CircleGeometry( 10, 128,); //半径，分段
+    this.scanMaterial4 = this.getScanMaterial4()
+    const circle = new THREE.Mesh( geometry, this.scanMaterial4 );
+    circle.position.set(0,0.5,25)
     circle.rotation.x = -Math.PI/2
     this.scene.add( circle );
+    // new Array(10).fill('').forEach((item, index)=>{
+    //   const cc = circle.clone()
+    //   cc.position.x += 30*index
+    //   this.scene.add( cc );
+    // })
   }
 
-  // 材质1
+  // 圆柱
+  addCylinder() {
+    //圆柱
+    const geometry = new THREE.CylinderGeometry(2, 2, 8, 32, 1, true);//true上下底面不封闭
+    this.scanMaterial3 = this.getScanMaterial3()
+    const cylinder = new THREE.Mesh(geometry, this.scanMaterial3);
+    cylinder.position.set(0,4.2,-20)
+    this.scene.add(cylinder);
+
+    //圆锥
+    const geometry2 = new THREE.CylinderGeometry(4, 0, 8, 32, 1, true);
+    const cylinder2 = new THREE.Mesh(geometry2, this.scanMaterial3);
+    cylinder2.position.set(8,4.2,-20)
+    this.scene.add(cylinder2);
+
+  }
+
+  // 材质1 扫描
   getMaterial() {
     const tubeShader = {
       vertexshader: `
@@ -223,7 +252,7 @@ export default class materialScene {
     return material
   }
 
-  // 扫描材质1
+  // 扫描材质1 扩散扫描材质
   getScanMaterial() {
     const tubeShader = {
       vertexshader: `
@@ -290,7 +319,7 @@ export default class materialScene {
     })
     return material
   }
-  //扫描材质2
+  //扫描材质2 旋转扫描材质
   getScanMaterial2() {
     const tubeShader = {
       vertexshader: `
@@ -310,13 +339,21 @@ export default class materialScene {
           uniform float speed;
           uniform float repeat;
           uniform float thickness;
+          uniform float PI;
           void main() {
-            float sp = 1.0/(repeat*2.0);
-            float dis = distance(vUv,vec2(0.5,0.5)) - 0.1*time;
-            float dis2 = distance(vUv,vec2(0.5,0.5));
-            float m = mod(dis, sp);
-            float a = step(m, sp*thickness); //用于分段,值为0或1
-            gl_FragColor = vec4(color, u_opacity * a * (0.5 - dis2));
+            // bool b2 = bool(step((vUv.x - 0.5), 0.0));
+            bool b = bool(step((vUv.x - 0.5),0.0));
+            // float a = b2 ? (vUv.y-0.5)-(vUv.x - 0.5)*fract(-time) : (vUv.x - 0.5) - (vUv.y-0.5);
+            // float a = b2 ? 0.5:0.0;
+            float x = b ? 0.0 : degrees(acos((vUv.y-0.5)/sqrt((vUv.x - 0.5)*(vUv.x - 0.5) + (vUv.y - 0.5)*(vUv.y - 0.5)))) /360.0;
+            // float sp = 1.0/(repeat*2.0);
+            // float dis = distance(vUv,vec2(0.5,0.5)) - 0.1*time;
+            // float dis2 = distance(vUv,vec2(0.5,0.5));
+            // float eagle = asin((vUv.x - 0.5)/sqrt((vUv.x - 0.5)*(vUv.x - 0.5) + (vUv.y - 0.5)*(vUv.y - 0.5)) + fract(time))/PI;
+            // float eagle = atan((vUv.y - 0.5)/(vUv.x - 0.5) - fract(time)*PI)/PI;
+            // float m = mod(dis, sp);
+            // float a = step(m, sp*thickness); //用于分段,值为0或1
+            gl_FragColor = vec4(color, x);
           }`
     }
     const material = new THREE.ShaderMaterial({
@@ -347,6 +384,183 @@ export default class materialScene {
         },
         u_opacity: {
           value: 1.0,
+          type: "f"
+        },
+        PI: {
+          value: Math.PI,
+          type: "f"
+        },
+      },
+      side:THREE.DoubleSide,//side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+      transparent: true,//是否透明
+      vertexShader: tubeShader.vertexshader, // 顶点着色器
+      fragmentShader: tubeShader.fragmentshader // 片元着色器
+    })
+    return material
+  }
+
+  // 扫描材质3
+  getScanMaterial3() {
+    const tubeShader = {
+      vertexshader: `
+        varying vec2 vUv;
+        varying vec3 modelPos;
+        void main() {
+          modelPos = position;
+          vUv = uv;
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+        `,
+      fragmentshader: `
+        varying vec2 vUv;
+        varying vec3 modelPos;
+        uniform float u_opacity;
+        uniform vec3 color;
+        uniform vec3 color2;
+        uniform float time;
+        uniform float speed;
+        uniform float repeat;
+        uniform float thickness;
+        void main() {
+          float sp = 1.0/(repeat);
+          float dis = fract(modelPos.y/repeat - speed*time);
+          float m = mod(dis, 0.5);
+          float a = step(m, sp*thickness); //用于分段,值为0或1
+          gl_FragColor = vec4(color,u_opacity*(1.0 - modelPos.y/4.0)*a);
+        }`
+    }
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        color: {
+          value: new THREE.Color(0x00ffff),
+          type: "v3"
+        },
+        color2: {
+          value: new THREE.Color(0x666666),
+          type: "v3"
+        },
+        time: {
+          value: 1,
+          type: "f"
+        },
+        repeat: {
+          value: 3,
+          type: "f"
+        },
+        thickness: {
+          value: 0.7,
+          type: "f"
+        },
+        speed: {
+          value: 1.0,
+          type: "f"
+        },
+        u_opacity: {
+          value: 0.8,
+          type: "f"
+        },
+      },
+      side:THREE.DoubleSide,//side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+      transparent: true,//是否透明
+      vertexShader: tubeShader.vertexshader, // 顶点着色器
+      fragmentShader: tubeShader.fragmentshader // 片元着色器
+    })
+    return material
+  }
+
+  // 扫描材质4 旋转矩阵的运用
+  getScanMaterial4() {
+    //常用矩阵
+    //modelMatrix模型矩阵
+    //modelViewMatrix模型视图矩阵
+    //projectionMatrix投影矩阵
+    //normalMatrix正规矩阵
+    const eagleFuc = `
+    float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
+      if(x>0.0){
+        if(y<0.0){
+          return atan(y/x) + 2.0*PI;
+        }
+        if(y>0.0){
+          return atan(y/x);
+        }
+      }else{
+        if(x<0.0){
+          return atan(y/x)+PI;
+        }else{
+          if(y>0.0){
+            return PI/2.0;
+          }else{
+            if(y<0.0){
+              return -PI/2.0;
+            }else{
+              return 0.0;
+            }
+          }
+        }
+      }
+    }
+    `
+    const tubeShader = {
+      vertexshader: `
+        varying vec2 vUv;
+        varying vec2 vUv2;
+        varying vec3 modelPos;
+        uniform float time;
+        uniform float speed;
+        uniform float PI;
+        `+eagleFuc+`
+        //degrees 弧度转角度
+        float computeX(float eagle){ //eagle旋转角度
+          return sqrt((vUv.x-0.5)*(vUv.x-0.5) + (vUv.y-0.5)*(vUv.y-0.5)) * cos(radians(eagle + degrees(eagleFuc(vUv.x-0.5,vUv.y-0.5))  ));
+        }
+        float computeY(float eagle){
+          return sqrt((vUv.x-0.5)*(vUv.x-0.5) + (vUv.y-0.5)*(vUv.y-0.5)) * sin(radians(eagle + degrees(eagleFuc(vUv.x-0.5,vUv.y-0.5))  ));
+        }
+        void main() {
+          float eagle = fract(-speed*time)*360.0;//旋转的角度
+          modelPos = position;
+          vUv = uv; //记录初始位置,然后计算出旋转后的位置,初始位置保持不变,通过旋转角度计算旋转后的位置
+          vUv2 = uv;
+          // modelPos.z += 5.0;
+          vUv2.x = 0.5 + computeX(eagle); //旋转后的位置x
+          vUv2.y = 0.5 + computeY(eagle); //旋转后的位置y
+          vec4 mvPosition = modelViewMatrix * vec4(modelPos, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+        `,
+      fragmentshader: `
+        varying vec2 vUv2;
+        uniform float u_opacity;
+        uniform vec3 color;
+        uniform float PI;
+        `+eagleFuc+`
+        void main() {
+          float e = eagleFuc(vUv2.x-0.5,vUv2.y-0.5)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
+          gl_FragColor = vec4(color, e * u_opacity);
+        }`
+    }
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        color: {
+          value: new THREE.Color(0x00ffff),
+          type: "v3"
+        },
+        time: {
+          value: 1,
+          type: "f"
+        },
+        speed: {
+          value: 1.0,
+          type: "f"
+        },
+        u_opacity: {
+          value: 0.9,
+          type: "f"
+        },
+        PI: {
+          value: Math.PI,
           type: "f"
         },
       },

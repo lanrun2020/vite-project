@@ -46,6 +46,9 @@
             <el-menu-item index="/threejs/materialScene">
               materialScene
             </el-menu-item>
+            <el-menu-item index="/threejs/outLine">
+              outLine
+            </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
         <el-menu-item index="/cesium">
@@ -91,6 +94,15 @@
             </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
+
+        <el-menu-item index="/webgl">
+          <el-icon>
+            <Compass />
+          </el-icon>
+          <template v-slot:title>
+            <span>WebGL</span>
+          </template>
+        </el-menu-item>
       </el-menu>
 
       <el-container>

@@ -21,7 +21,10 @@ export const addMoveCar = (viewer: any, active: boolean) => {
         heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND //模型贴地
       },
     });
-    viewer.flyTo(model)
+    viewer.flyTo(model,{
+      duration: 2,
+      offset: new Cesium.HeadingPitchRange(0, -90, 2000)
+    })
   } else {
     if (model) {
       viewer.entities.remove(model);
