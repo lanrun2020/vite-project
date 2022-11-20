@@ -1,7 +1,9 @@
 import * as T from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
+import flagImg from '../../assets/guoqi.png'
 import terrain from '../../assets/floor5.jpeg'
+
 const THREE = T
 let that: any
 export default class materialScene {
@@ -32,12 +34,12 @@ export default class materialScene {
     this.setCamera();
     this.setLight();
     this.setControls();
-    // this.addModel();
-    // this.addCircle();
-    // this.addCircle3();
-    // this.addCylinder();
+    this.addModel();
+    this.addCircle();
+    this.addCircle3();
+    this.addCylinder();
     this.addFlag();
-    // this.addPlane();
+    this.addPlane();
     window.addEventListener('resize', this.onWindowResize);
     this.animate();
   }
@@ -47,7 +49,7 @@ export default class materialScene {
     this.scene = new THREE.Scene();
     // Grid 添加网格辅助对象
     const helper = new THREE.GridHelper(100, 30, 0x303030, 0x303030); //长度1000 划分为50份
-    this.scene.add(helper);
+    // this.scene.add(helper);
     // 辅助三维坐标系
     const axesHelper = new THREE.AxesHelper(500); 
     this.scene.add(axesHelper)
@@ -106,11 +108,11 @@ export default class materialScene {
   // 动画
   animate() {
     this.requestId = requestAnimationFrame(() => this.animate());
-    // this.flowMaterial.uniforms.time.value = this.clock.getElapsedTime()
+    this.flowMaterial.uniforms.time.value = this.clock.getElapsedTime()
     this.flagMaterial.uniforms.time.value = this.clock.getElapsedTime()
-    // this.scanMaterial.uniforms.time.value = this.clock.getElapsedTime()
-    // this.scanMaterial3.uniforms.time.value = this.clock.getElapsedTime()
-    // this.scanMaterial4.uniforms.time.value = this.clock.getElapsedTime()
+    this.scanMaterial.uniforms.time.value = this.clock.getElapsedTime()
+    this.scanMaterial3.uniforms.time.value = this.clock.getElapsedTime()
+    this.scanMaterial4.uniforms.time.value = this.clock.getElapsedTime()
     this.controls.update()
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
@@ -148,9 +150,17 @@ export default class materialScene {
   }
 
   addFlag() {
+    //旗杆
+    const geometry = new THREE.CylinderGeometry( 0.2, 0.2, 30, 16 );
+    const material = new THREE.MeshBasicMaterial( {color: 0xdddddd} );
+    const cylinder = new THREE.Mesh( geometry, material );
+    cylinder.position.set(-30, 15, -25)
+    this.scene.add( cylinder );
+
+    //旗帜
     this.flagMaterial = this.getFlagMaterial()
-    const plane = new THREE.Mesh(new THREE.PlaneGeometry(10,8,128,128),this.flagMaterial)
-    plane.position.set(0,0,0)
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(12,8,128,128),this.flagMaterial)
+    plane.position.set(-23.9, 25.8, -25)
     this.scene.add(plane)
   }
 
@@ -159,21 +169,22 @@ export default class materialScene {
     const planeGeometry = new THREE.PlaneGeometry(100,100,worldWidth - 1, worldDepth - 1);//长宽,长宽分段
     const data = this.generateHeight( worldWidth, worldDepth );
     planeGeometry.rotateX( - Math.PI / 2 );
-    const vertices = planeGeometry.attributes.position.array;
-    for ( let i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3 ) {
-      vertices[ j + 1 ] = data[ i ] * 10;
-    }
+    // const vertices = planeGeometry.attributes.position.array;
+    // for ( let i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3 ) {
+    //   vertices[ j + 1 ] = data[ i ] * 10;
+    // }
     const texture = new THREE.TextureLoader().load(terrain); //首先，获取到材质贴图纹理
     const material = new THREE.MeshBasicMaterial({ map: texture });//添加到材质上
     material.side = THREE.DoubleSide
     const mesh = new THREE.Mesh( planeGeometry, material);
+    // mesh.position.set(0,-0.1,0)
 		this.scene.add( mesh );
   }
   //获取点位高度
   generateHeight( width:number, height:number ) {
     const size = width * height, data = new Uint8Array( size );
     for ( let i = 0; i < size; i ++ ) {
-      data[ i ] += 1
+      data[ i ] += 0
     }
     return data;
   }
@@ -183,7 +194,7 @@ export default class materialScene {
     // const material = new THREE.MeshBasicMaterial( { color: 0xffff00 ,side:THREE.DoubleSide } );
     this.scanMaterial = this.getScanMaterial()
     const circle = new THREE.Mesh( geometry, this.scanMaterial );
-    circle.position.set(-25,0.5,-25)
+    circle.position.set(-30,0.1,-25)
     circle.rotation.x = -Math.PI/2
     this.scene.add(circle);
   }
@@ -193,7 +204,7 @@ export default class materialScene {
     const geometry = new THREE.CircleGeometry( 10, 128,); //半径，分段
     this.scanMaterial4 = this.getScanMaterial4()
     const circle = new THREE.Mesh( geometry, this.scanMaterial4 );
-    circle.position.set(0,0.5,25)
+    circle.position.set(30,0.1,-25)
     circle.rotation.x = -Math.PI/2
     this.scene.add( circle );
     // new Array(10).fill('').forEach((item, index)=>{
@@ -297,9 +308,10 @@ export default class materialScene {
       void main() {
         vp = position;
         vUv = uv;
+        float dis = vUv.x;
         vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-        modelPosition.z += sin(modelPosition.x * repeat  - time) * 0.5;
-        modelPosition.z += sin(modelPosition.y * repeat  - time) * 0.5;
+        modelPosition.z += sin(modelPosition.x * repeat / 2.0  - 2.0*time) * 1.2 * dis; //保证起始位置不动,越往后,摆动弧度越大
+        modelPosition.y += sin(modelPosition.x * repeat  - 2.0*time) * 0.5 * dis - 1.5*dis*dis;
         gl_Position = projectionMatrix * viewMatrix  * modelPosition;
       }
           `,
@@ -317,7 +329,7 @@ export default class materialScene {
           // gl_FragColor = vec4(color, u_opacity);
       }`
     }
-    const texture = new THREE.TextureLoader().load(terrain); //首先，获取到材质贴图纹理
+    const texture = new THREE.TextureLoader().load(flagImg); //首先，获取到材质贴图纹理
     const material = new THREE.ShaderMaterial({
       uniforms: {
         color: {
