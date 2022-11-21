@@ -1,4 +1,4 @@
-// 城市
+// 城市 白膜建筑
 import Cesium from "@/utils/importCesium"
 let primitive: any
 let tilesetPrimitive: any

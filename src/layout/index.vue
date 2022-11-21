@@ -109,7 +109,7 @@
         <el-header>
           <Header @collapseChange='collapseChange'></Header>
         </el-header>
-        <el-main class="el-main">
+        <el-main id="main" class="el-main">
           <router-view v-slot="{ Component }">
             <component :is="Component" />
           </router-view>
@@ -137,6 +137,7 @@ let isCollapse = ref(false)
 // eslint-disable-next-line @typescript-eslint/ban-types
 const menuSelect = (path: string) => {
   if (path !== router.currentRoute.value.path) {
+    console.log('push',path);
     router.push({ path });
   }
 };
@@ -149,6 +150,7 @@ const collapseChange = () => {
   .el-main {
     padding: 0px;
     height: calc(100vh - 80px);
+    background-color: #fff;
   }
 }
 

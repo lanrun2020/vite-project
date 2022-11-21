@@ -15,6 +15,9 @@
       <el-icon @click="iconClick" style="padding-right: 10px;">
         <UserFilled />
       </el-icon>
+      <el-icon @click="screenFull" style="padding-right: 10px;">
+        <Monitor />
+      </el-icon>
       <el-tooltip class="box-item" effect="dark" content="退出登录" placement="bottom">
         <el-icon @click="loginOut">
           <SwitchButton />
@@ -30,6 +33,7 @@ import {
   UserFilled,
   Moon,
   Sunny,
+  Monitor,
   SwitchButton
 } from "@element-plus/icons-vue";
 import router from "@/router";
@@ -41,6 +45,18 @@ const iconClick = () => {
 }
 const loginOut = () => {
   router.push('/login')
+}
+const screenFull = () => {
+  const element = document.getElementById('main')!
+  if (element.requestFullscreen) {
+    element.requestFullscreen()
+  } else if (element.mozRequestFullScreen) {
+    element.mozRequestFullScreen()
+  } else if (element.msRequestFullscreen) {
+    element.msRequestFullscreen()
+  } else if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullScreen()
+  }
 }
 </script>
 <style lang="scss">

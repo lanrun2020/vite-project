@@ -1,8 +1,6 @@
 <template>
- <div>
   <div id="graph"></div>
   <div id="outline"></div>
- </div>
 </template>
 
 <script setup lang='ts'>
@@ -37,7 +35,7 @@ const init = () => {
 <style lang="scss">
 #outline {
   width: 100%;
-  height: calc(100vh - 80px);
+  height: 100%;
   position: relative;
   /* color: #00fdf5; */
   background-image: linear-gradient(90deg,rgb(0, 31, 84), rgb(0, 73, 150),rgb(0, 31, 84));

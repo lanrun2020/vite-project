@@ -13,6 +13,8 @@
     <el-button @click="test">测试</el-button>
     <el-button @click="test2">测试2</el-button>
     <el-button @click="test3">测试3</el-button>
+    <el-button @click="screenFull">全屏</el-button>
+
     <el-table :data="tableData" border :span-method="objectSpanMethod" style="width: 100%; margin-top: 20px">
       <el-table-column prop="id" label="ID" width="180">
       </el-table-column>
@@ -157,7 +159,18 @@ const test3 = async () => {
   newObj3.age.value = 26
   console.log(obj);
 };
-
+const screenFull = () => {
+  const element = document.getElementById('home')!
+  if (element.requestFullscreen) {
+    element.requestFullscreen()
+  } else if (element.mozRequestFullScreen) {
+    element.mozRequestFullScreen()
+  } else if (element.msRequestFullscreen) {
+    element.msRequestFullscreen()
+  } else if (element.webkitRequestFullscreen) {
+    element.webkitRequestFullScreen()
+  }
+}
 </script>
 <style lang="scss">
 .top-scroll {

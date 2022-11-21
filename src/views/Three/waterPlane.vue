@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <div id="container"></div>
-  </div>
+  <div id="container"></div>
 </template>
 <script setup lang="ts">
 import { onMounted } from 'vue';
@@ -22,11 +20,11 @@ onMounted(() => {
 const init = () => {
   container = document.getElementById('container')!;
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(container.offsetWidth, container.offsetHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   container.appendChild(renderer.domElement);
 
-  camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 1, 20000);
+  camera = new THREE.PerspectiveCamera(55, container.offsetWidth / container.offsetHeight, 1, 20000);
   camera.position.set(30, 30, 100);
 
   sun = new THREE.Vector3();
@@ -104,12 +102,16 @@ const init = () => {
   controls.update();
 
   stats = Stats()
-  container.appendChild(stats.dom);
+  container.appendChild(stats.domElement);
+  stats.domElement.style.position = 'absolute'
+  stats.domElement.style.right = '0px'
 
   // GUI
 
   const gui = new GUI();
-
+  container.appendChild(gui.domElement)
+  gui.domElement.style.position = 'absolute'
+  gui.domElement.style.right = '0px'
   const folderSky:any = gui.addFolder('Sky');
   folderSky.add(parameters, 'elevation', 0, 90, 0.1).onChange(updateSun);
   folderSky.add(parameters, 'azimuth', - 180, 180, 0.1).onChange(updateSun);
@@ -126,16 +128,14 @@ const init = () => {
 
   window.addEventListener('resize', onWindowResize);
   animate()
-  console.log(water.material.uniforms);
-  
 
 }
 const onWindowResize = () => {
 
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = container.offsetWidth / container.offsetHeight;
   camera.updateProjectionMatrix();
 
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(container.offsetWidth, container.offsetHeight);
 
 }
 
@@ -160,6 +160,7 @@ const render = () => {
 <style>
 #container {
   width: 100%;
-  height: calc(100vh - 80px);
+  height: 100%;
+  position: relative;
 }
 </style>
