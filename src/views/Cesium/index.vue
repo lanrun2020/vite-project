@@ -14,6 +14,7 @@ import "./flowLineMaterial";
 import "./RadarMaterial";
 import "./LineMaterial";
 import "./wallMaterial";
+import "./planeLineMaterial";
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
@@ -36,11 +37,11 @@ import { addLoad } from "./addLoad";
 import { addAirLine } from "./addAirLine";
 import { addShader } from "./addShader";
 import { addMoveCar } from "./addMoveCar";
-
+import { addPlaneLine } from "./addPlaneLine";
 let viewer: any;
 let toolList: any = ref([
   {
-    title: "迁徙线",
+    title: "航迹线",
     value: 0,
     active: false,
   },
@@ -153,7 +154,12 @@ let toolList: any = ref([
     title: "驾驶汽车",
     value: 22,
     active: false,
-  }
+  },
+  {
+    title: "航迹线",
+    value: 23,
+    active: false,
+  },
 ])
 onMounted(async () => {
   console.log('cesium page')
@@ -170,7 +176,7 @@ const toolChecked = (active: boolean, value: number) => {
   toolList.value[value].active = active
   switch (value) {
     case 0:// 增加迁徙线
-      addFlyLine(viewer, active);
+      addPlaneLine(viewer, active);
       break;
     case 1:// 扩散扫描效果
       addSpreadEllipse(viewer, active);
@@ -239,6 +245,9 @@ const toolChecked = (active: boolean, value: number) => {
     case 22:
       addMoveCar(viewer, active);
       break;
+    case 23:// 增加航迹线
+      addPlaneLine(viewer, active);
+      break;
     default: break;
   }
 };
@@ -270,6 +279,7 @@ const initCesium = () => {
     //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
     // })
   });
+  viewer.scene.debugShowFramesPerSecond = true;
   // viewer.scene.globe.enableLighting = true;
   viewer.clock.shouldAnimate = true
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
@@ -309,8 +319,8 @@ const initCesium = () => {
   display: none !important;
 }
 
-.cesium-viewer-animationContainer,
-.cesium-viewer-timelineContainer,
+// .cesium-viewer-animationContainer,
+// .cesium-viewer-timelineContainer,
 .cesium-viewer-bottom,
 .cesium-viewer-fullscreenContainer {
   display: none !important;

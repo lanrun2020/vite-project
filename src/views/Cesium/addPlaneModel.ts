@@ -110,14 +110,14 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
       }
       let transform = Cesium.Transforms.eastNorthUpToFixedFrame(res);
       transform = Cesium.Matrix4.fromRotationTranslation(Cesium.Matrix3.fromQuaternion(quaternion),res);
-      viewer.camera.flyTo({
-        destination:res,
-        duration:0.0,
-        orientation:{
-          heading: Cesium.Cartesian3.equals(current,res)?Cesium.Math.toRadians(0):getHeading(current,res),
-          pitch: Cesium.Math.toRadians(0),
-          roll: 0
-      }})
+      // viewer.camera.flyTo({
+      //   destination:res,
+      //   duration:0.0,
+      //   orientation:{
+      //     heading: Cesium.Cartesian3.equals(current,res)?Cesium.Math.toRadians(0):getHeading(current,res),
+      //     pitch: Cesium.Math.toRadians(0),
+      //     roll: 0
+      // }})
       current = Cesium.clone(res)
       renderId = requestAnimationFrame(render)
     }

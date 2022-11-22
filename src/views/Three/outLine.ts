@@ -23,6 +23,7 @@ export default class outLine {
   private controls: any
   private requestId: any
   private group: THREE.Group
+  private groupP: THREE.Group
   private lineGroup: THREE.Group
   private raycaster: THREE.Raycaster
   private outlinePass: any
@@ -35,6 +36,7 @@ export default class outLine {
     that = this
     this.dom = dom
     this.group = new THREE.Group()
+    this.groupP = new THREE.Group()
     this.lineGroup = new THREE.Group()
     this.clock = new THREE.Clock()
     this.raycaster = new THREE.Raycaster()
@@ -49,9 +51,12 @@ export default class outLine {
     this.setRenderer();
     this.setCamera();
     this.setLight();
-    this.setControls();
     this.setOutLine();
+    this.setControls();
     this.addModel();
+    setTimeout(()=>{
+      this.setTrackComputer(); //给指定物体添加描边
+    },1500)
 
     window.addEventListener('resize', this.onWindowResize);
     this.dom.addEventListener('mousemove', this.handleMousemove, false)
@@ -63,14 +68,16 @@ export default class outLine {
     this.composer = new EffectComposer(this.renderer)
     const renderPass = new RenderPass(this.scene, this.camera)
     this.composer.addPass(renderPass)
+    console.log( this.group);
     this.outlinePass = new OutlinePass(new THREE.Vector2(this.dom.offsetWidth, this.dom.offsetHeight), this.scene, this.camera)
-    this.outlinePass.visibleEdgeColor.set('#00ffff') //描边颜色
-    this.outlinePass.hiddenEdgeColor.set('#00ffff') //被其他物体遮挡时 描边颜色
+    this.outlinePass.visibleEdgeColor.set('#ff0000') //描边颜色
+    this.outlinePass.hiddenEdgeColor.set('#0000ff') //被其他物体遮挡时 描边颜色
     this.outlinePass.edgeStrength = 3 //线宽
-    this.outlinePass.edgeGlow = 0 //发光效果(0-1)
+    this.outlinePass.edgeGlow = 1 //发光效果(0-1)
     this.outlinePass.edgeThickness = 1 //厚度
-    this.outlinePass.pulsePeriod = 4 //脉冲周期,描边从有至无 循环周期时长
+    // this.outlinePass.pulsePeriod = 2 //脉冲周期,描边从有至无 循环周期时长
     this.composer.addPass(this.outlinePass)
+    console.log(this.outlinePass);
   }
   // 设置场景
   setScene() {
@@ -106,17 +113,17 @@ export default class outLine {
   setLight() {
     if (this.scene) {
       // 环境光
-      const ambient = new THREE.AmbientLight(0xffffff, 1);
+      const ambient = new THREE.AmbientLight(0xffffff, 0.8);
       this.scene.add(ambient);
       const directionalLight = new THREE.DirectionalLight(0xffffff);
       directionalLight.position.set(0, 0, 100);
       this.scene.add(directionalLight);
 
-      const pointLight = new THREE.PointLight( 0xffffff, 1 );
+      const pointLight = new THREE.PointLight( 0xffffff, 0.6 );
       // pointLight.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ) ) );
       pointLight.position.set(-50,5,-100)
       this.scene.add( pointLight );
-      const pointLight2 = new THREE.PointLight( 0xffffff, 1 );
+      const pointLight2 = new THREE.PointLight( 0xffffff, 0.6 );
       // pointLight2.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ) ) );
       pointLight2.position.set(50,5,-100)
       this.scene.add( pointLight2 );
@@ -191,6 +198,7 @@ export default class outLine {
     if (that.dom && that.dom.offsetWidth) {
       that.camera.aspect = that.dom.offsetWidth / that.dom.offsetHeight;
       that.camera.updateProjectionMatrix();
+      that.composer.setSize(that.dom.offsetWidth, that.dom.offsetHeight);
       that.renderer.setSize(that.dom.offsetWidth, that.dom.offsetHeight);
       that.labelRenderer.setSize(that.dom.offsetWidth, that.dom.offsetHeight);
     }
@@ -540,6 +548,7 @@ export default class outLine {
         })
         loader.load(url, (gltf) => {
           const mroot = gltf.scene
+          mroot.name = node.name
           mroot.information = node
           const bbox = new THREE.Box3().setFromObject(mroot)
           const cent = bbox.getCenter(new THREE.Vector3())
@@ -566,7 +575,8 @@ export default class outLine {
       newlinks.forEach((link:any) => {
         this.addLine(link.source.y , link.source.x , link.target.y , link.target.x ,link.source.id,link.target.id)
       })
-      that.scene.add(that.group)
+      that.groupP.add(that.group)
+      that.scene.add(that.groupP)
       that.scene.add(that.lineGroup)
       that.setFloor(150)
     }, 200)
@@ -588,7 +598,7 @@ export default class outLine {
       texture.wrapT = THREE.RepeatWrapping;
       // uv两个方向纹理重复数量
       texture.repeat.set(15, 15);
-      const material1 = new THREE.MeshBasicMaterial({ map: texture, color: 0xdddddd })//贴图表面
+      const material1 = new THREE.MeshBasicMaterial({ map: texture })//贴图表面
       const material2 = new THREE.MeshBasicMaterial({ color: 0x666666 })
 
       const material4 = new THREE.MeshBasicMaterial({
@@ -602,9 +612,14 @@ export default class outLine {
       cube2.position.set(0, -5, 0)
       cube3.position.set(0, 0.1, 0)
       cube3.rotation.x = -Math.PI / 2
-      this.scene.add(cube1); //网格模型添加到场景中
-      this.scene.add(cube2); //网格模型添加到场景中
-      this.scene.add(cube3);
+      // this.scene.add(cube1); //网格模型添加到场景中
+      // this.scene.add(cube2); //网格模型添加到场景中
+      // this.scene.add(cube3);
+      const planeGeometry = new THREE.PlaneGeometry(radius*5,radius*5);
+      const planeMesh = new THREE.Mesh(planeGeometry, material2)
+      planeMesh.rotation.x -= Math.PI * 0.5;
+      this.scene.add(planeMesh)
+
     }
   }
 
@@ -704,6 +719,16 @@ export default class outLine {
     })
   }
 
+  setTrackComputer() {
+    this.outlinePass.selectedObjects = []
+    const modelList = ['30.8/40.8','8网段']
+    modelList.forEach((name)=>{
+      if(this.group.getObjectByName(name)){
+        this.outlinePass.selectedObjects.push(this.group.getObjectByName(name))
+      }
+    })
+  }
+
   handleMousemove(event:any) {
     event.preventDefault(); //阻止默认事件
     if (event.isPrimary === false) return
@@ -713,11 +738,11 @@ export default class outLine {
     that.raycaster.setFromCamera(mouse, that.camera);
     const intersects = that.raycaster.intersectObjects(that.group.children)
     if (intersects.length > 0) {
-      that.outlinePass.selectedObjects = []
+      // that.outlinePass.selectedObjects = []
       that.dom.style.cursor= "pointer"
       if(intersects[0].object) {
         const PModel = that.getParent(intersects[0].object)
-        that.outlinePass.selectedObjects = [PModel]
+        // that.outlinePass.selectedObjects = [PModel]
         const info = PModel.information
         if(that.selectNodeId === info.id){ //与上次覆盖节点相同，将不会发起请求
         } else {
@@ -726,7 +751,7 @@ export default class outLine {
         }
       }
     }else{
-      that.outlinePass.selectedObjects = []
+      // that.outlinePass.selectedObjects = []
       that.dom.style.cursor= "default"
     }
   }
@@ -740,10 +765,12 @@ export default class outLine {
       if (intersects.length > 0) {
         if (intersects[0].object) {
           that.PModel = that.getParent(intersects[0].object)
+          console.log(that.PModel);
           const info = that.PModel.information
           that.transformControls.attach(that.PModel)
           that.transformControls.showY = false //在y轴垂直方向上 不允许拖动
           console.log('点击了节点：',info);
+          console.log(that.outlinePass.selectedObjects);
         }
       } else {
         that.transformControls.detach()

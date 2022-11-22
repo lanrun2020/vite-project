@@ -10,6 +10,7 @@ export default class simpleScene {
   private renderer!: THREE.WebGLRenderer
   private controls: any
   private requestId: any
+  private cube!: THREE.Mesh
   constructor(dom: HTMLElement) {
     that = this
     this.dom = dom
@@ -94,6 +95,11 @@ export default class simpleScene {
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     this.render();
+    // if(this.cube){
+    //   const position = this.cube.position.clone()
+    //   this.camera.lookAt(position)
+    //   this.controls.target = position
+    // }
   }
 
   // 监听窗口变化，重新设置画布大小
@@ -113,10 +119,10 @@ export default class simpleScene {
 
   addModel() {
     //创建一个立方体
-    const geometry = new THREE.BoxGeometry(20, 20, 20);
+    const geometry = new THREE.BoxGeometry(2, 2, 2);
     const material = new THREE.MeshBasicMaterial({ color: 0x666666 });
-    const cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0,10,0)
-    this.scene.add(cube)
+    this.cube = new THREE.Mesh(geometry, material);
+    this.cube.position.set(-10,1,0)
+    this.scene.add(this.cube)
   }
 }
