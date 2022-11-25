@@ -10,7 +10,9 @@ const pointsTurnToScreen = (scene: any, lng: number, lat: number) => {
 // 根据点坐标集合将坐标点加上时间参数
 const computeCirclularFlight = (Points: Array<object>, start: object) => {
   const property = new Cesium.SampledPositionProperty();
+  // let t = 0
   for (let i = 0; i < Points.length; i++) {
+    // t = t + Math.random()
     const time = Cesium.JulianDate.addSeconds(
       start,
       i * 1,

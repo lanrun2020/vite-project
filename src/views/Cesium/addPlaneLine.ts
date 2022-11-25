@@ -1,12 +1,17 @@
 // 飞机航线
 import Cesium from "@/utils/importCesium"
-import { computeCirclularFlight, getHeading } from './util'
-import lineMaterialProperty from "@/materials/lineMaterial";
-const lineMaterial = new lineMaterialProperty({ color: new Cesium.Color(0, 0, 1, 0.2), repeat: 1, speed: 0.4, thickness: 0.1 })
+import { id } from "element-plus/lib/locale"
 let entities: Array<object> = []
 let renderId: any
 let primitives: any
-
+let primitivesModel: any
+let primitivesModel2: any
+let _time: any
+let close = false
+const num = 500 //一个轨迹上的点个数
+const lineNum = 500 //轨迹数量
+const start = new Cesium.JulianDate(2459905, 21600, Cesium.TimeStandard.UTC);
+const stop = Cesium.JulianDate.addSeconds(start, num, new Cesium.JulianDate()) //一个点一秒
 // 获取流动曲线上多个连续点
 const generateCurve = (startPoint: object, endPoint: object, length: number, height = 0) => {
   const addPointCartesian = new Cesium.Cartesian3();
@@ -27,7 +32,7 @@ const generateCurve = (startPoint: object, endPoint: object, length: number, hei
     points: [startPoint, midPoint, endPoint], // 控制点,points.length必须 ≥ 2
   });
   const curvePoints: Array<object> = [spline.evaluate(0)];
-  for (let i = 2, len = length; i <= len - 2; i++) {
+  for (let i = 1, len = length; i <= len - 2; i++) {
     curvePoints.push(spline.evaluate(i / len)); // 传时间参数，返回曲线上给定时间点的新实例,时间段划分越多，曲线越平滑
   }
   curvePoints.push(spline.evaluate(1));
@@ -37,49 +42,94 @@ const generateCurve = (startPoint: object, endPoint: object, length: number, hei
 export const addPlaneLine = (viewer: any, active: boolean) => {
   if (active) {
     if (entities?.length) return
+    close = false
     viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider({})
     viewer.scene.globe.depthTestAgainstTerrain = true;
-    const start = Cesium.JulianDate.now()
-    const stop = Cesium.JulianDate.addSeconds(start, 500, new Cesium.JulianDate()) //一个点一秒
     //时间段循环
     viewer.clock.startTime = start.clone();
     viewer.clock.stopTime = stop.clone();
     viewer.clock.currentTime = start.clone();
     viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
     viewer.timeline.zoomTo(start, stop);
-    const airList = new Array(500).fill('').map((item, index) => {
+    _time = viewer.clock.currentTime.secondsOfDay
+    viewer.clock.shouldAnimate = true
+    const airList = new Array(lineNum).fill('').map((item, index) => {
       const lon = 0 + Math.random() * 180 - 90
       const lon2 = lon + Math.random() * 180 - 90
       const lat = 0 + Math.random() * 90 - 45
       const lat2 = lat + Math.random() * 90 - 45
       return {
         id: index,
-        startPoint: Cesium.Cartesian3.fromDegrees(lon, lat, 100),
-        endPoint: Cesium.Cartesian3.fromDegrees(lon2, lat2, 100)
+        startPoint: Cesium.Cartesian3.fromDegrees(lon, lat, 20000),
+        endPoint: Cesium.Cartesian3.fromDegrees(lon2, lat2, 20000)
       }
     })
-    // const instances:any = getInstances(Cesium.Cartesian3.fromDegrees(110, 30, 100),Cesium.Cartesian3.fromDegrees(130, 45, 100), start)
-    // const polylines = new Cesium.PolylineCollection();
-    primitives = viewer.scene.primitives.add(new Cesium.PolylineCollection())
-    airList.forEach((item, index) => {
-      addPlane(viewer, item, 500, start, primitives)
+    const airList2 = new Array(lineNum).fill('').map((item, index) => {
+      const lon = 0 + Math.random() * 180 - 90
+      const lon2 = lon + Math.random() * 180 - 90
+      const lat = 0 + Math.random() * 90 - 45
+      const lat2 = lat + Math.random() * 90 - 45
+      return {
+        id: index,
+        startPoint: Cesium.Cartesian3.fromDegrees(lon, lat, 20000),
+        endPoint: Cesium.Cartesian3.fromDegrees(lon2, lat2, 20000)
+      }
     })
-    console.log(primitives);
-    
-    // primitives = viewer.scene.primitives.add(polylines)
-    // viewer.scene.primitives.add(
-    //   new Cesium.ModelInstanceCollection({
-    //     url: `/model/CesiumAir.glb`,
-    //     instances: instances,
-    //   })
-    // );
+
+    primitives = viewer.scene.primitives.add(new Cesium.PolylineCollection())
+    airList.forEach((item) => { //创建所有飞机轨迹 添加到primitives
+      addPlane(item, num, start, primitives, 0,0)
+    })
+    airList2.forEach((item) => { //创建所有ufo的轨迹 添加到primitives
+      addPlane(item, num, start, primitives, airList.length,1)
+    })
+
+    const instances:any = getInstances(airList.length) //飞机轨迹数量
+    primitivesModel = new Cesium.ModelInstanceCollection({
+      url: `/model/un.glb`,
+      size: 10,
+      minimumPixelSize: 30,
+      instances: instances
+    })
+
+    const instances2:any = getInstances(airList2.length) // ufo轨迹数量
+    primitivesModel2 = new Cesium.ModelInstanceCollection({
+      url: `/model/ufo.glb`,
+      size: 10,
+      minimumPixelSize: 30,
+      instances: instances2
+    })
+
+    const primitivesModelList = [primitivesModel,primitivesModel2]
+    const tick = () => {
+        if(!close){
+          primitives._polylines.forEach((polyline:any,index:number) => {
+            const position = polyline.id.property.getValue(viewer.clock.currentTime) //查点坐标位置
+            if(position){ //修改模型所在位置矩阵
+              const quaternion = polyline.id.orientation.getValue(viewer.clock.currentTime)
+              const mtx4  = Cesium.Matrix4.fromTranslationQuaternionRotationScale(position,quaternion,new Cesium.Cartesian3(1, 1, 1))
+              primitivesModelList[polyline.id.pathTypeIndex]._instances[index-polyline.id.startIndex].modelMatrix = mtx4 //instances方式添加的模型，更新飞机位置
+            }
+            polyline._material.uniforms.curP = polyline.id.propertyDis.getValue(viewer.clock.currentTime)//查第几个点
+          })
+          Cesium.requestAnimationFrame(tick);
+        }
+      }
+      tick()
+      viewer.scene.primitives.add(primitivesModel)
+      viewer.scene.primitives.add(primitivesModel2)
+
+    // console.log(viewer.scene.primitives);
 
     // const render = () => { // 实时更新
     //   renderId = requestAnimationFrame(render)
     // }
   } else {
-    lineMaterial.close()
+    close = true
+    viewer.clock.currentTime = start.clone();
+    viewer.clock.shouldAnimate = false
     primitives.removeAll()
+    viewer.scene.primitives.remove(primitivesModel)
     if (entities?.length) {
       entities.forEach((entity) => {
         viewer.entities.remove(entity)
@@ -90,15 +140,41 @@ export const addPlaneLine = (viewer: any, active: boolean) => {
   }
 }
 
-const addPlane = (viewer: any, item: any, num: number, start: any, polylines:any) => {
+// 根据点坐标集合将坐标点加上时间参数
+const computeCirclularFlight = (Points: Array<object>, start: object) => {
+  const property = new Cesium.SampledPositionProperty();
+  const property2 = new Cesium.SampledProperty(Number)
+  // let t = 0
+  for (let i = 0; i < Points.length; i++) {
+    // t = t + Math.random()
+    const time = Cesium.JulianDate.addSeconds(
+      start,
+      i * 1,
+      new Cesium.JulianDate()
+    );
+    property.addSample(time, Points[i]);
+    property2.addSample(time, i); //存当前是第几个点
+  }
+  return {
+    property,
+    property2
+  };
+}
+
+const addPlane = (item: any, num: number, start: any, primitives:any, startIndex:number,pathTypeIndex:number) => {
   //轨迹起点，终点
   const startPoint = item.startPoint
   const endPoint = item.endPoint
-  const points = generateCurve(startPoint, endPoint, num, 25000) //轨迹点集合，获取路径上的点
-  const propertyLine = computeCirclularFlight(points, start)
+  const points = generateCurve(startPoint, endPoint, num, 21000) //轨迹点集合，获取路径上的点
+  const {property:propertyLine,property2} = computeCirclularFlight(points, start)
+  const orientation = new Cesium.VelocityOrientationProperty(propertyLine)
+  // console.log(points);
+  // const tt = points.map((p) => {
+  //   return [points]
+  // })
   // console.log('points:' ,points);
   // console.log('propertyLine:' ,propertyLine);
-  // const path = viewer.entities.add({
+  // const path = viewer.entities.add({ //entity方式加载path
   //   position: propertyLine,
   //   name: 'plane path',
   //   id: "planePath" + item.id,
@@ -111,117 +187,72 @@ const addPlane = (viewer: any, item: any, num: number, start: any, polylines:any
   //     material: Cesium.Color.BLUE
   //   }
   // })
-  const airPlane = viewer.entities.add({
-    id: "modelPlane" + item.id,
-    position: propertyLine,
-    model: {
-      uri: `/model/un.glb`,
-      scale: 3,
-      minimumPixelSize: 50,
-    },
-    orientation: new Cesium.VelocityOrientationProperty(propertyLine)
-  })
   // entities.push(path);
-  entities.push(airPlane)
-
-  // const instance = new Cesium.GeometryInstance({
-  //   geometry: new Cesium.CylinderGeometry({
-  //     length: point.num * 2000,
-  //     topRadius: 5000.0,
-  //     bottomRadius: 5000.0,
-  //   }),
-  //   attributes: {
-  //     color: Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(0.5, point.num / 50, 0, 1))
+  // console.log(path);
+  // const airPlane = viewer.entities.add({ //entity方式加载model
+  //   id: "modelPlane" + item.id,
+  //   position: propertyLine,
+  //   model: {
+  //     uri: `/model/un.glb`,
+  //     scale: 10,
+  //     minimumPixelSize: 30,
   //   },
-  //   modelMatrix: modelMatrix, // 提供位置参数
-  // });
+  //   orientation: new Cesium.VelocityOrientationProperty(propertyLine)
+  // })
+  // entities.push(airPlane)
   const source = `
     uniform vec4 color;\n
+    uniform float curP;\n
+    uniform float allP;\n
     czm_material czm_getMaterial(czm_materialInput materialInput)\n\
     {\n\
         czm_material material = czm_getDefaultMaterial(materialInput);\n\
         float dis = materialInput.s;\n\
-        material.alpha = dis * color.a ;\n\
+        bool b = bool(step(dis, curP/allP));\n\
+        material.alpha = b ? color.a : 0.0;\n\
         material.diffuse = color.rgb;\n\
         return material;\n\
     }`
 
-  const t = polylines.add({
+  primitives.add({
+    id: {
+      id: item.id,
+      startIndex,
+      pathTypeIndex,
+      propertyDis: property2,
+      property: propertyLine,
+      orientation: orientation,
+    },
     positions : points,
     width : 2,
-    // material: lineMaterial.getMaterial(),
     material: new Cesium.Material({
       fabric : {
           uniforms: {
             color: new Cesium.Color(.1, 1, 0, 1),
+            curP: 0.0,
+            allP: num,
           },
           source: source
         },
         translucent: true,
     })
   });
-  // const primitive = {
-  //   positions: points,
-  //   // name: 'plane path',
-  //   id: "planePath" + item.id,
-  //   show: true,
-  //   width: 2,
-  //   material: Cesium.Color.BLUE
-  // }
-  // primitives.add({
-  //   positions: points,
-  //   name: 'plane path',
-  //   id: "planePath" + item.id,
-  //   show: true,
-  //   width: 2,
-  //   material: Cesium.Color.BLUE
-  // })
-  // const primitive = Cesium.Model.fromGltf({
-  //     id: item.id,
-  //     url: `/model/CesiumAir.glb`, // 本地文件
-  //     // modelMatrix: towerMt4Tower,
-  //     scale: 100, // 放大倍数
-  //   })
-  // return primitive
+  // const origin = Cesium.Cartesian3.fromDegrees(95.0, 40.0, 200000.0);
+  // const modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(origin);
+  // primitives.add(Cesium.Model.fromGltf({
+  //   id:item.id,
+  //   url: `/model/un.glb`,
+  //   scale:30,
+  //   minimumPixelSize:60,
+  //   modelMatrix,
+  //   color: '#ffffff',
+  // }))
 }
-
-function getInstances(startP:any,endP:any,start:any) {
-  const instances = [];
-  const gridSize = Math.sqrt(1000);
-  const cLon = 110;
-  const cLat = 32;
-  const spacing = 0.01;
-  const height = 10000.0;
-  const points = generateCurve(startP, endP, 200, 15000) //轨迹点集合，获取路径上的点
-  const propertyLine = computeCirclularFlight(points, start)
-  for (let y = 0; y < gridSize; ++y) {
-    for (let x = 0; x < gridSize; ++x) {
-      const longitude = cLon + spacing * (x - gridSize / 2);
-      const latitude = cLat + spacing * (y - gridSize / 2);
-      const position = Cesium.Cartesian3.fromDegrees(
-        longitude,
-        latitude,
-        height
-      );
-      const heading = Math.random();
-      const pitch = Math.random();
-      const roll = Math.random();
-      const scale = 20;
-      const modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(
-        new Cesium.CallbackProperty(()=>{
-          return position
-        },false),
-        new Cesium.HeadingPitchRoll(heading, pitch, roll)
-      );
-      Cesium.Matrix4.multiplyByUniformScale(
-        modelMatrix,
-        scale,
-        modelMatrix
-      );
-      instances.push({
-        modelMatrix: modelMatrix
-      });
+function getInstances(num:number) {
+  const instances = new Array(num).fill('').map(()=>{
+    return {
+      modelMatrix: new Cesium.Matrix4(),
     }
-  }
+  });
   return instances;
 }
