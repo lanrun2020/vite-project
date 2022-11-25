@@ -279,6 +279,10 @@ const initCesium = () => {
     //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
     // })
   });
+  //时间轴设置成中文
+  viewer.animation.viewModel.dateFormatter = DateTimeFormatter
+  viewer.animation.viewModel.timeFormatter = TimeFormatter
+  viewer.timeline.makeLabel = DateTimeFormatter
   viewer.scene.debugShowFramesPerSecond = true;
   // viewer.scene.globe.enableLighting = true;
   viewer.clock.shouldAnimate = true
@@ -299,7 +303,24 @@ const initCesium = () => {
   });
   viewer.scene.screenSpaceCameraController.enableTit = false;
 };
-
+const TimeFormatter = (time: any, viewModel: any) => {
+  return DateTimeFormatter(time, viewModel, true)
+}
+const DateTimeFormatter = (datetime: any, viewModel: any, ignoredate: any) => {
+  let julianDate = new Cesium.JulianDate()
+  Cesium.JulianDate.addHours(datetime, 8, julianDate)
+  let gregorianDT = Cesium.JulianDate.toGregorianDate(julianDate)
+  let objDT
+  if (ignoredate) objDT = ''
+  else {
+    objDT = new Date(gregorianDT.year, gregorianDT.month, gregorianDT.day)
+    objDT = gregorianDT.year + '年' + objDT.toLocaleDateString('zh-cn', { month: 'short' }) + gregorianDT.day + '日'
+    if (viewModel || gregorianDT.hour + gregorianDT.minute === 0) return objDT
+    objDT += ''
+  }
+  // return objDT + Cesium.sprintf('%02d:%02d:%02d', gregorianDT.hour, gregorianDT.minute, gregorianDT.second)
+  return objDT + gregorianDT.hour + ':' + gregorianDT.minute + ':' + gregorianDT.second 
+}
 
 
 

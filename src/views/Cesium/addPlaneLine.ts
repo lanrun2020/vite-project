@@ -8,7 +8,7 @@ let primitivesModel: any
 let primitivesModel2: any
 let _time: any
 let close = false
-const num = 500 //一个轨迹上的点个数
+const num = 1000 //一个轨迹上的点个数
 const lineNum = 500 //轨迹数量
 const start = new Cesium.JulianDate(2459905, 21600, Cesium.TimeStandard.UTC);
 const stop = Cesium.JulianDate.addSeconds(start, num, new Cesium.JulianDate()) //一个点一秒
@@ -60,19 +60,19 @@ export const addPlaneLine = (viewer: any, active: boolean) => {
       const lat2 = lat + Math.random() * 90 - 45
       return {
         id: index,
-        startPoint: Cesium.Cartesian3.fromDegrees(lon, lat, 20000),
-        endPoint: Cesium.Cartesian3.fromDegrees(lon2, lat2, 20000)
+        startPoint: Cesium.Cartesian3.fromDegrees(lon, lat, 50000),
+        endPoint: Cesium.Cartesian3.fromDegrees(lon2, lat2, 50000)
       }
     })
     const airList2 = new Array(lineNum).fill('').map((item, index) => {
-      const lon = 0 + Math.random() * 180 - 90
-      const lon2 = lon + Math.random() * 180 - 90
+      const lon = Math.random() * 180 - 180
+      const lon2 = lon + Math.random() * 180
       const lat = 0 + Math.random() * 90 - 45
       const lat2 = lat + Math.random() * 90 - 45
       return {
         id: index,
-        startPoint: Cesium.Cartesian3.fromDegrees(lon, lat, 20000),
-        endPoint: Cesium.Cartesian3.fromDegrees(lon2, lat2, 20000)
+        startPoint: Cesium.Cartesian3.fromDegrees(lon, lat, 50000),
+        endPoint: Cesium.Cartesian3.fromDegrees(lon2, lat2, 50000)
       }
     })
 
@@ -87,16 +87,16 @@ export const addPlaneLine = (viewer: any, active: boolean) => {
     const instances:any = getInstances(airList.length) //飞机轨迹数量
     primitivesModel = new Cesium.ModelInstanceCollection({
       url: `/model/un.glb`,
-      size: 10,
-      minimumPixelSize: 30,
+      size: 5,
+      minimumPixelSize: 20,
       instances: instances
     })
 
     const instances2:any = getInstances(airList2.length) // ufo轨迹数量
     primitivesModel2 = new Cesium.ModelInstanceCollection({
       url: `/model/ufo.glb`,
-      size: 10,
-      minimumPixelSize: 30,
+      size: 5,
+      minimumPixelSize: 20,
       instances: instances2
     })
 
@@ -130,6 +130,8 @@ export const addPlaneLine = (viewer: any, active: boolean) => {
     viewer.clock.shouldAnimate = false
     primitives.removeAll()
     viewer.scene.primitives.remove(primitivesModel)
+    viewer.scene.primitives.remove(primitivesModel2)
+
     if (entities?.length) {
       entities.forEach((entity) => {
         viewer.entities.remove(entity)
@@ -165,7 +167,7 @@ const addPlane = (item: any, num: number, start: any, primitives:any, startIndex
   //轨迹起点，终点
   const startPoint = item.startPoint
   const endPoint = item.endPoint
-  const points = generateCurve(startPoint, endPoint, num, 21000) //轨迹点集合，获取路径上的点
+  const points = generateCurve(startPoint, endPoint, num, 50000) //轨迹点集合，获取路径上的点
   const {property:propertyLine,property2} = computeCirclularFlight(points, start)
   const orientation = new Cesium.VelocityOrientationProperty(propertyLine)
   // console.log(points);
