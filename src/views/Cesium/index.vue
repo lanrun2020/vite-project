@@ -38,6 +38,8 @@ import { addAirLine } from "./addAirLine";
 import { addShader } from "./addShader";
 import { addMoveCar } from "./addMoveCar";
 import { addPlaneLine } from "./addPlaneLine";
+import { addPlaneLineByTime } from "./addPlaneLineByTime";
+
 let viewer: any;
 let toolList: any = ref([
   {
@@ -46,7 +48,7 @@ let toolList: any = ref([
     active: false,
   },
   {
-    title: "扩散扫描",
+    title: "实时航线",
     value: 1,
     active: false,
   },
@@ -179,7 +181,8 @@ const toolChecked = (active: boolean, value: number) => {
       addPlaneLine(viewer, active);
       break;
     case 1:// 扩散扫描效果
-      addSpreadEllipse(viewer, active);
+      // addSpreadEllipse(viewer, active);
+      addPlaneLineByTime(viewer, active);
       break;
     case 2://旋转扫描效果
       addScanEllipse(viewer, active);
