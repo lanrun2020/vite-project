@@ -10,7 +10,7 @@ let positionCur: any
 let fly = false
 let cameraHeight = 0
 let timer:any
-const lineNum = 50 //一种轨迹的数量
+const lineNum = 500 //一种轨迹的数量
 const alltime = 50000 //实时数据时间段长度，秒
 let start: any; //起始时间
 let stop: any //终止时间 一个点一秒
