@@ -53,7 +53,8 @@ let toolList: any = ref([
     active: false,
   },
   {
-    title: "旋转扫描",
+    // title: "旋转扫描",
+    title: "迁徙线",
     value: 2,
     active: false,
   },
@@ -185,7 +186,8 @@ const toolChecked = (active: boolean, value: number) => {
       addPlaneLineByTime(viewer, active);
       break;
     case 2://旋转扫描效果
-      addScanEllipse(viewer, active);
+      addFlyLine(viewer, active);
+      // addScanEllipse(viewer, active);
       break;
     case 3://绘制多边形
       addPolygon2(viewer, active);
@@ -322,7 +324,7 @@ const DateTimeFormatter = (datetime: any, viewModel: any, ignoredate: any) => {
     objDT += ''
   }
   // return objDT + Cesium.sprintf('%02d:%02d:%02d', gregorianDT.hour, gregorianDT.minute, gregorianDT.second)
-  return objDT + gregorianDT.hour + ':' + gregorianDT.minute + ':' + gregorianDT.second 
+  return objDT + gregorianDT.hour.toString().padStart(2, '0') + ':' + gregorianDT.minute.toString().padStart(2, '0') + ':' + gregorianDT.second.toString().padStart(2, '0')
 }
 
 

@@ -61,7 +61,7 @@ export const addTrackPlane = (viewer: any, active: boolean) => {
       }, false),
       model: {
         uri: `/model/CesiumAir.glb`,
-        size: 10,
+        // size: 10,
         scale: 150,
         minimumPixelSize: 50,
         // silhouetteColor: Cesium.Color.ORANGE,
