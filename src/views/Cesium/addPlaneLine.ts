@@ -3,15 +3,9 @@ import Cesium from "@/utils/importCesium"
 let renderId: any
 let primitivesLine: any
 let primitivesModelList: any[] = []
-let airPlane: any
-let matx4Last = new Cesium.Matrix4()
-let pickModelLast: any
-let positionCur: any
-let fly = false
-let cameraHeight = 0
 let handler: any
 const num = 500 //一条轨迹上的点个数
-const lineNum = 500 //一种轨迹的数量
+const lineNum = 100 //一种轨迹的数量
 const start = new Cesium.JulianDate(2459905, 21600, Cesium.TimeStandard.UTC); //起始时间
 const stop = Cesium.JulianDate.addSeconds(start, num, new Cesium.JulianDate()) //终止时间 一个点一秒
 
@@ -72,92 +66,21 @@ export const addPlaneLine = (viewer: any, active: boolean) => {
     const primitivesModelLsit2:any = []
     pathList.forEach((path, index) => {
       path.airList.forEach((item) => {
-        addPlane(item, num, start, primitivesLine, pathStartIndex, index, primitivesModelLsit2) //item轨迹， num轨迹点数量，start轨迹起始时间，primitives用于存放轨迹primitive
+        addPlane(item, num, start, primitivesLine, pathStartIndex, index, primitivesModelLsit2, path) //item轨迹， num轨迹点数量，start轨迹起始时间，primitives用于存放轨迹primitive
       })
-      // const instances: any = getInstances2(path.airList.length) //轨迹数量
-      // const primitivesModel = new Cesium.ModelInstanceCollection({
-      //   id: {
-      //     id: 'pathModelType' + index,
-      //     pathStartIndex: pathStartIndex,
-      //   },
-      //   url: path.url,
-      //   dynamic: true,
-      //   scale: path.scale,
-      //   minimumPixelSize: path.minimumPixelSize,
-      //   silhouetteSize: 10,
-      //   silhouetteColor: new Cesium.Color(0, 1, 0, 1),
-      //   instances: instances
-      // })
-      // primitivesModel.readyPromise.then(function (model:any) {
-      //   model.activeAnimations.addAll({
-      //     loop: Cesium.ModelAnimationLoop.REPEAT,
-      //   })
-      // })
-      // primitivesModelList.push(primitivesModel)
       pathStartIndex += path.airList.length
     })
-    console.log(primitivesModelLsit2);
     primitivesModelLsit2.forEach((primitivesModel:any) => {
-      viewer.scene.primitives.add(primitivesModel)
+      viewer.entities.add(primitivesModel)
     })
-    // const m = addModelInstance()
-    // const newInstances = getInstances2(50)
-    // console.log(m._instances);
-    // setTimeout(()=>{
-    //    console.log(newInstances);
-    //    newInstances.forEach((item, index)=>{
-    //     m._instances[index].modelMatrix = item.modelMatrix
-    //   })
-    //   console.log(m._instances);
-    //   console.log('change');
-    // },5000)
-    // viewer.scene.primitives.add(m)
     handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
     let pickedPath: any[] = []
     handler.setInputAction((clickEvent: any) => {
-      const cartesian = viewer.camera.pickEllipsoid(clickEvent.position, viewer.scene.globe.ellipsoid);
       const pickModel = viewer.scene.pick(clickEvent.position);
-      // eslint-disable-next-line no-debugger
-      // console.log(pickModel.constructor.name);
-      const matx = new Cesium.Matrix4()
-      Cesium.Matrix4.fromScale(new Cesium.Cartesian3(0, 0, 0), matx)
-      if (pickModel) {
-        // console.log(pickModel);
-        if (pickModel.constructor && pickModel.constructor.name === 'ModelInstance') { //点击的是模型
-          if (pickModelLast && matx4Last) {
-            pickModelLast.modelMatrix = matx4Last
-          }
-          matx4Last = pickModel.model.modelMatrix.clone()
-          pickModelLast = pickModel.model
-          // Cesium.Matrix4.multiply(pickModel.model.modelMatrix, matx, pickModel.model.modelMatrix)
-          // console.log(pickModel.model); //这种轨迹的第一条轨迹起始下标
-          const line = primitivesLine.get(pickModel.model.id.pathStartIndex + pickModel.instanceId)
-          // console.log(line);
-          // console.log(pickModel.model);
-          positionCur = line.id.propertyPosition
-          fly = true
-          viewer.camera.position = new Cesium.Cartesian3(0, 0, 500000);
-          // console.log(viewer.camera);
-          if (airPlane) viewer.entities.remove(airPlane)
-          // airPlane = viewer.entities.add({ //entity方式加载model
-          //   position: line.id.propertyPosition,
-          //   model: {
-          //     uri: pickModel.model._resource._url,
-          //     scale: 25,
-          //     minimumPixelSize: 25,
-          //     silhouetteSize:2,
-          //   },
-          //   orientation: line.id.orientation
-          // })
-          // viewer.trackedEntity = airPlane
+      if (pickModel && pickModel.id) {
+        if (pickModel.id.model) { //点击的是模型
+          viewer.trackedEntity= pickModel.id
         } else {//点击的是路径线
-          fly = false
-          viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY)
-          if (airPlane) viewer.entities.remove(airPlane)
-          if (pickModelLast && matx4Last) {
-            pickModelLast.modelMatrix = matx4Last
-          }
-          // viewer.trackedEntity = undefined
           pickedPath.forEach((path) => {
             path._material.uniforms.color = new Cesium.Color(0, 1, 0, 1)
           })
@@ -165,52 +88,14 @@ export const addPlaneLine = (viewer: any, active: boolean) => {
           pickModel.primitive._material.uniforms.color = new Cesium.Color(1, 0, 0, 1)
           pickedPath.push(pickModel.primitive)
         }
-      } else {
-        if (airPlane) viewer.entities.remove(airPlane)
-        fly = false
-        viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY)
-        if (pickModelLast && matx4Last) {
-          pickModelLast.modelMatrix = matx4Last
-        }
+      } else { //undefined
+        viewer.trackedEntity = undefined
       }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-    handler.setInputAction((event:any) => {
-      // TODO
-      if(fly){
-        setCameraControl(viewer,false)
-        cameraHeight -= event
-        if(cameraHeight < 0) cameraHeight=0
-      }else{
-        setCameraControl(viewer,true)
-      }
-  }, Cesium.ScreenSpaceEventType.WHEEL);
-
     const tick = () => {
-      primitivesLine._polylines.forEach((polyline: any, index: number) => {
-        const position = polyline.id.propertyPosition.getValue(viewer.clock.currentTime) //查点坐标位置
-        if (position) { //修改模型所在位置矩阵
-          const quaternion = polyline.id.orientation.getValue(viewer.clock.currentTime)
-          const mtx4 = Cesium.Matrix4.fromTranslationQuaternionRotationScale(position, quaternion, new Cesium.Cartesian3(1, 1, 1))
-          // if(viewer.scene.mode === Cesium.SceneMode.SCENE3D){
-            primitivesModelLsit2[polyline.id.pathTypeIndex*500 + index - polyline.id.startIndex].modelMatrix = mtx4
-            // primitivesModelList[polyline.id.pathTypeIndex]._instances[index - polyline.id.startIndex].modelMatrix = mtx4 //instances方式添加的模型，更新飞机位置
-          // }else{
-            //暂停
-            // cancelAnimationFrame(renderId)
-            // primitivesModelList[polyline.id.pathTypeIndex]._instances[index - polyline.id.startIndex].modelMatrix = mtx4 //instances方式添加的模型，更新飞机位置
-            // primitivesModelList[polyline.id.pathTypeIndex]._instances[index - polyline.id.startIndex].modelMatrix = new Cesium.Matrix4(1,1,1,1,  1,1,1,1,  1,1,1,1,  1,1,1,1) //instances方式添加的模型，更新飞机位置
-          // }
-        }
+      primitivesLine._polylines.forEach((polyline: any) => {
         polyline._material.uniforms.curP = polyline.id.propertyIndex.getValue(viewer.clock.currentTime)//查当时时刻，飞机运行到第几个点
       })
-      if (fly) {
-        const c3 = positionCur.getValue(viewer.clock.currentTime)
-        if (c3) {
-          const transform = Cesium.Transforms.eastNorthUpToFixedFrame(c3);
-          viewer.camera.lookAtTransform(transform, new Cesium.HeadingPitchRange(viewer.camera.heading,  viewer.camera.pitch, 50000 + cameraHeight*2000));
-        }
-      }
-      // cancelAnimationFrame(renderId)
       renderId = Cesium.requestAnimationFrame(tick);
     }
     tick()
@@ -231,86 +116,13 @@ export const addPlaneLine = (viewer: any, active: boolean) => {
     })
   }
 }
-const setCameraControl = (viewer:any, value = true) => { // 控制鼠标是否可拖动地图
-  // viewer.scene.screenSpaceCameraController.enableTilt = value
-  // viewer.scene.screenSpaceCameraController.enableRotate = value
-  // viewer.scene.screenSpaceCameraController.enableTranslate = value
-  viewer.scene.screenSpaceCameraController.enableZoom = value
-}
+
 const setView = (viewer: any, position: any) => {
   viewer.camera.lookAt(position.getValue(viewer.clock.currentTime), new Cesium.Cartesian3(0, 0, 5000))
   console.log('set');
   setTimeout(() => {
     setView(viewer, position)
   }, 1000)
-}
-
-const getInstances = (num: number) => {
-  const instances = new Array(num).fill('').map(() => {
-    const position = Cesium.Cartesian3.fromDegrees(
-      110+Math.random(),
-      30+Math.random(),
-      5000
-    );
-    const modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(
-      position,
-      new Cesium.HeadingPitchRoll(0, 0, 0)
-    );
-    return {
-      modelMatrix: modelMatrix,
-    }
-  });
-  return instances;
-}
-const getInstances2 = (num: number) => {
-  const instances = [];
-  const gridSize = Math.sqrt(num);
-  const cLon = 110 + Math.random()*10;
-  const cLat = 32 + Math.random()*10;
-  const spacing = 0.5;
-  const height = 50000;
-  for (let y = 0; y < gridSize; ++y) {
-    for (let x = 0; x < gridSize; ++x) {
-      const longitude = cLon + spacing * (x - gridSize / 2);
-      const latitude = cLat + spacing * (y - gridSize / 2);
-      const position = Cesium.Cartesian3.fromDegrees(
-        longitude,
-        latitude,
-        height
-      );
-      const heading = 0;
-      const pitch = 0;
-      const roll = 0;
-      const scale = 1;
-      const modelMatrix = Cesium.Transforms.headingPitchRollToFixedFrame(
-        position,
-        new Cesium.HeadingPitchRoll(heading, pitch, roll)
-      );
-      Cesium.Matrix4.multiplyByUniformScale(
-        modelMatrix,
-        scale,
-        modelMatrix
-      );
-      instances.push({
-        modelMatrix: modelMatrix
-      });
-    }
-  }
-  return instances;
-}
-
-const addModelInstance = () => {
-  const instances =  getInstances2(50)
-  const primitivesModel = new Cesium.ModelInstanceCollection({
-    url: `/model/CesiumAir.glb`,
-    dynamic: true,
-    scale: 1,
-    minimumPixelSize: 35,
-    silhouetteSize: 10,
-    silhouetteColor: new Cesium.Color(0, 1, 0, 1),
-    instances: instances
-  })
-  return primitivesModel
 }
 
 // 根据点坐标集合将坐标点加上时间参数
@@ -334,7 +146,7 @@ const computeCirclularFlight = (Points: Array<object>, start: object) => {
   };
 }
 
-const addPlane = (item: any, num: number, start: any, primitives: any, startIndex: number, pathTypeIndex: number, primitivesModelLsit2: any) => {
+const addPlane = (item: any, num: number, start: any, primitives: any, startIndex: number, pathTypeIndex: number, primitivesModelLsit2: any, path:any) => {
   //轨迹起点，终点
   const startPoint = item.startPoint
   const endPoint = item.endPoint
@@ -371,7 +183,7 @@ const addPlane = (item: any, num: number, start: any, primitives: any, startInde
         uniforms: {
           color: new Cesium.Color(0, 1, 0, 1),
           curP: 0.0,
-          allP: num,
+          allP: num - 1, //所有点数量减1，点与点之间的线段数量是num - 1
         },
         source: source
       },
@@ -379,12 +191,16 @@ const addPlane = (item: any, num: number, start: any, primitives: any, startInde
     })
   });
 
-  const model = Cesium.Model.fromGltf({
-    url: `/model/CesiumAir.glb`,
-    modelMatrix: new Cesium.Matrix4(),
-    minimumPixelSize: 45,
-  })
-  primitivesModelLsit2.push(model)
+  const modelEntity = {
+    position: propertyPosition,
+    model: {
+      uri: path.url,
+      scale: path.scale,
+      minimumPixelSize: path.minimumPixelSize,
+    },
+    orientation: orientation,
+  }
+  primitivesModelLsit2.push(modelEntity)
 }
 
 // 获取流动曲线上多个连续点

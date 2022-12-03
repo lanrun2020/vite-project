@@ -319,7 +319,7 @@ const DateTimeFormatter = (datetime: any, viewModel: any, ignoredate: any) => {
   if (ignoredate) objDT = ''
   else {
     objDT = new Date(gregorianDT.year, gregorianDT.month, gregorianDT.day)
-    objDT = gregorianDT.year + '年' + objDT.toLocaleDateString('zh-cn', { month: 'short' }) + gregorianDT.day + '日'
+    objDT = gregorianDT.year + '年' + gregorianDT.month + '月' + gregorianDT.day + '日'
     if (viewModel || gregorianDT.hour + gregorianDT.minute === 0) return objDT
     objDT += ''
   }

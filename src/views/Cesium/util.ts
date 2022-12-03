@@ -92,4 +92,11 @@ const getMidPoint = (start: typeof Cesium.Cartographic.fromDegrees, end: typeof 
     midpointCartographic.latitude
   );
 }
-export { pointsTurnToScreen, computeCirclularFlight, calcPoints, getHeading, getPitch, getRoutePoints, getDistance, getMidPoint }
+//
+const setCameraControl = (viewer: any, value = true) => { // 控制鼠标是否可操控地图
+  viewer.scene.screenSpaceCameraController.enableTilt = value //倾斜地图
+  viewer.scene.screenSpaceCameraController.enableRotate = value //旋转地图
+  viewer.scene.screenSpaceCameraController.enableTranslate = value //拖动地图
+  viewer.scene.screenSpaceCameraController.enableZoom = value //缩放地图
+}
+export { pointsTurnToScreen, computeCirclularFlight, calcPoints, getHeading, getPitch, getRoutePoints, getDistance, getMidPoint, setCameraControl }
