@@ -23,7 +23,6 @@ export default class outLine {
   private controls: any
   private requestId: any
   private group: THREE.Group
-  private groupP: THREE.Group
   private lineGroup: THREE.Group
   private raycaster: THREE.Raycaster
   private outlinePass: any
@@ -36,7 +35,6 @@ export default class outLine {
     that = this
     this.dom = dom
     this.group = new THREE.Group()
-    this.groupP = new THREE.Group()
     this.lineGroup = new THREE.Group()
     this.clock = new THREE.Clock()
     this.raycaster = new THREE.Raycaster()
@@ -69,7 +67,7 @@ export default class outLine {
     const renderPass = new RenderPass(this.scene, this.camera)
     this.composer.addPass(renderPass)
     console.log( this.group);
-    this.outlinePass = new OutlinePass(new THREE.Vector2(this.dom.offsetWidth, this.dom.offsetHeight), this.scene, this.camera)
+    this.outlinePass = new OutlinePass(new THREE.Vector2(this.dom.offsetWidth, this.dom.offsetHeight), this.group, this.camera)
     this.outlinePass.visibleEdgeColor.set('#ff0000') //描边颜色
     this.outlinePass.hiddenEdgeColor.set('#0000ff') //被其他物体遮挡时 描边颜色
     this.outlinePass.edgeStrength = 3 //线宽
@@ -575,8 +573,7 @@ export default class outLine {
       newlinks.forEach((link:any) => {
         this.addLine(link.source.y , link.source.x , link.target.y , link.target.x ,link.source.id,link.target.id)
       })
-      that.groupP.add(that.group)
-      that.scene.add(that.groupP)
+      that.scene.add(that.group)
       that.scene.add(that.lineGroup)
       that.setFloor(150)
     }, 200)
@@ -616,7 +613,7 @@ export default class outLine {
       // this.scene.add(cube2); //网格模型添加到场景中
       // this.scene.add(cube3);
       const planeGeometry = new THREE.PlaneGeometry(radius*5,radius*5);
-      const planeMesh = new THREE.Mesh(planeGeometry, material2)
+      const planeMesh = new THREE.Mesh(planeGeometry, material1)
       planeMesh.rotation.x -= Math.PI * 0.5;
       this.scene.add(planeMesh)
 

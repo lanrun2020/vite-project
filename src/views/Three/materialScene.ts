@@ -39,7 +39,7 @@ export default class materialScene {
     // this.addFlag();
     this.addPlane();
 
-    this.addBufferGeometry(); // 自定义几何缓存体
+    // this.addBufferGeometry(); // 自定义几何缓存体
 
     window.addEventListener('resize', this.onWindowResize);
     this.animate();

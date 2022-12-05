@@ -50,14 +50,14 @@ export const addPlaneLine = (viewer: any, active: boolean) => {
     const pathList = [ //历史轨迹数据
       {
         url: `/model/airplane02.glb`,
-        scale: 1,
+        scale: 500,
         minimumPixelSize: 25,
         airList: airList,
       },
       {
         url: `/model/CesiumAir.glb`,
-        scale: 1,
-        minimumPixelSize: 40,
+        scale: 500,
+        minimumPixelSize: 50,
         airList: airList2,
       }
     ]
