@@ -216,7 +216,7 @@ export default class outLine {
       url:`/model/XM.glb`
     },{
       type:'Switch',
-      url:`/model/routerN.glb`
+      url:`/model/server05.glb`
     }]
     const res = [
       {
