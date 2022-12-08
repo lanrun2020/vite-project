@@ -4,8 +4,8 @@ let renderId: any
 let primitivesLine: any
 let primitivesModelList: any[] = []
 let handler: any
-const num = 500 //一条轨迹上的点个数
-const lineNum = 100 //一种轨迹的数量
+const num = 20 //一条轨迹上的点个数
+const lineNum = 2 //一种轨迹的数量
 const start = new Cesium.JulianDate(2459905, 21600, Cesium.TimeStandard.UTC); //起始时间
 const stop = Cesium.JulianDate.addSeconds(start, num, new Cesium.JulianDate()) //终止时间 一个点一秒
 
@@ -56,7 +56,7 @@ export const addPlaneLine = (viewer: any, active: boolean) => {
       },
       {
         url: `/model/CesiumAir.glb`,
-        scale: 500,
+        scale: 1,
         minimumPixelSize: 50,
         airList: airList2,
       }
@@ -176,8 +176,9 @@ const addPlane = (item: any, num: number, start: any, primitives: any, startInde
       propertyPosition, //存路径点地理位置
       orientation, //存路径点方向
     },
+    distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0.0, 20000000.0),
     positions: points,
-    width: 1,
+    width: 100,
     material: new Cesium.Material({
       fabric: {
         uniforms: {

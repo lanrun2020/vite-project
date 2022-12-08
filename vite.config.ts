@@ -24,7 +24,7 @@ export default defineConfig({
     port: 3015,
     proxy: {
       '/map': {
-        target: 'http://localhost:8081/map',
+        target: 'http://localhost:8088/map',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/map/, '')
       }
