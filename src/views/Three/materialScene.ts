@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
 import flagImg from '../../assets/guoqi.png'
 import terrain from '../../assets/floor5.jpeg'
-import {getFlowMaterial, getFlagMaterial,getScanMaterial,getFlowMaterialByY,getRotateScanMaterial } from './shaderMaterial'
+import {getFlowMaterial, getFlagMaterial,getScanMaterial,getFlowMaterialByY,getRotateScanMaterial,getRotateMaterialByY } from './shaderMaterial'
 const THREE = T
 let that: any
 export default class materialScene {
@@ -35,9 +35,9 @@ export default class materialScene {
     // this.addCubeAndPlane();
     // this.addCircle();
     // this.addCircle3();
-    // this.addCylinder();
+    this.addCylinder();
     // this.addFlag();
-    this.addPlane();
+    // this.addPlane();
 
     // this.addBufferGeometry(); // 自定义几何缓存体
 
@@ -230,6 +230,14 @@ export default class materialScene {
     this.shaderMaterialList.push(flowMaterial2)
     cylinder2.position.set(8, 4.2, -20)
     this.scene.add(cylinder2);
+
+    //圆柱2 立体旋转扫描
+    const geometry3 = new THREE.CylinderGeometry(5, 5, 16, 32, 1, true);//true上下底面不封闭
+    const flowMaterial3 = getRotateMaterialByY() //绕y轴的旋转材质
+    const cylinder3 = new THREE.Mesh(geometry3, flowMaterial3);
+    this.shaderMaterialList.push(flowMaterial3)
+    cylinder3.position.set(-20, 8.1, -20)
+    this.scene.add(cylinder3);
 
   }
 
