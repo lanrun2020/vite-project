@@ -569,3 +569,98 @@ export const getFlashMaterial = (options?:{side?: object, transparent?: boolean,
   })
   return material
 }
+
+// 浮动旋转材质，随时间变化循环浮动旋转
+// options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}
+export const getUpDownRotateMaterial = (options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}) => {
+  const eagleFuc = `
+  float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
+    if(x>0.0){
+      if(y<0.0){
+        return atan(y/x) + 2.0*PI;
+      }
+      if(y>0.0){
+        return atan(y/x);
+      }
+    }else{
+      if(x<0.0){
+        return atan(y/x)+PI;
+      }else{
+        if(y>0.0){
+          return PI/2.0;
+        }else{
+          if(y<0.0){
+            return -PI/2.0;
+          }else{
+            return 0.0;
+          }
+        }
+      }
+    }
+  }
+  `
+  const tubeShader = {
+    vertexshader: `
+      uniform float time;
+      uniform float PI;
+      uniform float speed;
+      varying vec3 modelPos;
+      varying vec3 modelPos2;
+      `+ eagleFuc + `
+      float computeX(float eagle){ //eagle旋转角度
+        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * cos(radians(eagle + degrees(eagleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
+      }
+      float computeY(float eagle){
+        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * sin(radians(eagle + degrees(eagleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
+      }
+      void main() {
+        float eagle = fract(-speed*time*0.2)*360.0;//旋转的角度
+        modelPos = position;
+        modelPos2 = position;
+        modelPos2.y += sin(time*5.0 - PI);
+        modelPos2.x = computeX(eagle); //旋转后的位置x
+        modelPos2.z = computeY(eagle); //旋转后的位置z
+        vec4 mvPosition = modelViewMatrix * vec4(modelPos2, 1.0);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+      `,
+    fragmentshader: `
+      uniform float opacity;
+      uniform vec3 color;
+      uniform float time;
+      uniform float speed;
+      void main() {
+        float a = (sin(5.0 * time * speed) + 1.5)/2.0;
+        gl_FragColor = vec4(color, a * opacity);
+      }`,
+  }
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      color: {
+        value: options?.color || new THREE.Color(0x00ffff),
+        type: 'v3',
+      },
+      time: {
+        value: 1,
+        type: 'f',
+      },
+      speed: {
+        value: options?.speed || 1.0,
+        type: 'f',
+      },
+      opacity: {
+        value: options?.opacity || 0.3,
+        type: 'f',
+      },
+      PI: {
+        value: Math.PI,
+        type: "f"
+      },
+    },
+    side: options?.side || THREE.DoubleSide, // side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+    transparent: options?.transparent || true, // 是否透明
+    vertexShader: tubeShader.vertexshader, // 顶点着色器
+    fragmentShader: tubeShader.fragmentshader, // 片元着色器
+  })
+  return material
+}
