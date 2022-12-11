@@ -572,7 +572,7 @@ export const getFlashMaterial = (options?:{side?: object, transparent?: boolean,
 
 // 浮动旋转材质，随时间变化循环浮动旋转
 // options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}
-export const getUpDownRotateMaterial = (options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}) => {
+export const getUpDownRotateMaterial = (options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number, bool?:boolean}) => {
   const eagleFuc = `
   float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
     if(x>0.0){
@@ -608,10 +608,10 @@ export const getUpDownRotateMaterial = (options?:{side?: object, transparent?: b
       varying vec3 modelPos2;
       `+ eagleFuc + `
       float computeX(float eagle){ //eagle旋转角度
-        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * cos(radians(eagle + degrees(eagleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
+        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * cos(radians(eagle + degrees(eagleFuc(modelPos.x,modelPos.z))  ));
       }
       float computeY(float eagle){
-        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * sin(radians(eagle + degrees(eagleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
+        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * sin(radians(eagle + degrees(eagleFuc(modelPos.x,modelPos.z))  ));
       }
       void main() {
         float eagle = fract(-speed*time*0.2)*360.0;//旋转的角度
@@ -629,9 +629,10 @@ export const getUpDownRotateMaterial = (options?:{side?: object, transparent?: b
       uniform vec3 color;
       uniform float time;
       uniform float speed;
+      uniform bool b;
       void main() {
         float a = (sin(5.0 * time * speed) + 1.5)/2.0;
-        gl_FragColor = vec4(color, a * opacity);
+        gl_FragColor = b ? vec4(color, a * opacity) : vec4(color, opacity);
       }`,
   }
   const material = new THREE.ShaderMaterial({
@@ -645,18 +646,23 @@ export const getUpDownRotateMaterial = (options?:{side?: object, transparent?: b
         type: 'f',
       },
       speed: {
-        value: options?.speed || 1.0,
+        value: options?.speed || 1,
         type: 'f',
       },
       opacity: {
         value: options?.opacity || 0.3,
         type: 'f',
       },
+      bool: {
+        value: options?.bool || true,
+        type: 'b',
+      },
       PI: {
         value: Math.PI,
         type: "f"
       },
     },
+    // wireframe: true,
     side: options?.side || THREE.DoubleSide, // side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
     transparent: options?.transparent || true, // 是否透明
     vertexShader: tubeShader.vertexshader, // 顶点着色器

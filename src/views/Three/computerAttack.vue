@@ -23,6 +23,9 @@ const init = () => {
   height: 100%;
   /* height: calc(100vh - 80px); */
   position: relative;
+  /* background: url('../../assets/sceneBG.jpg') no-repeat;
+  background-size: cover;
+  background-position: center; */
   /* color: #00fdf5; */
   background-image: linear-gradient(90deg,rgb(0, 31, 84), rgb(0, 73, 150),rgb(0, 31, 84));
 }

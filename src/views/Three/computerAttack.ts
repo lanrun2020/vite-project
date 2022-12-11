@@ -21,6 +21,7 @@ import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import pointPng from '@/assets/point.png';
 import arrow1 from '@/assets/arrow5.png';
+import { getScanMaterial } from './shaderMaterial'
 const THREE = T
 let that: any
 export default class computerAttack {
@@ -32,7 +33,7 @@ export default class computerAttack {
   private group = new THREE.Group()
   private lineGroup = new THREE.Group()
   private labelRenderer: any
-  private tubeMaterial2: any
+  private rushMaterialList = []
   private beIntersectObject = []
   private transformControls: any
   private model: any
@@ -67,6 +68,7 @@ export default class computerAttack {
   setRenderer() {
     this.renderer = new THREE.WebGLRenderer({
       alpha:true,
+      antialias:true
     });
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
@@ -146,9 +148,10 @@ export default class computerAttack {
       // if (this.camera.position.y<0){this.camera.position.set(this.camera.position.x,0,this.camera.position.z)}
       this.renderer.render(this.scene, this.camera);
       this.labelRenderer.render(this.scene, this.camera);
-      if(this.tubeMaterial2){
-        // console.log(this.clock.getElapsedTime());
-        this.tubeMaterial2.uniforms.time.value = this.clock.getElapsedTime()
+      if(this.rushMaterialList.length){
+        this.rushMaterialList.forEach((material) => {
+          material.uniforms.time.value = this.clock.getElapsedTime()
+        })
       }
     }
   }
@@ -169,19 +172,20 @@ export default class computerAttack {
   setLight() {
     if (this.scene) {
       // 环境光
-      const ambient = new THREE.AmbientLight(0xffffff, 1);
+      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
       this.scene.add(ambient);
-      const directionalLight = new THREE.DirectionalLight(0xffffff);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
       directionalLight.position.set(0, 0, 100);
       this.scene.add(directionalLight);
 
-      const pointLight = new THREE.PointLight( 0xffffff, 1 );
+      const pointLight = new THREE.PointLight( 0xffffff, 0.5 );
       // pointLight.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ) ) );
-      pointLight.position.set(-50,5,-100)
+      pointLight.position.set(-50,50,-100)
       this.scene.add( pointLight );
-      const pointLight2 = new THREE.PointLight( 0xffffff, 1 );
+      const pointLight2 = new THREE.PointLight( 0xffffff, 0.5 );
       // pointLight2.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ) ) );
-      pointLight2.position.set(50,5,-100)
+      pointLight2.position.set(50,50,-100)
       this.scene.add( pointLight2 );
 
       // const rectLight3 = new THREE.RectAreaLight( 0xAFFFFF, 10, 50, 10 );
@@ -210,8 +214,10 @@ export default class computerAttack {
 
   setScene() {
     this.scene = new THREE.Scene();
+    // this.scene.background = new THREE.Color(0x000000);
+    // this.scene.fog = new THREE.FogExp2(0xcccccc, 0.002);
     // Grid 添加网格辅助对象
-    // const helper = new THREE.GridHelper(100, 50, 0x303030, 0x303030); //长度1000 划分为50份
+    const helper = new THREE.GridHelper(1500, 50, 0x60b1b5, 0x60b1b5); //长度1000 划分为50份
     // this.scene.add(helper);
     const axesHelper = new THREE.AxesHelper(500); //辅助三维坐标系
     // this.scene.add(axesHelper)
@@ -645,6 +651,71 @@ export default class computerAttack {
     }, 200)
   }
 
+  getTubeMaterial() {
+    // 第一步新建一个场景
+    const tubeShader = {
+      vertexshader: `
+          uniform float size;
+          uniform float time;
+          uniform float u_len;
+          attribute float u_index;
+          varying vec2 vUv;
+          uniform vec3 color;
+          uniform float u_opacity;
+          void main() {
+            vUv = uv;
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            gl_Position = projectionMatrix * mvPosition;
+          }
+          `,
+      fragmentshader: `
+        varying vec2 vUv;
+            uniform float u_opacity;
+            uniform vec3 color;
+            uniform float isTexture;
+            uniform float time;
+            uniform float speed;
+            uniform float repeatX;
+            void main() {
+                vec4 u_color = vec4(color,u_opacity);
+                gl_FragColor =  vec4(color,fract(vUv.x * repeatX - time*speed) * u_opacity * step(0.5,fract(vUv.x * repeatX - time*speed)));
+            }`
+    }
+    const tubeMaterial = new THREE.ShaderMaterial({
+      uniforms:{
+        color: {
+          value: new THREE.Color(0x00ffff),
+          type: "v3"
+        },
+        time: {
+          value: this.time,
+          type: "f"
+        },
+        u_len: {
+          value: 10,
+          type: "f"
+        },
+        repeatX: {
+          value: 5,
+          type: "f"
+        },
+        speed: {
+          value: 1.0,
+          type: "f"
+        },
+        u_opacity: {
+          value: 0.8,
+          type: "f"
+        },
+      },
+      transparent: true,
+      // depthTest: false,
+      vertexShader: tubeShader.vertexshader,
+      fragmentShader: tubeShader.fragmentshader
+    })
+    return tubeMaterial
+  }
+
   addLine(x1, y1, x2, y2, sourceId,targetId) {
     //平滑曲线
     const curve = new THREE.CatmullRomCurve3([
@@ -653,7 +724,9 @@ export default class computerAttack {
       new THREE.Vector3(x2, 0.5, y2),
     ]);
     const tubeGeometry = new THREE.TubeGeometry(curve, 50, 0.05, 10, false); //path路径 tubularSegments分段 radius半径 radialSegments管道横截面分段 close是否闭合
-    const mesh = new THREE.Mesh(tubeGeometry, this.tubeMaterial2);
+    const linematerial = this.getTubeMaterial()
+    const mesh = new THREE.Mesh(tubeGeometry, linematerial);
+    this.rushMaterialList.push(linematerial)
     mesh.sourceId = sourceId
     mesh.targetId = targetId
     mesh.sourceX = x1
@@ -751,6 +824,15 @@ export default class computerAttack {
       cube2.position.set(0, -5, 0)
       cube3.position.set(0, 0.1, 0)
       cube3.rotation.x = -Math.PI / 2
+
+      const geometry6 = new THREE.CircleGeometry(150, 128, 0); //半径，分段
+      const scanMaterial = getScanMaterial({repeat:2,thickness:0.01,opacity:0.6})
+      this.rushMaterialList.push(scanMaterial)
+      const circle = new THREE.Mesh(geometry6, scanMaterial);
+      circle.position.set(0, 1, 0)
+      circle.rotation.x = -Math.PI / 2
+      
+      this.scene.add(circle);
       this.scene.add(cube1); //网格模型添加到场景中
       this.scene.add(cube2); //网格模型添加到场景中
       this.scene.add(cube3);
@@ -821,86 +903,6 @@ export default class computerAttack {
 
   // 初始化
   async init() {
-    const textureLoader = new THREE.TextureLoader();
-    this.texture = textureLoader.load(arrow1); //./ZS箭头.svg  ./arrow.jpg
-    // 设置阵列模式为 RepeatWrapping
-    this.texture.wrapS = THREE.RepeatWrapping
-    this.texture.wrapT = THREE.RepeatWrapping
-
-    // 第一步新建一个场景
-    const tubeShader = {
-      vertexshader: `
-          uniform float size;
-          uniform float time;
-          uniform float u_len;
-          attribute float u_index;
-          varying vec2 vUv;
-          uniform vec3 color;
-          uniform float u_opacity;
-          void main() {
-            vUv = uv;
-            // vec4 v_color = vec4(color,u_opacity);
-              // if( u_index < time + u_len && u_index > time){
-              // }
-              vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-              gl_Position = projectionMatrix * mvPosition;
-              // vertexColors = true;
-          }
-          `,
-      fragmentshader: `
-      varying vec2 vUv;
-          uniform sampler2D u_map;
-          uniform float u_opacity;
-          uniform vec3 color;
-          uniform float isTexture;
-          uniform float time;
-          uniform float speed;
-          uniform float repeatX;
-          void main() {
-              vec4 u_color = vec4(color,u_opacity);
-              // gl_FragColor = u_color * texture2D(u_map, vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y));
-              // gl_FragColor = u_color * texture2D(u_map, vec2(fract(vUv.x * repeatX - time*speed),vUv.y));
-
-              gl_FragColor =  vec4(color,fract(vUv.x * repeatX - time*speed) * u_opacity * step(0.5,fract(vUv.x * repeatX - time*speed)));
-              // gl_FragColor = vec4(1.0, 1.0, 0, 1.0);
-          }`
-  }
-    this.tubeMaterial2 = new THREE.ShaderMaterial({
-      uniforms:{
-        color: {
-          value: new THREE.Color(0x00ffff),
-          type: "v3"
-        },
-        time: {
-          value: this.time,
-          type: "f"
-        },
-        u_len: {
-          value: 10,
-          type: "f"
-        },
-        u_map: {
-          value: this.texture,
-          type: "t2"
-        },
-        repeatX: {
-          value: 5,
-          type: "f"
-        },
-        speed: {
-          value: 1.0,
-          type: "f"
-        },
-        u_opacity: {
-          value: 0.8,
-          type: "f"
-        },
-      },
-      transparent: true,
-      // depthTest: false,
-      vertexShader: tubeShader.vertexshader,
-      fragmentShader: tubeShader.fragmentshader
-    })
     this.setScene();
     this.setRenderer();
     this.setCamera();

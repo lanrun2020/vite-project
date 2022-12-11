@@ -240,11 +240,17 @@ export default class materialScene {
     this.scene.add(cylinder3);
 
     const geometry4 = new THREE.CylinderGeometry(8, 0, 16, 5, 1, false);//true上下底面不封闭
+    // const geometry4 = new THREE.OctahedronGeometry(5);
     const flowMaterial4 = getUpDownRotateMaterial() //绕y轴的旋转材质
+    const flowMaterial41 = getUpDownRotateMaterial({opacity:1,bool:false}) //绕y轴的旋转材质
     const cylinder4 = new THREE.Mesh(geometry4, flowMaterial4);
     this.shaderMaterialList.push(flowMaterial4)
-    cylinder3.position.set(-40, 8.1, -20)
-    this.scene.add(cylinder4);
+    this.shaderMaterialList.push(flowMaterial41)
+
+    const edges3 = new THREE.EdgesGeometry(geometry4);
+    const line3 = new THREE.LineSegments(edges3,flowMaterial41);
+    // this.scene.add(cylinderMesh,line3);
+    this.scene.add(cylinder4, line3);
 
   }
 
