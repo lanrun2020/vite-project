@@ -94,7 +94,9 @@ export const getFlagMaterial = (options?: { side?: object, transparent?: boolean
     uniform float u_opacity;
     uniform float time;
     void main() {
-        gl_FragColor = texture2D(u_map,vUv);
+        vec2 vUv2 = vUv;
+        // vUv2.x = fract(vUv.x - time);
+        gl_FragColor = texture2D(u_map, vUv2);
     }`
   }
   const texture = new THREE.TextureLoader().load(options?.url || ''); //首先，获取到材质贴图纹理
@@ -464,6 +466,110 @@ export const getRotateMaterialByY = (options?:{side?: object, transparent?: bool
   return material
 }
 
+// 立体旋转扫描材质 圆柱绕Y轴的旋转扫描材质
+export const getRotateMaterialByY2 = (options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}) => {
+  //常用矩阵
+  const eagleFuc = `
+  float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
+    if(x>0.0){
+      if(y<0.0){
+        return atan(y/x) + 2.0*PI;
+      }
+      if(y>0.0){
+        return atan(y/x);
+      }
+    }else{
+      if(x<0.0){
+        return atan(y/x)+PI;
+      }else{
+        if(y>0.0){
+          return PI/2.0;
+        }else{
+          if(y<0.0){
+            return -PI/2.0;
+          }else{
+            return 0.0;
+          }
+        }
+      }
+    }
+  }
+  `
+  const tubeShader = {
+    vertexshader: `
+      varying vec2 vUv;
+      varying vec2 vUv2;
+      varying vec3 modelPos;
+      varying vec3 modelPos2;
+      uniform float time;
+      uniform float speed;
+      uniform float PI;
+      varying float eagle;
+      `+ eagleFuc + `
+      //degrees 弧度转角度
+      float computeX(float eagle){ //eagle旋转角度
+        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * cos(radians(eagle + degrees(eagleFuc(modelPos.x,modelPos.z))  ));
+      }
+      float computeY(float eagle){
+        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * sin(radians(eagle + degrees(eagleFuc(modelPos.x,modelPos.z))  ));
+      }
+      void main() {
+        vUv = uv;
+        eagle = fract(-speed*time)*360.0;//旋转的角度
+        modelPos = position;
+        modelPos2 = position;//记录初始位置,然后计算出旋转后的位置,初始位置保持不变,通过旋转角度计算旋转后的位置
+        // modelPos.z += 5.0;
+        modelPos2.x = computeX(eagle); //旋转后的位置x
+        modelPos2.z = computeY(eagle); //旋转后的位置z
+        vec4 mvPosition = modelViewMatrix * vec4(modelPos, 1.0);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+      `,
+    fragmentshader: `
+      varying vec3 modelPos2;
+      varying vec2 vUv;
+      uniform float opacity;
+      uniform vec3 color;
+      uniform float PI;
+      uniform float time;
+      varying float eagle;
+      `+ eagleFuc + `
+      void main() {
+        float e = eagleFuc(modelPos2.x,modelPos2.z)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
+        bool b = bool(sin(e) - mod(time*4.0-modelPos2.y,8.0));
+        gl_FragColor = vec4(color, sin(e) - mod(time*4.0-modelPos2.y,4.0));
+      }`
+  }
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      color: {
+        value: options?.color || new THREE.Color(0x00ffff),
+        type: "v3"
+      },
+      time: {
+        value: 1,
+        type: "f"
+      },
+      speed: {
+        value: options?.speed || 1.0,
+        type: "f"
+      },
+      opacity: {
+        value: options?.opacity || 0.4,
+        type: "f"
+      },
+      PI: {
+        value: Math.PI,
+        type: "f"
+      },
+    },
+    side: options?.side || THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+    transparent: options?.transparent || true,// 是否透明
+    vertexShader: tubeShader.vertexshader, // 顶点着色器
+    fragmentShader: tubeShader.fragmentshader // 片元着色器
+  })
+  return material
+}
 //流动线材质
 export const attackLineMaterial = () => {
   //正在攻击中材质

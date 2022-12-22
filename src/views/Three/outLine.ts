@@ -13,6 +13,7 @@ import {
   CSS2DRenderer,
   CSS2DObject
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
+import TWEEN from "tween"
 let that: any
 export default class outLine {
   private dom!: HTMLElement
@@ -184,6 +185,7 @@ export default class outLine {
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     this.render();
+    TWEEN.update();
     this.labelRenderer.render(this.scene, this.camera);
     this.composer.render()//放在render后面
     if(this.lineMaterial){
@@ -744,7 +746,7 @@ export default class outLine {
         if(that.selectNodeId === info.id){ //与上次覆盖节点相同，将不会发起请求
         } else {
           that.selectNodeId = info.id
-          console.log('覆盖节点模型，发起请求',info.id);
+          // console.log('覆盖节点模型，发起请求',info.id);
         }
       }
     }else{
@@ -762,17 +764,51 @@ export default class outLine {
       if (intersects.length > 0) {
         if (intersects[0].object) {
           that.PModel = that.getParent(intersects[0].object)
-          console.log(that.PModel);
+          // console.log(that.PModel);
           const info = that.PModel.information
           that.transformControls.attach(that.PModel)
           that.transformControls.showY = false //在y轴垂直方向上 不允许拖动
-          console.log('点击了节点：',info);
-          console.log(that.outlinePass.selectedObjects);
+          const pos = that.PModel.position
+          const newPos = new THREE.Vector3(pos.x, pos.y + 60, pos.z + 80)
+          // console.log('点击了节点：',info);
+          that.aanimateCamera(that.camera.position, newPos, that.controls.target,pos)
+          // console.log(that.outlinePass.selectedObjects);
         }
       } else {
         that.transformControls.detach()
       }
     }
+  }
+
+  aanimateCamera(current1, target1, current2, target2) { //current1相机当前位置,target1相机目标位置，current2控制器当前位置，target2控制器目标位置
+    const tween = new TWEEN.Tween({
+      x1: current1.x, // 相机当前位置x
+      y1: current1.y, // 相机当前位置y
+      z1: current1.z, // 相机当前位置z
+      x2: current2.x, // 控制当前的中心点x
+      y2: current2.y, // 控制当前的中心点y
+      z2: current2.z // 控制当前的中心点z
+    });
+    tween.to({
+      x1: target1.x, // 新的相机位置x
+      y1: target1.y, // 新的相机位置y
+      z1: target1.z, // 新的相机位置z
+      x2: target2.x, // 新的控制中心点位置x
+      y2: target2.y, // 新的控制中心点位置x
+      z2: target2.z // 新的控制中心点位置x
+    }, 1000);
+    tween.onUpdate(function() {
+      that.camera.position.x = this.x1;
+      that.camera.position.y = this.y1;
+      that.camera.position.z = this.z1;
+      that.controls.target.x = this.x2;
+      that.controls.target.y = this.y2;
+      that.controls.target.z = this.z2;
+      that.controls.update();
+    })
+    tween.easing(TWEEN.Easing.Cubic.InOut);
+    tween.start();
+    console.log('ddd');
   }
 
   getParent(obj) {

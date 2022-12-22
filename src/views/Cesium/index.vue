@@ -15,6 +15,7 @@ import "./RadarMaterial";
 import "./LineMaterial";
 import "./wallMaterial";
 import "./planeLineMaterial";
+import "./circleMaterial";
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
@@ -39,6 +40,7 @@ import { addShader } from "./addShader";
 import { addMoveCar } from "./addMoveCar";
 import { addPlaneLine } from "./addPlaneLine";
 import { addPlaneLineByTime } from "./addPlaneLineByTime";
+import { addBillboard } from "./addBillboard";
 
 let viewer: any;
 let toolList: any = ref([
@@ -163,6 +165,11 @@ let toolList: any = ref([
     value: 23,
     active: false,
   },
+  {
+    title: "billboard",
+    value: 24,
+    active: false,
+  },
 ])
 onMounted(async () => {
   console.log('cesium page')
@@ -253,6 +260,9 @@ const toolChecked = (active: boolean, value: number) => {
     case 23:// 增加航迹线
       addPlaneLine(viewer, active);
       break;
+    case 24:
+      addBillboard(viewer, active);
+      break;
     default: break;
   }
 };
@@ -277,10 +287,10 @@ const initCesium = () => {
     infoBox: false, // 是否显示点击要素之后显示的信息
     fullscreenButton: false, // 是否显示全屏按钮
     selectionIndicator: false, // 是否显示选中指示器
-    terrainProvider: Cesium.createWorldTerrain({
+    // terrainProvider: Cesium.createWorldTerrain({
       // requestVertexNormals: true,
       // requestWaterMask: true
-    }),
+    // }),
     // imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
     //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
     // })
@@ -307,7 +317,7 @@ const initCesium = () => {
     destination: Cesium.Cartesian3.fromDegrees(110, 30, 10000000),
     duration: 1.6,
   });
-  viewer.scene.screenSpaceCameraController.enableTit = false;
+  // viewer.scene.screenSpaceCameraController.enableTit = false;
 };
 const TimeFormatter = (time: any, viewModel: any) => {
   return DateTimeFormatter(time, viewModel, true)

@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
 import flagImg from '../../assets/guoqi.png'
 import terrain from '../../assets/floor5.jpeg'
-import {getFlowMaterial, getFlagMaterial,getScanMaterial,getFlowMaterialByY,getRotateScanMaterial,getRotateMaterialByY,getUpDownRotateMaterial } from './shaderMaterial'
+import {getFlowMaterial, getFlagMaterial,getScanMaterial,getFlowMaterialByY,getRotateScanMaterial,getRotateMaterialByY,getRotateMaterialByY2,getUpDownRotateMaterial } from './shaderMaterial'
 const THREE = T
 let that: any
 export default class materialScene {
@@ -36,7 +36,8 @@ export default class materialScene {
     // this.addCircle();
     // this.addCircle3();
     this.addCylinder();
-    // this.addFlag();
+    this.addFlag();
+    this.addTextPlane();
     // this.addPlane();
 
     // this.addBufferGeometry(); // 自定义几何缓存体
@@ -81,7 +82,7 @@ export default class materialScene {
       // 环境光
       const ambient = new THREE.AmbientLight(0xbbbbbb);
       this.scene.add(ambient);
-      const directionalLight = new THREE.DirectionalLight(0xffffff);
+      const directionalLight = new THREE.DirectionalLight(0xffffff,0.1);
       directionalLight.position.set(10, -50, 300);
       this.scene.add(directionalLight);
     }
@@ -150,6 +151,90 @@ export default class materialScene {
     this.scene.add(plane)
   }
 
+  addTextPlane() {
+    //创建一个长方体
+    const geometry = new THREE.BoxGeometry(14, 4, 0.1);
+    // const geometry = new THREE.CylinderGeometry(7.2, 7.2, 10, 32, 1, true);//true上下底面不封闭
+    const basicMaterial = new THREE.MeshBasicMaterial({ color: 0x666666, side: THREE.DoubleSide });
+    // const flowMaterial = getFlowMaterial() //流动材质
+    // this.shaderMaterialList.push(flowMaterial) //用于刷新材质的时间参数
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 128;
+    const c = canvas.getContext('2d')!;
+    c.fillStyle = 'rgba(0,225,225,0.0)';
+    c.fillRect(0, 0, 512, 128);
+    // 文字
+    c.beginPath();
+    c.translate(256, 64);
+    c.fillStyle = "#00ffff"; //文本填充颜色
+    c.font = "bold 36px 宋体"; //字体样式设置
+    c.textBaseline = "middle"; //文本与fillText定义的纵坐标
+    c.textAlign = "center"; //文本居中(以fillText定义的横坐标)
+    c.fillText("注入攻击中...", 0, 0);
+
+    const canvasTexture = new THREE.CanvasTexture(canvas);
+    canvasTexture.wrapS = THREE.RepeatWrapping;
+    const tubeShader = {
+      vertexshader: `
+      varying vec3 vp;
+      varying vec2 vUv;
+      uniform float time;
+      uniform float repeat;
+      void main() {
+        vp = position;
+        vUv = uv;
+        float dis = vUv.x;
+        vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * viewMatrix  * modelPosition;
+      }
+          `,
+      fragmentshader: `
+      varying vec2 vUv;
+      uniform sampler2D u_map;
+      uniform float u_opacity;
+      uniform float time;
+      uniform vec3 color;
+      void main() {
+          vec2 vUv2 = vUv;
+          vUv2.x = fract(vUv.x + time * 0.3);
+          gl_FragColor = texture2D(u_map, vUv2) + vec4(color, u_opacity * 0.2);;
+      }`
+    }
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        color: {
+          value: new THREE.Color(0x00ffff),
+          type: "v3"
+        },
+        time: {
+          value: 1,
+          type: "f"
+        },
+        repeat: { //周期
+          value: 1.5,
+          type: "f"
+        },
+        u_opacity: {
+          value: 0.9,
+          type: "f"
+        },
+        u_map: {
+          value: canvasTexture,
+          type: "t2"
+        }
+      },
+      // side: THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+      transparent: true,// 是否透明
+      vertexShader: tubeShader.vertexshader, // 顶点着色器
+      fragmentShader: tubeShader.fragmentshader // 片元着色器
+    })
+    this.shaderMaterialList.push(material)
+    const cube = new THREE.Mesh(geometry, material);
+    cube.position.set(0, 12, 0)
+    this.scene.add(cube)
+  }
+
   addFlag() {
     //旗杆
     const geometry = new THREE.CylinderGeometry(0.2, 0.2, 30, 16);
@@ -216,8 +301,8 @@ export default class materialScene {
   // 圆柱
   addCylinder() {
     //圆柱
-    const geometry = new THREE.CylinderGeometry(2, 2, 16, 32, 1, true);//true上下底面不封闭
-    const flowMaterial = getFlowMaterialByY({height:16,thickness:0.3}) //沿Y轴的流动材质
+    const geometry = new THREE.CylinderGeometry(2, 2, 10, 32, 1, true);//true上下底面不封闭
+    const flowMaterial = getFlowMaterialByY({height:10,thickness:0.1,speed:0.3,repeat:16}) //沿Y轴的流动材质
     const cylinder = new THREE.Mesh(geometry, flowMaterial);
     this.shaderMaterialList.push(flowMaterial)
     cylinder.position.set(0, 8.1, -20)
@@ -238,6 +323,14 @@ export default class materialScene {
     this.shaderMaterialList.push(flowMaterial3)
     cylinder3.position.set(-20, 8.1, -20)
     this.scene.add(cylinder3);
+
+      //圆柱2 立体旋转扫描
+      const geometry31 = new THREE.CylinderGeometry(5, 5, 16, 32, 1, true);//true上下底面不封闭
+      const flowMaterial31 = getRotateMaterialByY2() //绕y轴的旋转材质
+      const cylinder31 = new THREE.Mesh(geometry31, flowMaterial31);
+      this.shaderMaterialList.push(flowMaterial31)
+      cylinder31.position.set(-20, 8.1, 20)
+      this.scene.add(cylinder31);
 
     const geometry4 = new THREE.CylinderGeometry(8, 0, 16, 5, 1, false);//true上下底面不封闭
     // const geometry4 = new THREE.OctahedronGeometry(5);
