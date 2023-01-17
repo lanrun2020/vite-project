@@ -1,7 +1,7 @@
 import Cesium from "@/utils/importCesium"
 import river from '../../assets/arrow1.jpg'
 
-const entities: Array<object> = []
+const entities: object[] = []
 
 export const addBillboard = async (viewer: any, active: boolean) => {
   if (active) {
@@ -21,6 +21,13 @@ export const addBillboard = async (viewer: any, active: boolean) => {
       });
       const circleMaterial2 = new Cesium.CircleMaterialProperty({
         color: new Cesium.Color(1.0, 0.0, 0.0, 1.0),
+        speed: 1.0,
+        repeat: 1,
+        thickness: .8,
+        flash: true
+      });
+      const circleMaterial3 = new Cesium.CircleRotateMaterialProperty({
+        color: new Cesium.Color(0.0, 1.0, 1.0, 1.0),
         speed: 1.0,
         repeat: 1,
         thickness: .8,
@@ -57,6 +64,23 @@ export const addBillboard = async (viewer: any, active: boolean) => {
         semiMajorAxis: 1000,
         height: 1,
         material:circleMaterial2,
+      },
+    }));
+    let rotation = 0
+    entities.push(viewer.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(115.69777, 34.05883),
+      ellipse: {
+        // 椭圆短半轴长度
+        semiMinorAxis: 1000,
+        // 椭圆长半轴长度
+        semiMajorAxis: 1000,
+        height: 1,
+        material:circleMaterial3,
+        stRotation: new Cesium.CallbackProperty(() => {
+              // 设置旋转角度
+              rotation -= 0.08
+              return rotation
+            }, false)
       },
     }));
     const entity2 = viewer.entities.add({

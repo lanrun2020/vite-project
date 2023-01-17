@@ -16,6 +16,7 @@ import "./LineMaterial";
 import "./wallMaterial";
 import "./planeLineMaterial";
 import "./circleMaterial";
+import "./circleRotateMaterial";
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
@@ -45,18 +46,17 @@ import { addBillboard } from "./addBillboard";
 let viewer: any;
 let toolList: any = ref([
   {
-    title: "航迹线",
+    title: "迁徙线",
     value: 0,
     active: false,
   },
   {
-    title: "实时航线",
+    title: "扩散扫描",
     value: 1,
     active: false,
   },
   {
-    // title: "旋转扫描",
-    title: "迁徙线",
+    title: "旋转扫描",
     value: 2,
     active: false,
   },
@@ -166,8 +166,13 @@ let toolList: any = ref([
     active: false,
   },
   {
-    title: "billboard",
+    title: "实时航迹",
     value: 24,
+    active: false,
+  },
+  {
+    title: "billboard",
+    value: 25,
     active: false,
   },
 ])
@@ -186,15 +191,13 @@ const toolChecked = (active: boolean, value: number) => {
   toolList.value[value].active = active
   switch (value) {
     case 0:// 增加迁徙线
-      addPlaneLine(viewer, active);
+      addFlyLine(viewer, active);
       break;
     case 1:// 扩散扫描效果
-      // addSpreadEllipse(viewer, active);
-      addPlaneLineByTime(viewer, active);
+      addSpreadEllipse(viewer, active);
       break;
     case 2://旋转扫描效果
-      addFlyLine(viewer, active);
-      // addScanEllipse(viewer, active);
+      addScanEllipse(viewer, active);
       break;
     case 3://绘制多边形
       addPolygon2(viewer, active);
@@ -260,7 +263,10 @@ const toolChecked = (active: boolean, value: number) => {
     case 23:// 增加航迹线
       addPlaneLine(viewer, active);
       break;
-    case 24:
+    case 24:// 增加实时航迹线
+      addPlaneLineByTime(viewer, active);
+      break;
+    case 25:
       addBillboard(viewer, active);
       break;
     default: break;

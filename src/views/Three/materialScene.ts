@@ -162,7 +162,7 @@ export default class materialScene {
     canvas.width = 512;
     canvas.height = 128;
     const c = canvas.getContext('2d')!;
-    c.fillStyle = 'rgba(0,225,225,0.0)';
+    c.fillStyle = 'rgba(0,0,0,0.0)';
     c.fillRect(0, 0, 512, 128);
     // 文字
     c.beginPath();
@@ -171,7 +171,7 @@ export default class materialScene {
     c.font = "bold 36px 宋体"; //字体样式设置
     c.textBaseline = "middle"; //文本与fillText定义的纵坐标
     c.textAlign = "center"; //文本居中(以fillText定义的横坐标)
-    c.fillText("注入攻击中...", 0, 0);
+    c.fillText("起点", 0, 0);
 
     const canvasTexture = new THREE.CanvasTexture(canvas);
     canvasTexture.wrapS = THREE.RepeatWrapping;
@@ -197,14 +197,14 @@ export default class materialScene {
       uniform vec3 color;
       void main() {
           vec2 vUv2 = vUv;
-          vUv2.x = fract(vUv.x + time * 0.3);
+          // vUv2.x = fract(vUv.x + time * 0.3);
           gl_FragColor = texture2D(u_map, vUv2) + vec4(color, u_opacity * 0.2);;
       }`
     }
     const material = new THREE.ShaderMaterial({
       uniforms: {
         color: {
-          value: new THREE.Color(0x00ffff),
+          value: new THREE.Color(0x000000),
           type: "v3"
         },
         time: {
@@ -216,7 +216,7 @@ export default class materialScene {
           type: "f"
         },
         u_opacity: {
-          value: 0.9,
+          value: 0.0,
           type: "f"
         },
         u_map: {
@@ -324,13 +324,13 @@ export default class materialScene {
     cylinder3.position.set(-20, 8.1, -20)
     this.scene.add(cylinder3);
 
-      //圆柱2 立体旋转扫描
-      const geometry31 = new THREE.CylinderGeometry(5, 5, 16, 32, 1, true);//true上下底面不封闭
-      const flowMaterial31 = getRotateMaterialByY2() //绕y轴的旋转材质
-      const cylinder31 = new THREE.Mesh(geometry31, flowMaterial31);
-      this.shaderMaterialList.push(flowMaterial31)
-      cylinder31.position.set(-20, 8.1, 20)
-      this.scene.add(cylinder31);
+    //圆柱2 立体旋转扫描
+    const geometry31 = new THREE.CylinderGeometry(5, 5, 16, 32, 1, true);//true上下底面不封闭
+    const flowMaterial31 = getRotateMaterialByY2() //绕y轴的旋转材质
+    const cylinder31 = new THREE.Mesh(geometry31, flowMaterial31);
+    this.shaderMaterialList.push(flowMaterial31)
+    cylinder31.position.set(-20, 8.1, 20)
+    this.scene.add(cylinder31);
 
     const geometry4 = new THREE.CylinderGeometry(8, 0, 16, 5, 1, false);//true上下底面不封闭
     // const geometry4 = new THREE.OctahedronGeometry(5);
