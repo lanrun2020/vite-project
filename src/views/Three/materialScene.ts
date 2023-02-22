@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
 import flagImg from '../../assets/guoqi.png'
 import terrain from '../../assets/floor5.jpeg'
-import {getFlowMaterial, getFlagMaterial,getScanMaterial,getFlowMaterialByY,getRotateScanMaterial,getRotateMaterialByY,getRotateMaterialByY2,getUpDownRotateMaterial } from './shaderMaterial'
+import {getFlowMaterial, getFlagMaterial,getScanMaterial,getFlowMaterialByY,getRotateScanMaterial,getRotateMaterialByY,getRotateMaterialByY2,getRotateMaterialByY3,getUpDownRotateMaterial } from './shaderMaterial'
 const THREE = T
 let that: any
 export default class materialScene {
@@ -35,11 +35,11 @@ export default class materialScene {
     // this.addCubeAndPlane();
     // this.addCircle();
     // this.addCircle3();
-    this.addCylinder();
-    this.addFlag();
-    this.addTextPlane();
+    // this.addCylinder();
+    // this.addFlag();
+    // this.addTextPlane();
     // this.addPlane();
-
+    this.addRotationCylinder()
     // this.addBufferGeometry(); // 自定义几何缓存体
 
     window.addEventListener('resize', this.onWindowResize);
@@ -345,6 +345,16 @@ export default class materialScene {
     // this.scene.add(cylinderMesh,line3);
     this.scene.add(cylinder4, line3);
 
+  }
+
+  addRotationCylinder() {
+     //圆柱2 立体旋转扫描
+     const geometry31 = new THREE.CylinderGeometry(5, 5, 16, 32, 1, false);//true上下底面不封闭
+     const flowMaterial31 = getRotateMaterialByY3() //绕y轴的旋转材质
+     const cylinder31 = new THREE.Mesh(geometry31, flowMaterial31);
+     this.shaderMaterialList.push(flowMaterial31)
+     cylinder31.position.set(-20, 8.1, 20)
+     this.scene.add(cylinder31);
   }
 
   addBufferGeometry() {
