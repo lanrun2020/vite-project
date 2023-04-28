@@ -9,6 +9,9 @@ import { onMounted } from 'vue';
 let nodes
 let edges
 onMounted(() => {
+  draw()
+})
+const draw = () => {
   nodes = new DataSet([
   { id: 1, label: "Node 1" },
   { id: 2, label: "Node 2" },
@@ -29,11 +32,10 @@ onMounted(() => {
   };
   let options = {};
   let network = new Network(container, data, options);
-  setTimeout(() => {
-    network.body.data.nodes.add([{ id: 5, label: "Node 5" }])
-  }, 2000)
-})
-
+  // setTimeout(() => {
+  //   network.body.data.nodes.add([{ id: 5, label: "Node 5" }])
+  // }, 2000)
+}
 </script>
 <style scoped lang="scss">
 #network {

@@ -73,6 +73,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'outLine',
         component: () => import('../views/Three/outLine.vue'),
+      },
+      {
+        path: 'sceneBuild',
+        component: () => import('../views/Three/sceneBuild.vue'),
       }
     ],
   },

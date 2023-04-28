@@ -126,9 +126,283 @@ export const getFlagMaterial = (options?: { side?: object, transparent?: boolean
   })
   return material
 }
+// 动态水面
+export const getSeaMaterial = (options?: { side?: object, transparent?: boolean, url?: string }) => {
+  const tubeShader = {
+    vertexshader: `
+    varying vec3 vp;
+    varying vec2 vUv;
+    uniform float time;
+    uniform float repeat;
+    void main() {
+      vp = position;
+      vUv = uv;
+      float dis = vUv.x;
+      vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+      modelPosition.y += sin(modelPosition.x * repeat  - 2.0*time) * 5.0; //保证起始位置不动,越往后,摆动弧度越大
+      gl_Position = projectionMatrix * viewMatrix  * modelPosition;
+    }
+        `,
+    fragmentshader: `
+    varying vec2 vUv;
+    uniform float u_opacity;
+    uniform float time;
+    uniform vec3 color;
+    void main() {
+        vec2 vUv2 = vUv;
+        gl_FragColor = vec4(color, 0.5);
+    }`
+  }
+  const texture = new THREE.TextureLoader().load(options?.url || ''); //首先，获取到材质贴图纹理
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      color: {
+        value: new THREE.Color(0x00ffff),
+        type: "v3"
+      },
+      time: {
+        value: 1,
+        type: "f"
+      },
+      repeat: { //周期
+        value: 1.5,
+        type: "f"
+      },
+      u_opacity: {
+        value: 0.9,
+        type: "f"
+      },
+      u_map: {
+        value: texture,
+        type: "t2"
+      }
+    },
+    side: options?.side || THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+    transparent: options?.transparent || true,// 是否透明
+    vertexShader: tubeShader.vertexshader, // 顶点着色器
+    fragmentShader: tubeShader.fragmentshader // 片元着色器
+  })
+  return material
+}
+
+// 水面材质
+export const getWaterMaterial = () => {
+  const methods = `
+  /*
+ * "Seascape" by Alexander Alekseev aka TDM - 2014
+ * License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+ * Contact: tdmaav@gmail.com
+ */
+
+const int NUM_STEPS = 8;
+const float PI = 3.141592;
+const float EPSILON	= 1e-3;
+#define EPSILON_NRM (0.1 / iResolution.x)
+
+// sea
+const int ITER_GEOMETRY = 3;
+const int ITER_FRAGMENT = 5;
+const float SEA_HEIGHT = 0.6;
+const float SEA_CHOPPY = 4.0;
+const float SEA_SPEED = 0.8;
+const float SEA_FREQ = 0.16;
+const vec3 SEA_BASE = vec3(0.1,0.19,0.22);
+const vec3 SEA_WATER_COLOR = vec3(0.8,0.9,0.6);
+#define SEA_TIME (1.0 + time * SEA_SPEED)
+const mat2 octave_m = mat2(1.6,1.2,-1.2,1.6);
+
+// math
+mat3 fromEuler(vec3 ang) {
+	vec2 a1 = vec2(sin(ang.x),cos(ang.x));
+    vec2 a2 = vec2(sin(ang.y),cos(ang.y));
+    vec2 a3 = vec2(sin(ang.z),cos(ang.z));
+    mat3 m;
+    m[0] = vec3(a1.y*a3.y+a1.x*a2.x*a3.x,a1.y*a2.x*a3.x+a3.y*a1.x,-a2.y*a3.x);
+	m[1] = vec3(-a2.y*a1.x,a1.y*a2.y,a2.x);
+	m[2] = vec3(a3.y*a1.x*a2.x+a1.y*a3.x,a1.x*a3.x-a1.y*a3.y*a2.x,a2.y*a3.y);
+	return m;
+}
+float hash( vec2 p ) {
+	float h = dot(p,vec2(127.1,311.7));
+    return fract(sin(h)*43758.5453123);
+}
+float noise( in vec2 p ) {
+    vec2 i = floor( p );
+    vec2 f = fract( p );
+	vec2 u = f*f*(3.0-2.0*f);
+    return -1.0+2.0*mix( mix( hash( i + vec2(0.0,0.0) ),
+                     hash( i + vec2(1.0,0.0) ), u.x),
+                mix( hash( i + vec2(0.0,1.0) ),
+                     hash( i + vec2(1.0,1.0) ), u.x), u.y);
+}
+
+// lighting
+float diffuse(vec3 n,vec3 l,float p) {
+    return pow(dot(n,l) * 0.4 + 0.6,p);
+}
+float specular(vec3 n,vec3 l,vec3 e,float s) {
+    float nrm = (s + 8.0) / (PI * 8.0);
+    return pow(max(dot(reflect(e,n),l),0.0),s) * nrm;
+}
+
+// sky
+vec3 getSkyColor(vec3 e) {
+    e.y = max(e.y,0.0);
+    return vec3(pow(1.0-e.y,2.0), 1.0-e.y, 0.6+(1.0-e.y)*0.4);
+}
+
+// sea
+float sea_octave(vec2 uv, float choppy) {
+    uv += noise(uv);
+    vec2 wv = 1.0-abs(sin(uv));
+    vec2 swv = abs(cos(uv));
+    wv = mix(wv,swv,wv);
+    return pow(1.0-pow(wv.x * wv.y,0.65),choppy);
+}
+
+float map(vec3 p) {
+    float freq = SEA_FREQ;
+    float amp = SEA_HEIGHT;
+    float choppy = SEA_CHOPPY;
+    vec2 uv = p.xz; uv.x *= 0.75;
+    float d, h = 0.0;
+    for(int i = 0; i < ITER_GEOMETRY; i++) {
+    	d = sea_octave((uv+SEA_TIME)*freq,choppy);
+    	d += sea_octave((uv-SEA_TIME)*freq,choppy);
+        h += d * amp;
+    	uv *= octave_m; freq *= 1.9; amp *= 0.22;
+        choppy = mix(choppy,1.0,0.2);
+    }
+    return p.y - h;
+}
+
+float map_detailed(vec3 p) {
+    float freq = SEA_FREQ;
+    float amp = SEA_HEIGHT;
+    float choppy = SEA_CHOPPY;
+    vec2 uv = p.xz; uv.x *= 0.75;
+    float d, h = 0.0;
+    for(int i = 0; i < ITER_FRAGMENT; i++) {
+    	d = sea_octave((uv+SEA_TIME)*freq,choppy);
+    	d += sea_octave((uv-SEA_TIME)*freq,choppy);
+        h += d * amp;
+    	uv *= octave_m; freq *= 1.9; amp *= 0.22;
+        choppy = mix(choppy,1.0,0.2);
+    }
+    return p.y - h;
+}
+
+vec3 getSeaColor(vec3 p, vec3 n, vec3 l, vec3 eye, vec3 dist) {
+    float fresnel = clamp(1.0 - dot(n,-eye), 0.0, 1.0);
+    fresnel = pow(fresnel,3.0) * 0.65;
+    vec3 reflected = getSkyColor(reflect(eye,n));
+    vec3 refracted = SEA_BASE + diffuse(n,l,80.0) * SEA_WATER_COLOR * 0.12;
+    vec3 color = mix(refracted,reflected,fresnel);
+    float atten = max(1.0 - dot(dist,dist) * 0.001, 0.0);
+    color += SEA_WATER_COLOR * (p.y - SEA_HEIGHT) * 0.18 * atten;
+    color += vec3(specular(n,l,eye,60.0));
+    return color;
+}
+
+// tracing
+vec3 getNormal(vec3 p, float eps) {
+    vec3 n;
+    n.y = map_detailed(p);
+    n.x = map_detailed(vec3(p.x+eps,p.y,p.z)) - n.y;
+    n.z = map_detailed(vec3(p.x,p.y,p.z+eps)) - n.y;
+    n.y = eps;
+    return normalize(n);
+}
+
+float heightMapTracing(vec3 ori, vec3 dir, out vec3 p) {
+    float tm = 0.0;
+    float tx = 1000.0;
+    float hx = map(ori + dir * tx);
+    if(hx > 0.0) return tx;
+    float hm = map(ori + dir * tm);
+    float tmid = 0.0;
+    for(int i = 0; i < NUM_STEPS; i++) {
+        tmid = mix(tm,tx, hm/(hm-hx));
+        p = ori + dir * tmid;
+    	float hmid = map(p);
+		if(hmid < 0.0) {
+        	tx = tmid;
+            hx = hmid;
+        } else {
+            tm = tmid;
+            hm = hmid;
+        }
+    }
+    return tmid;
+  }`
+  const tubeShader = {
+    vertexshader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+      gl_Position = projectionMatrix * mvPosition;
+    }
+    `,
+    fragmentshader: `
+    // 时间
+    uniform float time;
+    // 分辨率
+    uniform vec2 iResolution;
+    // 鼠标位置
+    uniform vec2 iMouse;
+    varying vec2 vUv;
+    `+ methods + `
+    void main() {
+      vec2 uv = gl_FragCoord.xy / iResolution.xy;
+      uv = uv * 2.0 - 1.0;
+      uv.x *= iResolution.x / iResolution.y;
+      float time2 = time * 0.3 + iMouse.x*0.01;
+      // ray
+      vec3 ang = vec3(0.0, 0.0, 1.0);
+      vec3 ori = vec3(0.0,3.5,time2*5.0);
+      vec3 dir = normalize(vec3(uv.xy,-2.0));
+      dir.z += length(uv) * 0.15;
+      dir = normalize(dir) * fromEuler(ang);
+      // tracing
+      vec3 p;
+      heightMapTracing(ori,dir,p);
+      vec3 dist = p - ori;
+      vec3 n = getNormal(p, dot(dist,dist) * EPSILON_NRM);
+      vec3 light = normalize(vec3(0.0,1.0,0.8));
+      // color
+      vec3 color = mix(
+          getSkyColor(dir),
+          getSeaColor(p,n,light,dir,dist),
+          pow(smoothstep(0.0,-0.05,dir.y),0.3));
+      // post
+      gl_FragColor = vec4(pow(color,vec3(0.75)), 0.5);
+    }`
+  }
+  // const texture = new THREE.TextureLoader().load(options?.url || ''); //首先，获取到材质贴图纹理
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      time: {
+        value: 1,
+        type: "f"
+      },
+      iResolution: { value: new THREE.Vector2(1500.0, 1500.0) },
+      iMouse: { value: new THREE.Vector2(200.0, 1200.0) },
+      u_opacity: {
+        value: 0.9,
+        type: "f"
+      },
+    },
+    // side: options?.side || THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+    transparent: true,// 是否透明
+    vertexShader: tubeShader.vertexshader, // 顶点着色器
+    fragmentShader: tubeShader.fragmentshader // 片元着色器
+  })
+  return material
+}
 
 // 扫描材质 圆的扩散扫描材质
-export const getScanMaterial = (options?:{side?: object, transparent?: boolean,color?: THREE.Color,repeat?:number,thickness?: number,speed?: number, opacity?: number}) => {
+export const getScanMaterial = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number }) => {
   const tubeShader = {
     vertexshader: `
         varying vec2 vUv;
@@ -191,7 +465,7 @@ export const getScanMaterial = (options?:{side?: object, transparent?: boolean,c
 }
 
 // 流动材质 圆柱圆锥沿Y轴的流动材质
-export const getFlowMaterialByY = (options?:{side?: object, transparent?: boolean,height:number, color?: THREE.Color,repeat?:number,thickness?: number,speed?: number, opacity?: number}) => {
+export const getFlowMaterialByY = (options?: { side?: object, transparent?: boolean, height: number, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number }) => {
   const tubeShader = {
     vertexshader: `
       varying vec2 vUv;
@@ -261,7 +535,7 @@ export const getFlowMaterialByY = (options?:{side?: object, transparent?: boolea
 }
 
 // 扫描材质 圆的旋转扫描材质
-export const getRotateScanMaterial = (options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}) => {
+export const getRotateScanMaterial = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number }) => {
   //常用矩阵
   //modelMatrix模型矩阵
   //modelViewMatrix模型视图矩阵
@@ -364,7 +638,7 @@ export const getRotateScanMaterial = (options?:{side?: object, transparent?: boo
 }
 
 // 立体旋转扫描材质 圆柱绕Y轴的旋转扫描材质
-export const getRotateMaterialByY = (options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}) => {
+export const getRotateMaterialByY = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number }) => {
   //常用矩阵
   //modelMatrix模型矩阵
   //modelViewMatrix模型视图矩阵
@@ -467,7 +741,7 @@ export const getRotateMaterialByY = (options?:{side?: object, transparent?: bool
 }
 
 // 立体旋转扫描材质 圆柱绕Y轴的旋转扫描材质
-export const getRotateMaterialByY2 = (options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}) => {
+export const getRotateMaterialByY2 = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number }) => {
   //常用矩阵
   const eagleFuc = `
   float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
@@ -631,7 +905,7 @@ export const attackLineMaterial = () => {
 
 // 屏闪材质，随时间变化循环屏闪
 // options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}
-export const getFlashMaterial = (options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}) => {
+export const getFlashMaterial = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number }) => {
   const tubeShader = {
     vertexshader: `
       void main() {
@@ -678,7 +952,7 @@ export const getFlashMaterial = (options?:{side?: object, transparent?: boolean,
 
 // 浮动旋转材质，随时间变化循环浮动旋转
 // options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}
-export const getUpDownRotateMaterial = (options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number, bool?:boolean}) => {
+export const getUpDownRotateMaterial = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number, bool?: boolean }) => {
   const eagleFuc = `
   float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
     if(x>0.0){
@@ -777,7 +1051,7 @@ export const getUpDownRotateMaterial = (options?:{side?: object, transparent?: b
   return material
 }
 // 立体旋转扫描材质 圆柱绕中心轴的旋转 垂直间隔栅格
-export const getRotateMaterialByY3 = (options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number, edge?: number}) => {
+export const getRotateMaterialByY3 = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number, edge?: number }) => {
   const eagleFuc = `
   float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
     if(x>0.0){

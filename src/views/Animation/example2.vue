@@ -43,6 +43,9 @@ const lineOptions = new Array(10).fill('').map((item,index)=>{
   width: 100%;
   height: 100%;
   background-color: #1E0731;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .wrapper{
   width: 1000px;

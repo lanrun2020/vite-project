@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
 import flagImg from '../../assets/guoqi.png'
 import terrain from '../../assets/floor5.jpeg'
-import {getFlowMaterial, getFlagMaterial,getScanMaterial,getFlowMaterialByY,getRotateScanMaterial,getRotateMaterialByY,getRotateMaterialByY2,getRotateMaterialByY3,getUpDownRotateMaterial } from './shaderMaterial'
+import {getFlowMaterial, getFlagMaterial,getSeaMaterial,getWaterMaterial,getScanMaterial,getFlowMaterialByY,getRotateScanMaterial,getRotateMaterialByY,getRotateMaterialByY2,getRotateMaterialByY3,getUpDownRotateMaterial } from './shaderMaterial'
 const THREE = T
 let that: any
 export default class materialScene {
@@ -39,8 +39,10 @@ export default class materialScene {
     // this.addFlag();
     // this.addTextPlane();
     // this.addPlane();
-    this.addRotationCylinder()
+    // this.addRotationCylinder()
     // this.addBufferGeometry(); // 自定义几何缓存体
+    this.addWater();
+    // this.addSea();
 
     window.addEventListener('resize', this.onWindowResize);
     this.animate();
@@ -97,7 +99,7 @@ export default class materialScene {
     this.controls.screenSpacePanning = false; //定义平移时如何平移相机的位置。如果为 true，则相机在屏幕空间中平移。否则，相机会在与相机向上方向正交的平面中平移。OrbitControls 默认为 true；MapControls 为 false。
     // controls.minDistance = 50; //移动最小距离
     this.controls.maxDistance = 1500; //移动最大距离
-    this.controls.maxPolarAngle = Math.PI; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
+    this.controls.maxPolarAngle = Math.PI / 2.5; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
   }
 
   // 渲染
@@ -249,6 +251,36 @@ export default class materialScene {
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(12, 8, 128, 128), flagMaterial)
     plane.position.set(-23.9, 25.8, -25)
     this.scene.add(plane)
+  }
+
+  addSea() {
+      //旗帜
+    const flagMaterial = getSeaMaterial()
+    this.shaderMaterialList.push(flagMaterial)
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 128, 128), flagMaterial)
+    plane.position.set(0, 0, 0)
+    plane.rotateX(- Math.PI / 2)
+    this.scene.add(plane)
+  }
+
+  addWater() {
+    //旗帜
+    const flagMaterial = getWaterMaterial()
+    this.shaderMaterialList.push(flagMaterial)
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000, 1, 1), flagMaterial)
+    plane.position.set(0, 0, 0 )
+    plane.rotateX( -Math.PI / 2)
+    this.scene.add(plane)
+    /* 监听鼠标移动，并改变着色器使用的 iMouse 参数 */
+    // let mouseStartPosition:any = null; // 鼠标起始位置
+    // window.addEventListener("mousemove", function (event) {
+    //     if (!mouseStartPosition) {
+    //         mouseStartPosition = {x: event.clientX, y: event.clientY}
+    //     } else {
+    //       flagMaterial.uniforms.iMouse.value.x = event.clientX - mouseStartPosition.x;
+    //       flagMaterial.uniforms.iMouse.value.y = event.clientY - mouseStartPosition.y;
+    //     }
+    // })
   }
 
   addPlane() {

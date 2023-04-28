@@ -49,6 +49,9 @@
             <el-menu-item index="/threejs/outLine">
               outLine
             </el-menu-item>
+            <el-menu-item index="/threejs/sceneBuild">
+              SceneBuild
+            </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
         <el-menu-item index="/cesium">
