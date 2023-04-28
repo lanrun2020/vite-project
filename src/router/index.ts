@@ -22,6 +22,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'webgl',
         component: () => import('../views/WebGL/index.vue'),
+      },
+      {
+        path: 'graph',
+        component: () => import('../views/Graph/index.vue'),
       }
     ],
   },

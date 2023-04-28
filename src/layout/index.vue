@@ -103,6 +103,15 @@
             <span>WebGL</span>
           </template>
         </el-menu-item>
+
+        <el-menu-item index="/graph">
+          <el-icon>
+            <Compass />
+          </el-icon>
+          <template v-slot:title>
+            <span>Graph</span>
+          </template>
+        </el-menu-item>
       </el-menu>
 
       <el-container>

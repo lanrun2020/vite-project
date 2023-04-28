@@ -172,7 +172,7 @@ const screenFull = () => {
   }
 }
 </script>
-<style lang="scss">
+<style scoped lang="scss">
 .top-scroll {
   transform: translate3d(100%, 0, 0);
   animation: 40s 2s move linear infinite;
@@ -191,8 +191,12 @@ const screenFull = () => {
     }
   }
 }
-#home{
+#home {
   height: 100%;
   padding: 10px;
+  :deep(.el-table__row) {
+    color: rgb(0, 0, 0);
+  }
 }
+
 </style>

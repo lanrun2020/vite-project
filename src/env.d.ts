@@ -11,6 +11,7 @@ declare module '*.vue' {
 //   export default EchartsLayers
 // }
 declare module 'three'
+declare module 'dagre-d3'
 declare interface Window {
   Cesium: any,
   Viewer: any
