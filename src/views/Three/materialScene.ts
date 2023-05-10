@@ -36,13 +36,14 @@ export default class materialScene {
     // this.addCircle();
     // this.addCircle3();
     // this.addCylinder();
-    // this.addFlag();
+    this.addFlag();
     // this.addTextPlane();
     // this.addPlane();
     // this.addRotationCylinder()
     // this.addBufferGeometry(); // 自定义几何缓存体
-    this.addWater();
+    // this.addWater();
     // this.addSea();
+    this.addPoints()
 
     window.addEventListener('resize', this.onWindowResize);
     this.animate();
@@ -98,8 +99,8 @@ export default class materialScene {
     this.controls.dampingFactor = 0.05; // 阻尼系数
     this.controls.screenSpacePanning = false; //定义平移时如何平移相机的位置。如果为 true，则相机在屏幕空间中平移。否则，相机会在与相机向上方向正交的平面中平移。OrbitControls 默认为 true；MapControls 为 false。
     // controls.minDistance = 50; //移动最小距离
-    this.controls.maxDistance = 1500; //移动最大距离
-    this.controls.maxPolarAngle = Math.PI / 2.5; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
+    this.controls.maxDistance = 2500; //移动最大距离
+    // this.controls.maxPolarAngle = Math.PI / 2.5; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
   }
 
   // 渲染
@@ -267,7 +268,7 @@ export default class materialScene {
     //旗帜
     const flagMaterial = getWaterMaterial()
     this.shaderMaterialList.push(flagMaterial)
-    const plane = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000, 1, 1), flagMaterial)
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(100, 100, 1, 1), flagMaterial)
     plane.position.set(0, 0, 0 )
     plane.rotateX( -Math.PI / 2)
     this.scene.add(plane)
@@ -281,6 +282,20 @@ export default class materialScene {
     //       flagMaterial.uniforms.iMouse.value.y = event.clientY - mouseStartPosition.y;
     //     }
     // })
+  }
+
+  addPoints() {
+    const geometry = new THREE.BufferGeometry()
+    const vertices = new Float32Array( [
+      -1.0, -1.0,  1.0,
+       1.0, -1.0,  1.0
+    ] );
+    // itemSize = 3 因为每个顶点都是一个三元组。
+    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+    // const material = new THREE.MeshBasicMaterial( { color: 0xff0000, side: THREE.DoubleSide } );
+    const material = new THREE.PointsMaterial( { size: 0.1,color: 0x888888 } );
+    const mesh = new THREE.Points( geometry, material );
+    this.scene.add(mesh)
   }
 
   addPlane() {
@@ -382,7 +397,7 @@ export default class materialScene {
   addRotationCylinder() {
      //圆柱2 立体旋转扫描
      const geometry31 = new THREE.CylinderGeometry(5, 5, 16, 32, 1, false);//true上下底面不封闭
-     const flowMaterial31 = getRotateMaterialByY3() //绕y轴的旋转材质
+     const flowMaterial31 = getRotateMaterialByY3({edge:2}) //绕y轴的旋转材质
      const cylinder31 = new THREE.Mesh(geometry31, flowMaterial31);
      this.shaderMaterialList.push(flowMaterial31)
      cylinder31.position.set(-20, 8.1, 20)

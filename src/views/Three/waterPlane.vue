@@ -28,6 +28,9 @@ const init = () => {
   camera.position.set(30, 30, 100);
 
   sun = new THREE.Vector3();
+    // 辅助三维坐标系
+    // const axesHelper = new THREE.AxesHelper(500);
+    // scene.add(axesHelper)
 
   // Water
 
@@ -95,7 +98,7 @@ const init = () => {
   updateSun();
 
   controls = new OrbitControls(camera, renderer.domElement);
-  // controls.maxPolarAngle = Math.PI * 0.495;
+  controls.maxPolarAngle = Math.PI * 0.495;
   controls.target.set(0, 10, 0);
   controls.minDistance = 40.0;
   controls.maxDistance = 200.0;

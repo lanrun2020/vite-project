@@ -28,5 +28,6 @@ module.exports = {
         "@typescript-eslint/no-this-alias": 'off',
         "@typescript-eslint/ban-types": 'off',
         'no-undef': 'off',
+        "no-debugger": "off",
     }
 }

@@ -570,6 +570,8 @@ export default class outLine {
           cube1.position.copy(mroot.position)
           cube1.position.y += size.y * 0.5
           that.addLabel(mroot, node.name, size.y / Scalar, size.x)
+        },undefined,(error) => {
+          console.log('模型加载错误', error);
         })
       })
       newlinks.forEach((link:any) => {

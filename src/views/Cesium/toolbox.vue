@@ -17,12 +17,16 @@
 import { ref, watch } from "vue";
 import Toolitem from "./toolitem.vue";
 import { DArrowRight, DArrowLeft } from "@element-plus/icons-vue";
-
+type toolItemType = {
+  title: string;
+  value: number;
+  active: boolean;
+}
 let toolActive = ref(true);
 
 //props带默认值的写法
 const props = withDefaults(defineProps<{
-  toolList?: Array<{ value: number, title: string, active:boolean }>;
+  toolList?: Array<toolItemType>;
 }>(), { toolList: () => [] });
 
 const emit = defineEmits(["toolChecked"]);
@@ -38,7 +42,7 @@ const toolChecked = (active: boolean, value: number) => {
   width: 300px;
   top: 18vh;
   right: -1px;
-  z-index: 1;
+  z-index: 999;
   height: 60vh;
   border-radius: 2px;
   border: 1px solid rgb(0, 195, 255);

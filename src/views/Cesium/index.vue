@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import Toolbox from "./toolbox.vue";
-import { ref, onMounted } from "vue";
+import { ref, Ref, onMounted } from "vue";
 import { fetchCesium } from "@/apis/an-system";
 import { addPolygon2 } from "./polygon";
 import Cesium from '@/utils/importCesium'
@@ -43,8 +43,13 @@ import { addPlaneLine } from "./addPlaneLine";
 import { addPlaneLineByTime } from "./addPlaneLineByTime";
 import { addBillboard } from "./addBillboard";
 
+type toolItemType = {
+  title: string;
+  value: number;
+  active: boolean;
+}
 let viewer: any;
-let toolList: any = ref([
+let toolList: Ref<toolItemType[]> = ref([
   {
     title: "迁徙线",
     value: 0,
@@ -155,11 +160,11 @@ let toolList: any = ref([
     value: 21,
     active: false,
   },
-  {
-    title: "驾驶汽车",
-    value: 22,
-    active: false,
-  },
+  // {
+  //   title: "驾驶汽车",
+  //   value: 22,
+  //   active: false,
+  // },
   {
     title: "航迹线",
     value: 23,
@@ -174,7 +179,7 @@ let toolList: any = ref([
     title: "billboard",
     value: 25,
     active: false,
-  },
+  }
 ])
 onMounted(async () => {
   console.log('cesium page')
@@ -188,7 +193,8 @@ const toolChecked = (active: boolean, value: number) => {
       duration: 1.6,
     });
   }
-  toolList.value[value].active = active
+  const tool = toolList.value.find((item) => item.value === value)
+  tool && (tool.active = active)
   switch (value) {
     case 0:// 增加迁徙线
       addFlyLine(viewer, active);

@@ -78,13 +78,14 @@ export const getFlagMaterial = (options?: { side?: object, transparent?: boolean
     varying vec2 vUv;
     uniform float time;
     uniform float repeat;
+    uniform float speed;
     void main() {
       vp = position;
       vUv = uv;
       float dis = vUv.x;
       vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-      modelPosition.z += sin(modelPosition.x * repeat / 2.0  - 2.0*time) * 1.2 * dis; //保证起始位置不动,越往后,摆动弧度越大
-      modelPosition.y += sin(modelPosition.x * repeat  - 2.0*time) * 0.5 * dis - 1.5*dis*dis;
+      modelPosition.z += sin(modelPosition.x * repeat / 2.0  - 2.0*time * speed) * 1.2 * dis; //保证起始位置不动,越往后,摆动弧度越大
+      modelPosition.y += sin(modelPosition.x * repeat  - 2.0*time*speed) * 0.5 * dis - 1.5*dis*dis;
       gl_Position = projectionMatrix * viewMatrix  * modelPosition;
     }
         `,
@@ -93,9 +94,10 @@ export const getFlagMaterial = (options?: { side?: object, transparent?: boolean
     uniform sampler2D u_map;
     uniform float u_opacity;
     uniform float time;
+    uniform float speed;
     void main() {
         vec2 vUv2 = vUv;
-        // vUv2.x = fract(vUv.x - time);
+        // vUv2.x = fract(vUv.x - time * speed);
         gl_FragColor = texture2D(u_map, vUv2);
     }`
   }
@@ -104,6 +106,10 @@ export const getFlagMaterial = (options?: { side?: object, transparent?: boolean
     uniforms: {
       time: {
         value: 1,
+        type: "f"
+      },
+      speed: {
+        value: 8.0,
         type: "f"
       },
       repeat: { //周期
@@ -197,7 +203,7 @@ export const getWaterMaterial = () => {
 const int NUM_STEPS = 8;
 const float PI = 3.141592;
 const float EPSILON	= 1e-3;
-#define EPSILON_NRM (0.1 / iResolution.x)
+#define EPSILON_NRM (0.1 / 11440.0)
 
 // sea
 const int ITER_GEOMETRY = 3;
@@ -214,13 +220,13 @@ const mat2 octave_m = mat2(1.6,1.2,-1.2,1.6);
 // math
 mat3 fromEuler(vec3 ang) {
 	vec2 a1 = vec2(sin(ang.x),cos(ang.x));
-    vec2 a2 = vec2(sin(ang.y),cos(ang.y));
-    vec2 a3 = vec2(sin(ang.z),cos(ang.z));
-    mat3 m;
-    m[0] = vec3(a1.y*a3.y+a1.x*a2.x*a3.x,a1.y*a2.x*a3.x+a3.y*a1.x,-a2.y*a3.x);
-	m[1] = vec3(-a2.y*a1.x,a1.y*a2.y,a2.x);
-	m[2] = vec3(a3.y*a1.x*a2.x+a1.y*a3.x,a1.x*a3.x-a1.y*a3.y*a2.x,a2.y*a3.y);
-	return m;
+  vec2 a2 = vec2(sin(ang.y),cos(ang.y));
+  vec2 a3 = vec2(sin(ang.z),cos(ang.z));
+  mat3 m;
+  m[0] = vec3(a1.y*a3.y+a1.x*a2.x*a3.x,a1.y*a2.x*a3.x+a3.y*a1.x,-a2.y*a3.x);
+  m[1] = vec3(-a2.y*a1.x,a1.y*a2.y,a2.x);
+  m[2] = vec3(a3.y*a1.x*a2.x+a1.y*a3.x,a1.x*a3.x-a1.y*a3.y*a2.x,a2.y*a3.y);
+  return m;
 }
 float hash( vec2 p ) {
 	float h = dot(p,vec2(127.1,311.7));
@@ -285,9 +291,9 @@ float map_detailed(vec3 p) {
     for(int i = 0; i < ITER_FRAGMENT; i++) {
     	d = sea_octave((uv+SEA_TIME)*freq,choppy);
     	d += sea_octave((uv-SEA_TIME)*freq,choppy);
-        h += d * amp;
+      h += d * amp;
     	uv *= octave_m; freq *= 1.9; amp *= 0.22;
-        choppy = mix(choppy,1.0,0.2);
+      choppy = mix(choppy,1.0,0.2);
     }
     return p.y - h;
 }
@@ -348,35 +354,35 @@ float heightMapTracing(vec3 ori, vec3 dir, out vec3 p) {
     // 时间
     uniform float time;
     // 分辨率
-    uniform vec2 iResolution;
+    //uniform vec2 iResolution;
     // 鼠标位置
     uniform vec2 iMouse;
     varying vec2 vUv;
     `+ methods + `
     void main() {
-      vec2 uv = gl_FragCoord.xy / iResolution.xy;
-      uv = uv * 2.0 - 1.0;
-      uv.x *= iResolution.x / iResolution.y;
-      float time2 = time * 0.3 + iMouse.x*0.01;
-      // ray
+      vec2 uv = vUv;
+      // gl_FragCoord 当前片元相对窗口坐标;
+      uv = uv * 2.0 - 2.0;
+      float time2 = time * 0.3;
       vec3 ang = vec3(0.0, 0.0, 1.0);
-      vec3 ori = vec3(0.0,3.5,time2*5.0);
+      vec3 ori = vec3(0.0, 3.5, time2 * 5.0);
       vec3 dir = normalize(vec3(uv.xy,-2.0));
-      dir.z += length(uv) * 0.15;
+      // normalize(x)将x归一化
+      // dir.z += length(uv) * 0.15;
       dir = normalize(dir) * fromEuler(ang);
       // tracing
       vec3 p;
       heightMapTracing(ori,dir,p);
       vec3 dist = p - ori;
+      // dot()函数是求点积
       vec3 n = getNormal(p, dot(dist,dist) * EPSILON_NRM);
       vec3 light = normalize(vec3(0.0,1.0,0.8));
       // color
-      vec3 color = mix(
-          getSkyColor(dir),
-          getSeaColor(p,n,light,dir,dist),
-          pow(smoothstep(0.0,-0.05,dir.y),0.3));
-      // post
-      gl_FragColor = vec4(pow(color,vec3(0.75)), 0.5);
+      vec3 color = getSeaColor(p,n,light,dir,dist);
+      // mix(x, y, a): x, y的线性混叠, x(1-a) + y*a; a为0 结果为x, a为1 结果为y
+      // pow(x,y)返回x的y次幂
+      // smoothstep(edge0,edge1,x)函数将x在[edge0, edge1]的部分平滑的映射到[0,1]
+      gl_FragColor = vec4(pow(color,vec3(0.75)), 0.9);
     }`
   }
   // const texture = new THREE.TextureLoader().load(options?.url || ''); //首先，获取到材质贴图纹理
@@ -386,7 +392,7 @@ float heightMapTracing(vec3 ori, vec3 dir, out vec3 p) {
         value: 1,
         type: "f"
       },
-      iResolution: { value: new THREE.Vector2(1500.0, 1500.0) },
+      //iResolution: { value: new THREE.Vector2(2560.0, 1440.0) },//分辨率
       iMouse: { value: new THREE.Vector2(200.0, 1200.0) },
       u_opacity: {
         value: 0.9,
