@@ -12,7 +12,7 @@ import { Sky } from 'three/examples/jsm/objects/Sky.js';
 
 const renderer = new THREE.WebGLRenderer();
 const scene = new THREE.Scene();
-let camera:any, sun:any,water:any,controls:any,stats:any
+let camera: any, sun: any, water: any, controls: any, stats: any
 let container: HTMLElement
 onMounted(() => {
   init()
@@ -28,9 +28,9 @@ const init = () => {
   camera.position.set(30, 30, 100);
 
   sun = new THREE.Vector3();
-    // 辅助三维坐标系
-    // const axesHelper = new THREE.AxesHelper(500);
-    // scene.add(axesHelper)
+  // 辅助三维坐标系
+  // const axesHelper = new THREE.AxesHelper(500);
+  // scene.add(axesHelper)
 
   // Water
 
@@ -41,7 +41,7 @@ const init = () => {
     {
       textureWidth: 1024,
       textureHeight: 1024,
-      waterNormals: new THREE.TextureLoader().load('textures/waternormals.jpg', function (texture:any) {
+      waterNormals: new THREE.TextureLoader().load('textures/waternormals.jpg', function (texture: any) {
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
       }),
       sunDirection: new THREE.Vector3(),
@@ -75,7 +75,7 @@ const init = () => {
   };
 
   const pmremGenerator = new THREE.PMREMGenerator(renderer);
-  let renderTarget:any;
+  let renderTarget: any;
 
   function updateSun() {
 
@@ -115,14 +115,14 @@ const init = () => {
   container.appendChild(gui.domElement)
   gui.domElement.style.position = 'absolute'
   gui.domElement.style.right = '0px'
-  const folderSky:any = gui.addFolder('Sky');
+  const folderSky: any = gui.addFolder('Sky');
   folderSky.add(parameters, 'elevation', 0, 90, 0.1).onChange(updateSun);
   folderSky.add(parameters, 'azimuth', - 180, 180, 0.1).onChange(updateSun);
   folderSky.open();
 
   const waterUniforms = water.material.uniforms;
 
-  const folderWater:any = gui.addFolder('Water');
+  const folderWater: any = gui.addFolder('Water');
   folderWater.add(waterUniforms.distortionScale, 'value', 0, 8, 0.1).name('distortionScale');
   folderWater.add(waterUniforms.size, 'value', 0.1, 10, 0.1).name('size');
   folderWater.open();

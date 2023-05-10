@@ -26,10 +26,12 @@ const init = () => {
   position: relative;
   width: 100%;
   height: 100%;
+
   #sceneBuild {
     width: 100%;
     height: 100%;
   }
+
   .tool-card {
     position: absolute;
     top: 0;

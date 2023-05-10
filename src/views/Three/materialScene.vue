@@ -4,7 +4,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
 import materialScene from "./materialScene"
-let scene: any
+let scene: materialScene
 onMounted(() => {
   init();
 });

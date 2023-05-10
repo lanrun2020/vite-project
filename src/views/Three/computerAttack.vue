@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
 import computerAttack from "./computerAttack"
-let map: any
+let map: computerAttack
 onMounted(() => {
   init();
 });
@@ -27,9 +27,10 @@ const init = () => {
   background-size: cover;
   background-position: center; */
   /* color: #00fdf5; */
-  background-image: linear-gradient(90deg,rgb(0, 31, 84), rgb(0, 73, 150),rgb(0, 31, 84));
+  background-image: linear-gradient(90deg, rgb(0, 31, 84), rgb(0, 73, 150), rgb(0, 31, 84));
 }
-.computer-box-label2{
+
+.computer-box-label2 {
   /* width: 120px; */
   /* height: 30px; */
   padding: 5px;
@@ -38,7 +39,8 @@ const init = () => {
   border: 1px solid rgba(0, 83, 91, 0.083);
   background-color: rgb(0, 0, 0);
 }
-.computer-box-label{
+
+.computer-box-label {
   color: rgb(0, 255, 255);
   /* width: 80px; */
   font-size: 14px;
@@ -47,6 +49,7 @@ const init = () => {
   background: url('@/assets/msg-bg.png') no-repeat;
   background-size: cover;
 }
+
 /* .computer-box-label::after {
     content: "";
     width: calc(100% + 22px);
@@ -57,7 +60,6 @@ const init = () => {
     left: -22px;
     background: url('@/assets/corner.png') no-repeat;
 } */
-#graph{
+#graph {
   display: none;
-}
-</style>
+}</style>

@@ -4,7 +4,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
 import chinaMap from "./chinaMap"
-let map: any
+let map: chinaMap
 onMounted(() => {
   init();
 });

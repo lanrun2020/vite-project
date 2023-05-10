@@ -152,7 +152,6 @@ let isCollapse = ref(false)
 // eslint-disable-next-line @typescript-eslint/ban-types
 const menuSelect = (path: string) => {
   if (path !== router.currentRoute.value.path) {
-    console.log('push',path);
     router.push({ path });
   }
 };

@@ -5,7 +5,7 @@
 import { onMounted, onUnmounted } from "vue";
 // import ThreeJs2 from "./index"
 import ThreeJs2 from "./three"
-let T: any
+let T: ThreeJs2
 onMounted(() => {
   init();
 });

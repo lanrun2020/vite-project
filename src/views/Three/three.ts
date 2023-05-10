@@ -26,7 +26,7 @@ export default class ThreeJs2 {
     this.init()
   }
   // 设置透视相机
-  setCamera () {
+  setCamera() {
     // 第二参数就是 长度和宽度比 默认采用浏览器  返回以像素为单位的窗口的内部宽度和高度
     this.camera = new THREE.PerspectiveCamera(
       75,
@@ -38,7 +38,7 @@ export default class ThreeJs2 {
   }
 
   // 设置渲染器
-  setRenderer () {
+  setRenderer() {
     this.renderer = new THREE.WebGLRenderer();
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
@@ -46,7 +46,7 @@ export default class ThreeJs2 {
   }
 
   // 设置控制器
-  setControls () {
+  setControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement) //轨道控制器
     this.controls.update();
     this.controls.enableDamping = true; // 阻尼（惯性）是否启用
@@ -57,7 +57,7 @@ export default class ThreeJs2 {
     this.controls.maxPolarAngle = Math.PI; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
   }
   // 创建网格模型
-  setCube () {
+  setCube() {
     if (this.scene) {
       const geometry = new THREE.BoxGeometry(20, 20, 20); //创建一个立方体几何对象Geometry
       // const material2 = new THREE.MeshBasicMaterial({ color: 0xfff, transparent: true, opacity: 0.8 }); //材质对象Material
@@ -81,7 +81,7 @@ export default class ThreeJs2 {
     }
   }
 
-  setSphere () {
+  setSphere() {
     if (this.scene) {
       const sphereMaterial = new THREE.MeshLambertMaterial({ //MeshLambertMaterial  漫反射效果
         color: 0x0000ff,
@@ -131,14 +131,14 @@ export default class ThreeJs2 {
   }
 
   // 渲染
-  render () {
+  render() {
     if (this.renderer && this.scene && this.camera) {
       this.renderer.render(this.scene, this.camera);
     }
   }
 
   // 动画
-  animate () {
+  animate() {
     this.requestId = requestAnimationFrame(() => this.animate());
     this.cubeCamera.update(this.renderer, this.scene);
     this.controls.update()
@@ -156,7 +156,7 @@ export default class ThreeJs2 {
     this.render();
   }
   // 设置光源
-  setLight () {
+  setLight() {
     if (this.scene) {
       // 环境光
       // var ambient = new THREE.AmbientLight(0xffffff);
@@ -184,7 +184,7 @@ export default class ThreeJs2 {
   }
 
   // 监听窗口变化，重新设置画布大小
-  onWindowResize () {
+  onWindowResize() {
     if (that.dom && that.dom.offsetWidth) {
       that.camera.aspect = that.dom.offsetWidth / that.dom.offsetHeight;
       that.camera.updateProjectionMatrix();
@@ -192,7 +192,7 @@ export default class ThreeJs2 {
     }
   }
 
-  setScene () {
+  setScene() {
     this.scene = new THREE.Scene();
     // scene.background = new THREE.Color(0xcccccc); //背景颜色
     // scene.fog = new THREE.FogExp2(0xcccccc, 0.002); //雾效果
@@ -212,7 +212,7 @@ export default class ThreeJs2 {
     });
   }
 
-  addSolider () {
+  addSolider() {
     const loader = new GLTFLoader();
     loader.load(`/model/Soldier.glb`, function (gltf) {
       const model = gltf.scene;
@@ -233,7 +233,7 @@ export default class ThreeJs2 {
       that.setWeight(walkAction, 0)
     });
   }
-  setWeight (action: any, weight: number) {
+  setWeight(action: any, weight: number) {
 
     action.enabled = true;
     action.setEffectiveTimeScale(1);
@@ -242,7 +242,7 @@ export default class ThreeJs2 {
 
   }
   // 停止渲染
-  stop () {
+  stop() {
     window.removeEventListener('resize', this.onWindowResize)
     cancelAnimationFrame(this.requestId)
   }
@@ -251,7 +251,7 @@ export default class ThreeJs2 {
   //   this.animate();
   // }
   // 初始化
-  init () {
+  init() {
     // 第一步新建一个场景
     this.setScene();
     keyStates = {}

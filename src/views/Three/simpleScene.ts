@@ -1,15 +1,14 @@
-import axios from "axios";
 import * as T from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 const THREE = T
-let that: any
+let that: simpleScene
 export default class simpleScene {
   private dom!: HTMLElement
   private scene!: THREE.Scene
   private camera!: THREE.PerspectiveCamera
   private renderer!: THREE.WebGLRenderer
-  private controls: any
-  private requestId: any
+  private controls: OrbitControls
+  private requestId: number
   private cube!: THREE.Mesh
   constructor(dom: HTMLElement) {
     that = this
@@ -17,7 +16,7 @@ export default class simpleScene {
     this.init()
   }
 
-   // 初始化
+  // 初始化
   async init() {
     // 第一步新建一个场景
     this.setScene();
@@ -37,7 +36,7 @@ export default class simpleScene {
     const helper = new THREE.GridHelper(100, 30, 0x303030, 0x303030); //长度1000 划分为50份
     this.scene.add(helper);
     // 辅助三维坐标系
-    const axesHelper = new THREE.AxesHelper(500); 
+    const axesHelper = new THREE.AxesHelper(500);
     this.scene.add(axesHelper)
   }
 
@@ -53,8 +52,8 @@ export default class simpleScene {
   // 设置透视相机
   setCamera() {
     // 第二参数就是 长度和宽度比 默认采用浏览器  返回以像素为单位的窗口的内部宽度和高度
-    this.camera = new THREE.PerspectiveCamera(75,this.dom.offsetWidth / this.dom.offsetHeight,1,1000);
-    this.camera.position.set(0,30,50)
+    this.camera = new THREE.PerspectiveCamera(75, this.dom.offsetWidth / this.dom.offsetHeight, 1, 1000);
+    this.camera.position.set(0, 30, 50)
   }
 
   // 设置光源
@@ -122,7 +121,7 @@ export default class simpleScene {
     const geometry = new THREE.BoxGeometry(2, 2, 2);
     const material = new THREE.MeshBasicMaterial({ color: 0x666666 });
     this.cube = new THREE.Mesh(geometry, material);
-    this.cube.position.set(-10,1,0)
+    this.cube.position.set(-10, 1, 0)
     this.scene.add(this.cube)
   }
 }

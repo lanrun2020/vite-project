@@ -3,16 +3,16 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
 import flagImg from '../../assets/guoqi.png'
 import terrain from '../../assets/floor5.jpeg'
-import {getFlowMaterial, getFlagMaterial,getSeaMaterial,getWaterMaterial,getScanMaterial,getFlowMaterialByY,getRotateScanMaterial,getRotateMaterialByY,getRotateMaterialByY2,getRotateMaterialByY3,getUpDownRotateMaterial } from './shaderMaterial'
+import { getFlowMaterial, getFlagMaterial, getSeaMaterial, getWaterMaterial, getScanMaterial, getFlowMaterialByY, getRotateScanMaterial, getRotateMaterialByY, getRotateMaterialByY2, getRotateMaterialByY3, getUpDownRotateMaterial } from './shaderMaterial'
 const THREE = T
-let that: any
+let that: materialScene
 export default class materialScene {
   private dom!: HTMLElement
   private scene!: THREE.Scene
   private camera!: THREE.PerspectiveCamera
   private renderer!: THREE.WebGLRenderer
-  private controls: any
-  private requestId: any
+  private controls: OrbitControls
+  private requestId: number
   private clock!: THREE.Clock
   private shaderMaterialList: object[] = [] //保存场景中的自定义shader材质，用于更新时间参数
   constructor(dom: HTMLElement) {
@@ -85,7 +85,7 @@ export default class materialScene {
       // 环境光
       const ambient = new THREE.AmbientLight(0xbbbbbb);
       this.scene.add(ambient);
-      const directionalLight = new THREE.DirectionalLight(0xffffff,0.1);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.1);
       directionalLight.position.set(10, -50, 300);
       this.scene.add(directionalLight);
     }
@@ -113,7 +113,7 @@ export default class materialScene {
   // 动画
   animate() {
     this.requestId = requestAnimationFrame(() => this.animate());
-    this.shaderMaterialList.forEach((material: any) => {
+    this.shaderMaterialList.forEach((material: THREE.ShaderMaterial) => {
       material.uniforms.time.value = this.clock.getElapsedTime()
     })
     this.controls.update()
@@ -247,7 +247,7 @@ export default class materialScene {
     this.scene.add(cylinder);
 
     //旗帜
-    const flagMaterial = getFlagMaterial({url:flagImg})
+    const flagMaterial = getFlagMaterial({ url: flagImg })
     this.shaderMaterialList.push(flagMaterial)
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(12, 8, 128, 128), flagMaterial)
     plane.position.set(-23.9, 25.8, -25)
@@ -255,7 +255,7 @@ export default class materialScene {
   }
 
   addSea() {
-      //旗帜
+    //旗帜
     const flagMaterial = getSeaMaterial()
     this.shaderMaterialList.push(flagMaterial)
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 128, 128), flagMaterial)
@@ -269,11 +269,11 @@ export default class materialScene {
     const flagMaterial = getWaterMaterial()
     this.shaderMaterialList.push(flagMaterial)
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(100, 100, 1, 1), flagMaterial)
-    plane.position.set(0, 0, 0 )
-    plane.rotateX( -Math.PI / 2)
+    plane.position.set(0, 0, 0)
+    plane.rotateX(-Math.PI / 2)
     this.scene.add(plane)
     /* 监听鼠标移动，并改变着色器使用的 iMouse 参数 */
-    // let mouseStartPosition:any = null; // 鼠标起始位置
+    // let mouseStartPosition = null; // 鼠标起始位置
     // window.addEventListener("mousemove", function (event) {
     //     if (!mouseStartPosition) {
     //         mouseStartPosition = {x: event.clientX, y: event.clientY}
@@ -286,15 +286,15 @@ export default class materialScene {
 
   addPoints() {
     const geometry = new THREE.BufferGeometry()
-    const vertices = new Float32Array( [
-      -1.0, -1.0,  1.0,
-       1.0, -1.0,  1.0
-    ] );
+    const vertices = new Float32Array([
+      -1.0, -1.0, 1.0,
+      1.0, -1.0, 1.0
+    ]);
     // itemSize = 3 因为每个顶点都是一个三元组。
-    geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     // const material = new THREE.MeshBasicMaterial( { color: 0xff0000, side: THREE.DoubleSide } );
-    const material = new THREE.PointsMaterial( { size: 0.1,color: 0x888888 } );
-    const mesh = new THREE.Points( geometry, material );
+    const material = new THREE.PointsMaterial({ size: 0.1, color: 0x888888 });
+    const mesh = new THREE.Points(geometry, material);
     this.scene.add(mesh)
   }
 
@@ -311,7 +311,7 @@ export default class materialScene {
     const material = new THREE.MeshBasicMaterial({ map: texture });//添加到材质上
     material.side = THREE.DoubleSide
     const mesh = new THREE.Mesh(planeGeometry, material);
-    mesh.position.set(0,-0.1,0)
+    mesh.position.set(0, -0.1, 0)
     this.scene.add(mesh);
   }
   //获取点位高度
@@ -349,7 +349,7 @@ export default class materialScene {
   addCylinder() {
     //圆柱
     const geometry = new THREE.CylinderGeometry(2, 2, 10, 32, 1, true);//true上下底面不封闭
-    const flowMaterial = getFlowMaterialByY({height:10,thickness:0.1,speed:0.3,repeat:16}) //沿Y轴的流动材质
+    const flowMaterial = getFlowMaterialByY({ height: 10, thickness: 0.1, speed: 0.3, repeat: 16 }) //沿Y轴的流动材质
     const cylinder = new THREE.Mesh(geometry, flowMaterial);
     this.shaderMaterialList.push(flowMaterial)
     cylinder.position.set(0, 8.1, -20)
@@ -357,7 +357,7 @@ export default class materialScene {
 
     //圆锥
     const geometry2 = new THREE.CylinderGeometry(4, 0, 8, 32, 1, true);
-    const flowMaterial2 = getFlowMaterialByY({height:8}) //沿Y轴的流动材质
+    const flowMaterial2 = getFlowMaterialByY({ height: 8 }) //沿Y轴的流动材质
     const cylinder2 = new THREE.Mesh(geometry2, flowMaterial2);
     this.shaderMaterialList.push(flowMaterial2)
     cylinder2.position.set(8, 4.2, -20)
@@ -382,31 +382,31 @@ export default class materialScene {
     const geometry4 = new THREE.CylinderGeometry(8, 0, 16, 5, 1, false);//true上下底面不封闭
     // const geometry4 = new THREE.OctahedronGeometry(5);
     const flowMaterial4 = getUpDownRotateMaterial() //绕y轴的旋转材质
-    const flowMaterial41 = getUpDownRotateMaterial({opacity:1,bool:false}) //绕y轴的旋转材质
+    const flowMaterial41 = getUpDownRotateMaterial({ opacity: 1, bool: false }) //绕y轴的旋转材质
     const cylinder4 = new THREE.Mesh(geometry4, flowMaterial4);
     this.shaderMaterialList.push(flowMaterial4)
     this.shaderMaterialList.push(flowMaterial41)
 
     const edges3 = new THREE.EdgesGeometry(geometry4);
-    const line3 = new THREE.LineSegments(edges3,flowMaterial41);
+    const line3 = new THREE.LineSegments(edges3, flowMaterial41);
     // this.scene.add(cylinderMesh,line3);
     this.scene.add(cylinder4, line3);
 
   }
 
   addRotationCylinder() {
-     //圆柱2 立体旋转扫描
-     const geometry31 = new THREE.CylinderGeometry(5, 5, 16, 32, 1, false);//true上下底面不封闭
-     const flowMaterial31 = getRotateMaterialByY3({edge:2}) //绕y轴的旋转材质
-     const cylinder31 = new THREE.Mesh(geometry31, flowMaterial31);
-     this.shaderMaterialList.push(flowMaterial31)
-     cylinder31.position.set(-20, 8.1, 20)
-     this.scene.add(cylinder31);
+    //圆柱2 立体旋转扫描
+    const geometry31 = new THREE.CylinderGeometry(5, 5, 16, 32, 1, false);//true上下底面不封闭
+    const flowMaterial31 = getRotateMaterialByY3({ edge: 2 }) //绕y轴的旋转材质
+    const cylinder31 = new THREE.Mesh(geometry31, flowMaterial31);
+    this.shaderMaterialList.push(flowMaterial31)
+    cylinder31.position.set(-20, 8.1, 20)
+    this.scene.add(cylinder31);
   }
 
   addBufferGeometry() {
     const geometry = new THREE.BufferGeometry() //创建一个Buffer类型几何体对象
-    const geometry2 = new THREE.BoxGeometry(3,3,3)
+    const geometry2 = new THREE.BoxGeometry(3, 3, 3)
     console.log(geometry2);
     //类型数组创建顶点数据
     const vertices = new Float32Array([

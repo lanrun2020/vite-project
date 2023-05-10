@@ -5,12 +5,13 @@
       <div>slot content</div>
     </template>
   </TabCard>
+  <xbutton>click me</xbutton>
  </div>
 </template>
 
 <script setup lang='ts'>
 import TabCard from './components/tabCard.vue';
-
+import xbutton from '../../components/xbutton.vue'
 </script>
 
 <style scoped lang="scss">

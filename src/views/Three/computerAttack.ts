@@ -1,52 +1,38 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+// //@ts-nocheck
 import * as T from "three";
-import * as d3 from "d3";
 import ForceGraph from 'force-graph';
 import floorImg from '../../assets/floor5.jpeg'
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import {
   CSS2DRenderer,
   CSS2DObject
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
-import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js"
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { InitFlyLine } from "@/utils/flyLine";
-import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
-import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
-import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import pointPng from '@/assets/point.png';
-import arrow1 from '@/assets/arrow5.png';
 import { getScanMaterial } from './shaderMaterial'
 const THREE = T
-let that: any
+let that: computerAttack
 export default class computerAttack {
   private dom!: HTMLElement
   private scene!: THREE.Scene
   private camera!: THREE.PerspectiveCamera
   private renderer!: THREE.WebGLRenderer
-  private raycaster
+  private raycaster: THREE.Raycaster
   private group = new THREE.Group()
   private lineGroup = new THREE.Group()
-  private labelRenderer: any
+  private labelRenderer: CSS2DRenderer
   private rushMaterialList = []
-  private beIntersectObject = []
-  private transformControls: any
-  private model: any
+  private transformControls: TransformControls
   private clock!: THREE.Clock
-  private time = -10
-  private controls: any
-  private requestId: any
+  private time = 0
+  private controls: OrbitControls
+  private requestId: number
   private flyManager: InitFlyLine
-  private texture: any
-  private selectNodeId:null
-  private radius: 1000
-  private dragV3: THREE.Vector3
-  private PModel: any
+  private selectNodeId: null
+  private PModel: THREE.Group
   constructor(dom: HTMLElement) {
     this.clock = new THREE.Clock()
     that = this
@@ -67,8 +53,8 @@ export default class computerAttack {
   // 设置渲染器
   setRenderer() {
     this.renderer = new THREE.WebGLRenderer({
-      alpha:true,
-      antialias:true
+      alpha: true,
+      antialias: true
     });
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
@@ -98,19 +84,19 @@ export default class computerAttack {
     this.transformControls.addEventListener('change', () => {
       // 如果界面显示性能不好，则在模型移动完成后（mouseUp事件）调用以下代码
       // 更新模型位置，移除相关连线
-      const res = this.lineGroup.children.filter((line)=>{
-        return line.sourceId === this.PModel.information.id
+      const res = this.lineGroup.children.filter((line) => {
+        return line.sourceId === this.PModel['information'].id
       })
-      const res2 = this.lineGroup.children.filter((line)=>{
-        return line.targetId === this.PModel.information.id
+      const res2 = this.lineGroup.children.filter((line) => {
+        return line.targetId === this.PModel['information'].id
       })
-      res.forEach((line)=>{
+      res.forEach((line) => {
         this.lineGroup.remove(line) // 移除原来的线
-        this.addLine(this.PModel.position.x,this.PModel.position.z,line.targetX,line.targetY,line.sourceId,line.targetId) // 添加新的连线
+        this.addLine(this.PModel.position.x, this.PModel.position.z, line.targetX, line.targetY, line.sourceId, line.targetId) // 添加新的连线
       })
-      res2.forEach((line)=>{
+      res2.forEach((line) => {
         this.lineGroup.remove(line)
-        this.addLine(line.sourceX,line.sourceY,this.PModel.position.x,this.PModel.position.z,line.sourceId,line.targetId)
+        this.addLine(line.sourceX, line.sourceY, this.PModel.position.x, this.PModel.position.z, line.sourceId, line.targetId)
       })
     });
     this.transformControls.addEventListener('mouseUp', () => {
@@ -139,7 +125,7 @@ export default class computerAttack {
     this.controls.screenSpacePanning = false; //定义平移时如何平移相机的位置。如果为 true，则相机在屏幕空间中平移。否则，相机会在与相机向上方向正交的平面中平移。OrbitControls 默认为 true；MapControls 为 false。
     this.controls.minDistance = 0; //移动最小距离
     this.controls.maxDistance = 2300; //移动最大距离
-    this.controls.maxPolarAngle = Math.PI ; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
+    this.controls.maxPolarAngle = Math.PI; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
   }
 
   // 渲染
@@ -148,7 +134,7 @@ export default class computerAttack {
       // if (this.camera.position.y<0){this.camera.position.set(this.camera.position.x,0,this.camera.position.z)}
       this.renderer.render(this.scene, this.camera);
       this.labelRenderer.render(this.scene, this.camera);
-      if(this.rushMaterialList.length){
+      if (this.rushMaterialList.length) {
         this.rushMaterialList.forEach((material) => {
           material.uniforms.time.value = this.clock.getElapsedTime()
         })
@@ -158,7 +144,6 @@ export default class computerAttack {
 
   // 动画
   animate() {
-    // console.log(this.clock.getElapsedTime());
     this.requestId = requestAnimationFrame(() => this.animate());
     this.controls.update()
     // 设置画布的大小
@@ -179,20 +164,20 @@ export default class computerAttack {
       directionalLight.position.set(0, 0, 100);
       this.scene.add(directionalLight);
 
-      const pointLight = new THREE.PointLight( 0xffffff, 0.5 );
+      const pointLight = new THREE.PointLight(0xffffff, 0.5);
       // pointLight.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ) ) );
-      pointLight.position.set(-50,50,-100)
-      this.scene.add( pointLight );
-      const pointLight2 = new THREE.PointLight( 0xffffff, 0.5 );
+      pointLight.position.set(-50, 50, -100)
+      this.scene.add(pointLight);
+      const pointLight2 = new THREE.PointLight(0xffffff, 0.5);
       // pointLight2.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ) ) );
-      pointLight2.position.set(50,50,-100)
-      this.scene.add( pointLight2 );
+      pointLight2.position.set(50, 50, -100)
+      this.scene.add(pointLight2);
 
       // const rectLight3 = new THREE.RectAreaLight( 0xAFFFFF, 10, 50, 10 );
       // rectLight3.position.set( 0, 0, 25 );
       // this.scene.add( rectLight3 );
       // this.scene.add( new RectAreaLightHelper( rectLight3 ) );
-       // 环境光
+      // 环境光
       //  const ambient = new THREE.AmbientLight(0xbbbbbb);
       //  this.scene.add(ambient);
       //  const directionalLight = new THREE.DirectionalLight(0x666666);
@@ -234,11 +219,11 @@ export default class computerAttack {
 
   addModel() {
     const options = [{
-      type:'Host',
-      url:`/model/XM.glb`
-    },{
-      type:'Switch',
-      url:`/model/routerN.glb`
+      type: 'Host',
+      url: `/model/XM.glb`
+    }, {
+      type: 'Switch',
+      url: `/model/routerN.glb`
     }]
     const res = [
       {
@@ -532,41 +517,41 @@ export default class computerAttack {
         "x_coordinates": 40
       }
     ]
-    const arr = new Array(5).fill('').map((item,index)=>{
+    const arr = new Array(5).fill('').map((item, index) => {
       return {
-          "default_gateway": "192.168.2.9",
-          "role": "instance",
-          "os": "linux",
-          "emulation": "kvm",
-          "ip": "2390|192.168.0.66,2391|192.168.8.40",
-          "to_node": "40网段",
-          "netmask": "255.255.255.0",
-          "name": "9527"+index,
-          "y_coordinates": -12.99999999999784,
-          "id": 9527+index,
-          "category": "Host",
-          "cpuCount": 2,
-          "x_coordinates": -99.9999999999966,
-          "ram": 1024
-        }
+        "default_gateway": "192.168.2.9",
+        "role": "instance",
+        "os": "linux",
+        "emulation": "kvm",
+        "ip": "2390|192.168.0.66,2391|192.168.8.40",
+        "to_node": "40网段",
+        "netmask": "255.255.255.0",
+        "name": "9527" + index,
+        "y_coordinates": -12.99999999999784,
+        "id": 9527 + index,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": -99.9999999999966,
+        "ram": 1024
+      }
     })
-    const arr2 = new Array(5).fill('').map((item,index)=>{
+    const arr2 = new Array(5).fill('').map((item, index) => {
       return {
-          "default_gateway": "192.168.2.9",
-          "role": "instance",
-          "os": "linux",
-          "emulation": "kvm",
-          "ip": "2390|192.168.0.66,2391|192.168.8.40",
-          "to_node": "8网段",
-          "netmask": "255.255.255.0",
-          "name": "9527"+index,
-          "y_coordinates": -12.99999999999784,
-          "id": 9527+index,
-          "category": "Host",
-          "cpuCount": 2,
-          "x_coordinates": -99.9999999999966,
-          "ram": 1024
-        }
+        "default_gateway": "192.168.2.9",
+        "role": "instance",
+        "os": "linux",
+        "emulation": "kvm",
+        "ip": "2390|192.168.0.66,2391|192.168.8.40",
+        "to_node": "8网段",
+        "netmask": "255.255.255.0",
+        "name": "9527" + index,
+        "y_coordinates": -12.99999999999784,
+        "id": 9527 + index,
+        "category": "Host",
+        "cpuCount": 2,
+        "x_coordinates": -99.9999999999966,
+        "ram": 1024
+      }
     })
     // res.push(...arr2)
     // res.push(...arr)
@@ -580,7 +565,7 @@ export default class computerAttack {
     //   // that.addLabel(model, 'computer', 1)
     //   that.group.add(model)
     // })
-    res.forEach((item) => {
+    res.forEach((item: any) => {
       const copy_id = item.id
       item.id = item.name
       item.copy_id = copy_id
@@ -603,23 +588,19 @@ export default class computerAttack {
         newlinks.push(link)
       }
     })
-    // console.log(links);
-    // console.log(newlinks);
-
     // const force = d3.forceSimulation().nodes(nodes).force("link",d3.forceLink(newlinks).id(d => d.id)).force("x",d3.forceX()).force("y",d3.forceY()).force('charge',d3.forceManyBody()).stop()
     // force.tick(100)
     const graph = ForceGraph()(document.getElementById('graph')).graphData({ nodes, links: newlinks }).warmupTicks(300) //只使用tick300次布局，以减少布局时长
-    // console.log(nodes,newlinks);
     setTimeout(() => {
       const loader = new GLTFLoader();
       // const loader = new FBXLoader()
-      nodes.forEach((node)=>{
-        const {url} = options.find((opt)=>{
+      nodes.forEach((node) => {
+        const { url } = options.find((opt) => {
           return opt.type === node.category
         })
         loader.load(url, (gltf) => {
           const mroot = gltf.scene
-          mroot.information = node
+          mroot['information'] = node
           const bbox = new THREE.Box3().setFromObject(mroot)
           const cent = bbox.getCenter(new THREE.Vector3())
           const size = bbox.getSize(new THREE.Vector3())
@@ -639,11 +620,13 @@ export default class computerAttack {
           const cube1 = new THREE.Mesh(boxGeometry, material)
           cube1.position.copy(mroot.position)
           cube1.position.y += size.y * 0.5
-          that.addLabel(mroot, node.name, size.y / Scalar, size.x)
+          that.addLabel(mroot, node.name, size.y / Scalar)
+        }, undefined, (error) => {
+          console.log('模型加载错误', error);
         })
       })
       newlinks.forEach((link) => {
-        this.addLine(link.source.y , link.source.x , link.target.y , link.target.x ,link.source.id,link.target.id)
+        this.addLine(link.source.y, link.source.x, link.target.y, link.target.x, link.source.id, link.target.id)
       })
       that.scene.add(that.group)
       that.scene.add(that.lineGroup)
@@ -682,7 +665,7 @@ export default class computerAttack {
             }`
     }
     const tubeMaterial = new THREE.ShaderMaterial({
-      uniforms:{
+      uniforms: {
         color: {
           value: new THREE.Color(0x00ffff),
           type: "v3"
@@ -716,7 +699,7 @@ export default class computerAttack {
     return tubeMaterial
   }
 
-  addLine(x1, y1, x2, y2, sourceId,targetId) {
+  addLine(x1, y1, x2, y2, sourceId, targetId) {
     //平滑曲线
     const curve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(x1, 0.5, y1),
@@ -736,13 +719,13 @@ export default class computerAttack {
     this.lineGroup.add(mesh);
   }
 
-  addLabel(object: THREE.Mesh, text: string, height) {
+  addLabel(object: THREE.Group, text: string, height: number) {
     const div = document.createElement("div");
     div.className = "computer-box-label";
-    div.style.cursor= "pointer";
+    div.style.cursor = "pointer";
     div.style.pointerEvents = 'auto';
-    div.addEventListener('click',(event:any)=>{
-      console.log('点击了标签',text);
+    div.addEventListener('click', (event: MouseEvent) => {
+      console.log('点击了标签', text);
       event.stopPropagation() // 阻止事件冒泡
     })
     div.textContent = text;
@@ -799,9 +782,9 @@ export default class computerAttack {
     if (this.scene) {
       // const radius = 476
       // const geometry = new THREE.BoxGeometry(200, 2, 200); //创建一个立方体几何对象Geometry
-      const geometry = new THREE.CylinderGeometry( radius, radius - 0.5, 2, 180 );//圆台
-      const geometry2 = new THREE.CylinderGeometry( radius - 1, radius - 1.5, 2, 180 );//圆台
-      const geometry3 = new THREE.RingGeometry( radius - 1.5, radius -1, 180 );//圆环
+      const geometry = new THREE.CylinderGeometry(radius, radius - 0.5, 2, 180);//圆台
+      const geometry2 = new THREE.CylinderGeometry(radius - 1, radius - 1.5, 2, 180);//圆台
+      const geometry3 = new THREE.RingGeometry(radius - 1.5, radius - 1, 180);//圆环
       const texture = new THREE.TextureLoader().load(
         floorImg
       ); //首先，获取到纹理
@@ -826,12 +809,12 @@ export default class computerAttack {
       cube3.rotation.x = -Math.PI / 2
 
       const geometry6 = new THREE.CircleGeometry(150, 128, 0); //半径，分段
-      const scanMaterial = getScanMaterial({repeat:2,thickness:0.01,opacity:0.6})
+      const scanMaterial = getScanMaterial({ repeat: 2, thickness: 0.01, opacity: 0.6 })
       this.rushMaterialList.push(scanMaterial)
       const circle = new THREE.Mesh(geometry6, scanMaterial);
       circle.position.set(0, 1, 0)
       circle.rotation.x = -Math.PI / 2
-      
+
       this.scene.add(circle);
       this.scene.add(cube1); //网格模型添加到场景中
       this.scene.add(cube2); //网格模型添加到场景中
@@ -847,52 +830,52 @@ export default class computerAttack {
     this.dom.removeEventListener('click', this.handleMouseDown);
   }
 
-  handleMousemove(event: any) {
+  handleMousemove(event: MouseEvent) {
     event.preventDefault();
     const mouse = new THREE.Vector2(0, 0);
     mouse.x = ((event.clientX - that.dom.offsetLeft) / that.dom.offsetWidth) * 2 - 1;
     mouse.y = - ((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1;
-    // console.log(mouse.x);
     that.raycaster.setFromCamera(mouse, that.camera);
     const intersects = that.raycaster.intersectObjects(that.group.children)
     if (intersects.length > 0) {
-      that.dom.style.cursor= "pointer"
-      if(intersects[0].object) {
+      that.dom.style.cursor = "pointer"
+      if (intersects[0].object) {
         const PModel = that.getParent(intersects[0].object)
         const info = PModel.information
-        if(that.selectNodeId === info.id){ //与上次覆盖节点相同，将不会发起请求
-          // console.log('none');
+        if (that.selectNodeId === info.id) { //与上次覆盖节点相同，将不会发起请求
         } else {
           that.selectNodeId = info.id
-          console.log('覆盖节点模型，发起请求',info.id);
+          console.log('覆盖节点模型，发起请求', info.id);
         }
       }
-    }else{
-      that.dom.style.cursor= "default"
+    } else {
+      that.dom.style.cursor = "default"
     }
   }
 
-  handleMouseDown(event: any) {
-    let vector = new THREE.Vector3(((event.clientX - that.dom.offsetLeft)  / that.dom.offsetWidth) * 2 - 1, -((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1, 0.5);
+  handleMouseDown(event: MouseEvent) {
+    let vector = new THREE.Vector3(((event.clientX - that.dom.offsetLeft) / that.dom.offsetWidth) * 2 - 1, -((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1, 0.5);
     vector = vector.unproject(that.camera); // 将屏幕的坐标转换成三维场景中的坐标
     that.raycaster = new THREE.Raycaster(that.camera.position, vector.sub(that.camera.position).normalize());
     const intersects = that.raycaster.intersectObjects(that.group.children); //false不检测物体的后代
     if (intersects.length > 0) {
       if (intersects[0].object) {
         that.PModel = that.getParent(intersects[0].object)
-        const info = that.PModel.information
-        that.transformControls.attach(that.PModel)
-        that.transformControls.showY = false
-        console.log('点击了节点：',info);
+        if (that.PModel && that.PModel['information']) {
+          const info = that.PModel['information']
+          that.transformControls.attach(that.PModel)
+          that.transformControls.showY = false
+          console.log('点击了节点：', info);
+        }
       }
-    }else{
+    } else {
       that.transformControls.detach()
     }
   }
 
   getParent(obj) {
-    if(obj && obj.parent){
-      if(obj.parent.information){
+    if (obj && obj.parent) {
+      if (obj.parent.information) {
         return obj.parent
       } else {
         return that.getParent(obj.parent)

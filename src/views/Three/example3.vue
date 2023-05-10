@@ -7,7 +7,7 @@ import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-let camera: any, controls: any, scene: any, renderer: any, dom: HTMLElement, mixer: any, idleAction: any, walkAction: any, runAction: any, clock: any, model: any, flag = true
+let camera: typeof THREE.PerspectiveCamera, controls: OrbitControls, scene: typeof THREE.Scene, renderer: typeof THREE.WebGLRenderer, dom: HTMLElement, mixer: typeof THREE.AnimationMixer, idleAction: any, walkAction: any, runAction: any, clock: any, model: any, flag = true
 let speed = 0.4
 
 let keyState = reactive({
@@ -36,7 +36,6 @@ const init = () => {
   dom = document.getElementById("demo4")!
   clock = new THREE.Clock();
   scene = new THREE.Scene();
-  console.log(scene);
   scene.position.set(0, 0, 20)
 
   scene.background = new THREE.Color(0xcccccc);
@@ -171,15 +170,7 @@ const animate = () => {
     mixer.update(mixerUpdateDelta);
   }
   if (model) {
-    // const position = model.position\
-    // const position = new THREE.Vector3()
-    // position.x = model.position.x + 10
-    // position.z = model.position.z + 20
-    // position.z = model.position.z - 75 * Math.cos(model.rotation.y)
-    // position.x = model.position.x - 75 * Math.sin(model.rotation.y)
     camera.lookAt(model.position)
-    // console.log(model.position);
-
   }
   soliderMove()
   render();
@@ -223,10 +214,6 @@ const addSolider = () => {
     scene.add(model);
     const wordPosition = new THREE.Vector3()
     model.getWorldPosition(wordPosition)
-    console.log(model.position);
-    console.log(wordPosition);
-
-
     model.traverse(function (object: any) {
       if (object.isMesh) object.castShadow = false;
     });
@@ -239,6 +226,8 @@ const addSolider = () => {
     setWeight(idleAction, 0)
     setWeight(runAction, 0)
     setWeight(walkAction, 0)
+  }, undefined, (error) => {
+    console.log('模型加载错误', error);
   });
 }
 const setWeight = (action: any, weight: number) => {

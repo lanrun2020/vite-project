@@ -1,5 +1,5 @@
 <template>
- <div class="container">
+ <div class="tabCard">
   <div class="card_title">{{ title }}</div>
   <slot name="header">defalut header</slot>
   <slot name="content">defalut content</slot>

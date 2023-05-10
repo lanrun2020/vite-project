@@ -4,13 +4,13 @@ import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
 const THREE = T
 import dalishi from '../../assets/dalishi.jpg'
-export default function ThreeJs2(dom: any) {
+export default function ThreeJs2(dom: HTMLElement) {
   let scene: THREE.Scene
   let camera: THREE.PerspectiveCamera
   let cubeCamera: THREE.CubeCamera
   let renderer: THREE.WebGLRenderer
   let mesh: THREE.Mesh
-  let controls: any
+  let controls: OrbitControls
   // 设置透视相机
   const setCamera = () => {
     // 第二参数就是 长度和宽度比 默认采用浏览器  返回以像素为单位的窗口的内部宽度和高度

@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+// //@ts-nocheck
 import * as THREE from "three";
 import floorImg from '../../assets/floor5.jpeg'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
@@ -14,24 +14,26 @@ import {
   CSS2DObject
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import TWEEN from "tween"
-let that: any
+let that: outLine
 export default class outLine {
   private dom!: HTMLElement
-  private scene!: THREE.Scene
-  private camera!: THREE.PerspectiveCamera
-  private renderer!: THREE.WebGLRenderer
-  private labelRenderer: any
-  private controls: any
-  private requestId: any
-  private group: THREE.Group
-  private lineGroup: THREE.Group
-  private raycaster: THREE.Raycaster
-  private outlinePass: any
-  private composer: any
-  private lineMaterial: any
-  private clock:THREE.Clock
-  private transformControls: any
-  private PModel: any
+  private scene!: typeof THREE.Scene
+  private camera!: typeof THREE.PerspectiveCamera
+  private renderer!: typeof THREE.WebGLRenderer
+  private labelRenderer: CSS2DRenderer
+  private time = -10
+  private controls: OrbitControls
+  private requestId: number
+  private group: typeof THREE.Group
+  private lineGroup: typeof THREE.Group
+  private raycaster: typeof THREE.Raycaster
+  private outlinePass: OutlinePass
+  private composer: EffectComposer
+  private lineMaterial: typeof THREE.ShaderMaterial
+  private clock: typeof THREE.Clock
+  private transformControls: TransformControls
+  private PModel: typeof THREE.Group
+  private selectNodeId: null
   constructor(dom: HTMLElement) {
     that = this
     this.dom = dom
@@ -42,7 +44,7 @@ export default class outLine {
     this.init()
   }
 
-   // 初始化
+  // 初始化
   async init() {
     // 第一步新建一个场景
     this.setScene();
@@ -53,9 +55,9 @@ export default class outLine {
     this.setOutLine();
     this.setControls();
     this.addModel();
-    setTimeout(()=>{
+    setTimeout(() => {
       this.setTrackComputer(); //给指定物体添加描边
-    },1500)
+    }, 1500)
 
     window.addEventListener('resize', this.onWindowResize);
     this.dom.addEventListener('mousemove', this.handleMousemove, false)
@@ -67,7 +69,6 @@ export default class outLine {
     this.composer = new EffectComposer(this.renderer)
     const renderPass = new RenderPass(this.scene, this.camera)
     this.composer.addPass(renderPass)
-    console.log( this.group);
     this.outlinePass = new OutlinePass(new THREE.Vector2(this.dom.offsetWidth, this.dom.offsetHeight), this.group, this.camera)
     this.outlinePass.visibleEdgeColor.set('#ff0000') //描边颜色
     this.outlinePass.hiddenEdgeColor.set('#0000ff') //被其他物体遮挡时 描边颜色
@@ -76,7 +77,6 @@ export default class outLine {
     this.outlinePass.edgeThickness = 1 //厚度
     // this.outlinePass.pulsePeriod = 2 //脉冲周期,描边从有至无 循环周期时长
     this.composer.addPass(this.outlinePass)
-    console.log(this.outlinePass);
   }
   // 设置场景
   setScene() {
@@ -86,7 +86,7 @@ export default class outLine {
   // 设置渲染器
   setRenderer() {
     this.renderer = new THREE.WebGLRenderer({
-      alpha:true,
+      alpha: true,
     });
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
@@ -118,14 +118,14 @@ export default class outLine {
       directionalLight.position.set(0, 0, 100);
       this.scene.add(directionalLight);
 
-      const pointLight = new THREE.PointLight( 0xffffff, 0.6 );
+      const pointLight = new THREE.PointLight(0xffffff, 0.6);
       // pointLight.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ) ) );
-      pointLight.position.set(-50,5,-100)
-      this.scene.add( pointLight );
-      const pointLight2 = new THREE.PointLight( 0xffffff, 0.6 );
+      pointLight.position.set(-50, 5, -100)
+      this.scene.add(pointLight);
+      const pointLight2 = new THREE.PointLight(0xffffff, 0.6);
       // pointLight2.add( new THREE.Mesh( new THREE.SphereGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0x00ff00 } ) ) );
-      pointLight2.position.set(50,5,-100)
-      this.scene.add( pointLight2 );
+      pointLight2.position.set(50, 5, -100)
+      this.scene.add(pointLight2);
     }
   }
 
@@ -150,19 +150,19 @@ export default class outLine {
     this.transformControls.addEventListener('change', () => {
       // 如果界面显示性能不好，则在模型移动完成后（mouseUp事件）调用以下代码
       // 更新模型位置，移除相关连线
-      const res = this.lineGroup.children.filter((line)=>{
+      const res = this.lineGroup.children.filter((line) => {
         return line.sourceId === this.PModel.information.id
       })
-      const res2 = this.lineGroup.children.filter((line)=>{
+      const res2 = this.lineGroup.children.filter((line) => {
         return line.targetId === this.PModel.information.id
       })
-      res.forEach((line)=>{
+      res.forEach((line) => {
         this.lineGroup.remove(line) // 移除原来的线
-        this.addLine(this.PModel.position.x,this.PModel.position.z,line.targetX,line.targetY,line.sourceId,line.targetId) // 添加新的连线
+        this.addLine(this.PModel.position.x, this.PModel.position.z, line.targetX, line.targetY, line.sourceId, line.targetId) // 添加新的连线
       })
-      res2.forEach((line)=>{
+      res2.forEach((line) => {
         this.lineGroup.remove(line)
-        this.addLine(line.sourceX,line.sourceY,this.PModel.position.x,this.PModel.position.z,line.sourceId,line.targetId)
+        this.addLine(line.sourceX, line.sourceY, this.PModel.position.x, this.PModel.position.z, line.sourceId, line.targetId)
       })
     });
     this.transformControls.addEventListener('mouseUp', () => {
@@ -188,7 +188,7 @@ export default class outLine {
     TWEEN.update();
     this.labelRenderer.render(this.scene, this.camera);
     this.composer.render()//放在render后面
-    if(this.lineMaterial){
+    if (this.lineMaterial) {
       this.lineMaterial.uniforms.time.value = this.clock.getElapsedTime()
     }
   }
@@ -214,13 +214,13 @@ export default class outLine {
 
   addModel() {
     const options = [{
-      type:'Host',
-      url:`/model/XM.glb`
-    },{
-      type:'Switch',
-      url:`/model/server05.glb`
+      type: 'Host',
+      url: `/model/XM.glb`
+    }, {
+      type: 'Switch',
+      url: `/model/server05.glb`
     }]
-    const res = [
+    const res: object[] = [
       {
         "default_gateway": "192.168.0.1",
         "role": "instance",
@@ -512,14 +512,14 @@ export default class outLine {
         "x_coordinates": 40
       }
     ]
-    const links:any = []
-    const newlinks:any = []
-    const nodes:any = []
-    res.forEach((item:any) => {
+    const links: object[] = []
+    const newlinks: object[] = []
+    const nodes: object[] = []
+    res.forEach((item: any) => {
       const copy_id = item.id
       item.id = item.name
       item.copy_id = copy_id
-      const index = nodes.filter((node:any) => {
+      const index = nodes.filter((node: any) => {
         return node.copy_id === copy_id
       })
       links.push({
@@ -530,8 +530,8 @@ export default class outLine {
         nodes.push(item)
       }
     })
-    links.forEach((link:any) => {
-      const index = nodes.filter((node:any) => {
+    links.forEach((link: any) => {
+      const index = nodes.filter((node: any) => {
         return node.name === link.target
       })
       if (index.length) {
@@ -542,14 +542,14 @@ export default class outLine {
     setTimeout(() => {
       const loader = new GLTFLoader();
       // const loader = new FBXLoader()
-      nodes.forEach((node:any)=>{
-        const {url} = options.find((opt)=>{
+      nodes.forEach((node: any) => {
+        const { url } = options.find((opt) => {
           return opt.type === node.category
         })
         loader.load(url, (gltf) => {
           const mroot = gltf.scene
           mroot.name = node.name
-          mroot.information = node
+          mroot['information'] = node
           const bbox = new THREE.Box3().setFromObject(mroot)
           const cent = bbox.getCenter(new THREE.Vector3())
           const size = bbox.getSize(new THREE.Vector3())
@@ -569,13 +569,13 @@ export default class outLine {
           const cube1 = new THREE.Mesh(boxGeometry, material)
           cube1.position.copy(mroot.position)
           cube1.position.y += size.y * 0.5
-          that.addLabel(mroot, node.name, size.y / Scalar, size.x)
-        },undefined,(error) => {
+          that.addLabel(mroot, node.name, size.y / Scalar)
+        }, undefined, (error) => {
           console.log('模型加载错误', error);
         })
       })
-      newlinks.forEach((link:any) => {
-        this.addLine(link.source.y , link.source.x , link.target.y , link.target.x ,link.source.id,link.target.id)
+      newlinks.forEach((link: any) => {
+        this.addLine(link.source.y, link.source.x, link.target.y, link.target.x, link.source.id, link.target.id)
       })
       that.scene.add(that.group)
       that.scene.add(that.lineGroup)
@@ -583,14 +583,14 @@ export default class outLine {
     }, 200)
   }
 
-   // 创建地板
-   setFloor(radius) {
+  // 创建地板
+  setFloor(radius: number) {
     if (this.scene) {
       // const radius = 476
       // const geometry = new THREE.BoxGeometry(200, 2, 200); //创建一个立方体几何对象Geometry
-      const geometry = new THREE.CylinderGeometry( radius, radius - 0.5, 2, 180 );//圆台
-      const geometry2 = new THREE.CylinderGeometry( radius - 1, radius - 1.5, 2, 180 );//圆台
-      const geometry3 = new THREE.RingGeometry( radius - 1.5, radius -1, 180 );//圆环
+      const geometry = new THREE.CylinderGeometry(radius, radius - 0.5, 2, 180);//圆台
+      const geometry2 = new THREE.CylinderGeometry(radius - 1, radius - 1.5, 2, 180);//圆台
+      const geometry3 = new THREE.RingGeometry(radius - 1.5, radius - 1, 180);//圆环
       const texture = new THREE.TextureLoader().load(
         floorImg
       ); //首先，获取到纹理
@@ -616,7 +616,7 @@ export default class outLine {
       // this.scene.add(cube1); //网格模型添加到场景中
       // this.scene.add(cube2); //网格模型添加到场景中
       // this.scene.add(cube3);
-      const planeGeometry = new THREE.PlaneGeometry(radius*5,radius*5);
+      const planeGeometry = new THREE.PlaneGeometry(radius * 5, radius * 5);
       const planeMesh = new THREE.Mesh(planeGeometry, material1)
       planeMesh.rotation.x -= Math.PI * 0.5;
       this.scene.add(planeMesh)
@@ -624,7 +624,7 @@ export default class outLine {
     }
   }
 
-  addLine(x1, y1, x2, y2, sourceId,targetId) {
+  addLine(x1: number, y1: number, x2: number, y2: number, sourceId: string, targetId: string) {
     //平滑曲线
     const curve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(x1, 0.5, y1),
@@ -641,13 +641,13 @@ export default class outLine {
     mesh.targetY = y2
     this.lineGroup.add(mesh);
   }
-  addLabel(object: THREE.Mesh, text: string, height) {
+  addLabel(object: typeof THREE.Group, text: string, height: number) {
     const div = document.createElement("div");
     div.className = "computer-box-label";
-    div.style.cursor= "pointer";
+    div.style.cursor = "pointer";
     div.style.pointerEvents = 'auto';
-    div.addEventListener('click',(event:any)=>{
-      console.log('点击了标签',text);
+    div.addEventListener('click', (event: MouseEvent) => {
+      console.log('点击了标签', text);
       event.stopPropagation() // 阻止事件冒泡
     })
     div.textContent = text;
@@ -685,9 +685,9 @@ export default class outLine {
               vec4 u_color = vec4(color,u_opacity);
               gl_FragColor =  vec4(color,fract(vUv.x * repeatX - time*speed) * u_opacity * step(0.5,fract(vUv.x * repeatX - time*speed)));
           }`
-  }
+    }
     this.lineMaterial = new THREE.ShaderMaterial({
-      uniforms:{
+      uniforms: {
         color: {
           value: new THREE.Color(0x00ffff),
           type: "v3"
@@ -713,7 +713,7 @@ export default class outLine {
           type: "f"
         },
       },
-      side:THREE.DoubleSide,
+      side: THREE.DoubleSide,
       transparent: true,
       vertexShader: tubeShader.vertexshader,
       fragmentShader: tubeShader.fragmentshader
@@ -722,17 +722,17 @@ export default class outLine {
 
   setTrackComputer() {
     this.outlinePass.selectedObjects = []
-    const modelList = ['30.8/40.8','8网段']
-    modelList.forEach((name)=>{
-      if(this.group.getObjectByName(name)){
+    const modelList = ['30.8/40.8', '8网段']
+    modelList.forEach((name) => {
+      if (this.group.getObjectByName(name)) {
         this.outlinePass.selectedObjects.push(this.group.getObjectByName(name))
       }
     })
   }
 
-  handleMousemove(event:any) {
+  handleMousemove(event: MouseEvent) {
     event.preventDefault(); //阻止默认事件
-    if (event.isPrimary === false) return
+    if (event['isPrimary'] === false) return
     const mouse = new THREE.Vector2();
     mouse.x = ((event.clientX - that.dom.offsetLeft) / that.dom.offsetWidth) * 2 - 1;
     mouse.y = - ((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1;
@@ -740,41 +740,37 @@ export default class outLine {
     const intersects = that.raycaster.intersectObjects(that.group.children)
     if (intersects.length > 0) {
       // that.outlinePass.selectedObjects = []
-      that.dom.style.cursor= "pointer"
-      if(intersects[0].object) {
+      that.dom.style.cursor = "pointer"
+      if (intersects[0].object) {
         const PModel = that.getParent(intersects[0].object)
         // that.outlinePass.selectedObjects = [PModel]
         const info = PModel.information
-        if(that.selectNodeId === info.id){ //与上次覆盖节点相同，将不会发起请求
+        if (that.selectNodeId === info.id) { //与上次覆盖节点相同，将不会发起请求
         } else {
           that.selectNodeId = info.id
-          // console.log('覆盖节点模型，发起请求',info.id);
         }
       }
-    }else{
+    } else {
       // that.outlinePass.selectedObjects = []
-      that.dom.style.cursor= "default"
+      that.dom.style.cursor = "default"
     }
   }
 
-  handleMouseDown(event: any) {
-    if (that.controls.enabled){
-      let vector = new THREE.Vector3(((event.clientX - that.dom.offsetLeft)  / that.dom.offsetWidth) * 2 - 1, -((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1, 0.5);
+  handleMouseDown(event: MouseEvent) {
+    if (that.controls.enabled) {
+      let vector = new THREE.Vector3(((event.clientX - that.dom.offsetLeft) / that.dom.offsetWidth) * 2 - 1, -((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1, 0.5);
       vector = vector.unproject(that.camera); // 将屏幕的坐标转换成三维场景中的坐标
       that.raycaster = new THREE.Raycaster(that.camera.position, vector.sub(that.camera.position).normalize());
       const intersects = that.raycaster.intersectObjects(that.group.children); //false不检测物体的后代
       if (intersects.length > 0) {
         if (intersects[0].object) {
           that.PModel = that.getParent(intersects[0].object)
-          // console.log(that.PModel);
           const info = that.PModel.information
           that.transformControls.attach(that.PModel)
           that.transformControls.showY = false //在y轴垂直方向上 不允许拖动
           const pos = that.PModel.position
           const newPos = new THREE.Vector3(pos.x, pos.y + 60, pos.z + 80)
-          // console.log('点击了节点：',info);
-          that.aanimateCamera(that.camera.position, newPos, that.controls.target,pos)
-          // console.log(that.outlinePass.selectedObjects);
+          that.aanimateCamera(that.camera.position, newPos, that.controls.target, pos)
         }
       } else {
         that.transformControls.detach()
@@ -782,7 +778,7 @@ export default class outLine {
     }
   }
 
-  aanimateCamera(current1, target1, current2, target2) { //current1相机当前位置,target1相机目标位置，current2控制器当前位置，target2控制器目标位置
+  aanimateCamera(current1: typeof THREE.Vector3, target1: typeof THREE.Vector3, current2: typeof THREE.Vector3, target2: typeof THREE.Vector3) { //current1相机当前位置,target1相机目标位置，current2控制器当前位置，target2控制器目标位置
     const tween = new TWEEN.Tween({
       x1: current1.x, // 相机当前位置x
       y1: current1.y, // 相机当前位置y
@@ -799,7 +795,7 @@ export default class outLine {
       y2: target2.y, // 新的控制中心点位置x
       z2: target2.z // 新的控制中心点位置x
     }, 1000);
-    tween.onUpdate(function() {
+    tween.onUpdate(function () {
       that.camera.position.x = this.x1;
       that.camera.position.y = this.y1;
       that.camera.position.z = this.z1;
@@ -810,12 +806,11 @@ export default class outLine {
     })
     tween.easing(TWEEN.Easing.Cubic.InOut);
     tween.start();
-    console.log('ddd');
   }
 
-  getParent(obj) {
-    if(obj && obj.parent){
-      if(obj.parent.information){
+  getParent(obj: typeof THREE.Group) {
+    if (obj && obj.parent) {
+      if (obj.parent.information) {
         return obj.parent
       } else {
         return that.getParent(obj.parent)
