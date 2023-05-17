@@ -1,9 +1,11 @@
 // 城市 白膜建筑
 import Cesium from "@/utils/importCesium"
+import ViewShed from './ViewShed'
 let primitive: any
 let tilesetPrimitive: any
 export const addCity = (viewer: any, active: boolean) => {
   if (active) {
+    const view = new ViewShed(viewer)
     if (primitive) {
       viewer.zoomTo(
         tilesetPrimitive,

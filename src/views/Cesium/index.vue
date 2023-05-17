@@ -1,5 +1,9 @@
 <template>
   <div id="cesiumContainer">
+    <!-- <img style="position: absolute;top:0;left:400px;zIndex:100;width:400px;" id="myImage" src="../../assets/guoqi.png" /> -->
+    <video id="myVideo" style="width: 400px;height: 400px;" autoplay loop controls >
+2     <source src="./video.mp4" type="video/mp4">
+5   </video>
     <toolbox :toolList="toolList" @toolChecked="toolChecked"></toolbox>
   </div>
 </template>
@@ -10,6 +14,8 @@ import { ref, Ref, onMounted } from "vue";
 import { fetchCesium } from "@/apis/an-system";
 import { addPolygon2 } from "./polygon";
 import Cesium from '@/utils/importCesium'
+import "@/jslibs/cesium-VideoShed3D.js"
+
 import "./flowLineMaterial";
 import "./RadarMaterial";
 import "./LineMaterial";
@@ -42,7 +48,8 @@ import { addMoveCar } from "./addMoveCar";
 import { addPlaneLine } from "./addPlaneLine";
 import { addPlaneLineByTime } from "./addPlaneLineByTime";
 import { addBillboard } from "./addBillboard";
-
+import ViewShed from './ViewShed'
+import { nextTick } from "process";
 type toolItemType = {
   title: string;
   value: number;
@@ -299,10 +306,10 @@ const initCesium = () => {
     infoBox: false, // 是否显示点击要素之后显示的信息
     fullscreenButton: false, // 是否显示全屏按钮
     selectionIndicator: false, // 是否显示选中指示器
-    // terrainProvider: Cesium.createWorldTerrain({
-      // requestVertexNormals: true,
-      // requestWaterMask: true
-    // }),
+    terrainProvider: Cesium.createWorldTerrain({
+      requestVertexNormals: true,
+      requestWaterMask: false
+    }),
     // imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
     //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
     // })
@@ -325,12 +332,123 @@ const initCesium = () => {
   // viewer.imageryLayers.addImageryProvider(layer);
   viewer.imageryLayers.addImageryProvider(overlay);
 
-  viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(110, 30, 10000000),
-    duration: 1.6,
-  });
+  // viewer.camera.flyTo({
+  //   destination: Cesium.Cartesian3.fromDegrees(110, 30, 10000000),
+  //   duration: 1.6,
+  // });
   // viewer.scene.screenSpaceCameraController.enableTit = false;
+  nextTick(() => {
+    setTimeout(() => {
+      addVideo()
+      const view = new ViewShed(viewer)
+    }, 2000);
+  })
+  // addCity(viewer, true);
 };
+//投射视频到模型
+const addVideo = () => {
+  const dom = document.getElementById('myVideo')
+//   const greenCylinder = viewer.entities.add({
+//   name: "Green cylinder with black outline",
+//   position: Cesium.Cartesian3.fromDegrees(111.0, 40.0, 200000.0),
+//   cylinder: {
+//     length: 400000.0,
+//     topRadius: 200000.0,
+//     bottomRadius: 200000.0,
+//     material: Cesium.Color.GREEN.withAlpha(0.9),
+//   },
+// });
+//   const redCone = viewer.entities.add({
+//     name: "Red cone",
+//     position: Cesium.Cartesian3.fromDegrees(110.0, 30.0, 200000.0),
+//     cylinder: {
+//       length: 400000.0,
+//       topRadius: 0.0,
+//       bottomRadius: 200000.0,
+//       material: dom,
+//     },
+//   });
+  // const primitive = new Cesium.Primitive({
+  //     geometryInstances: new Cesium.GeometryInstance({
+  //       geometry: new Cesium.PolygonGeometry({
+  //         polygonHierarchy: new Cesium.PolygonHierarchy(
+  //           Cesium.Cartesian3.fromDegreesArray([
+  //             121.4591830727844, 31.20923471021075,
+  //             121.4591830727844, 31.27923471021075,
+  //             121.5599830727844, 31.27923471021075,
+  //             121.5599830727844, 31.20923471021075])
+  //         ),
+  //         height: 0,
+  //         extrudedHeight: 100,
+  //       }),
+  //     }),
+  //     classificationType : Cesium.ClassificationType.BOTH,
+  //     appearance: new Cesium.EllipsoidSurfaceAppearance({
+  //       material: Cesium.Material.fromType("Stripe"),
+  //     }),
+  //   })
+    // viewer.scene.primitives.add(
+    //   primitive
+    // );
+  // 121.4991830727844, 31.236923471021075
+  // viewer.zoomTo(viewer.entities);
+  // const dom2 = document.getElementById('myImage')
+  // 参数
+  // let viewModel = { verticalAngle: 90, horizontalAngle: 120, distance: 10 };
+  // let videoShed3DArr = [];
+  //   // 创建
+  //   let create = () => {
+  //       let videoShed3D = new Cesium.VideoShed3D(viewer, {
+  //         type: 'Video',
+  //         url: "src/cs.mp4",
+  //         alpha: 1,
+  //         debugFrustum: true,
+  //         horizontalAngle: Number(viewModel.horizontalAngle),
+  //         verticalAngle: Number(viewModel.verticalAngle),
+  //         distance: Number(viewModel.distance),
+  //       });
+  //       videoShed3DArr.push(videoShed3D)
+  //   }
+  //   create()
+    // 销毁
+    // let destroy = () => {
+    //     videoShed3DArr.forEach(video => video.destroy())
+    // }
+  const e = viewer.entities.add({
+    polygon:{
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        // heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+        // height:0,
+        hierarchy: Cesium.Cartesian3.fromDegreesArrayHeights([
+          121.5091830727844, 31.23923471021075,1215,
+          121.5091830727844, 31.24123471021075,1215,
+          121.5109830727844, 31.24123471021075,1215,
+          121.5109830727844, 31.23923471021075,1215,
+        ]),
+        // extrudedHeight: 10,
+        // material: Cesium.Color.GREEN,
+        material: dom,
+        clampToGround: true,
+        classificationType: Cesium.ClassificationType.BOTH,
+      },
+    });
+    setTimeout(() => {
+      viewer.zoomTo(e);
+    },100)
+
+  // var videoElement = document.getElementById('myVideo');
+  // var projectionImage = new Cesium.ProjectionImage(videoElement);
+  // projectionImage.setImage({
+  //                   video: videoElement
+  //               });
+  //   projectionImage.viewPosition = [110.0, 30.0, 210000.0];
+
+  //   projectionImage.horizontalFov = 20000;
+  //   projectionImage.verticalFov = 10000;
+
+  //   projectionImage.setDistDirByPoint([110.0, 30.0, 200000.0]);
+  //   projectionImage.distance = 10000;
+}
 const TimeFormatter = (time: any, viewModel: any) => {
   return DateTimeFormatter(time, viewModel, true)
 }
@@ -373,6 +491,14 @@ const DateTimeFormatter = (datetime: any, viewModel: any, ignoredate: any) => {
 .cesium-viewer-bottom,
 .cesium-viewer-fullscreenContainer {
   display: none !important;
+}
+#myVideo{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400px;
+  height: 256px;
+  z-index: 100;
 }
 </style>
 
