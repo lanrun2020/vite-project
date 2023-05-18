@@ -3,11 +3,12 @@ import Cesium from "@/utils/importCesium"
 import CesiumVideo3d from './CesiumVideo3d'
 let primitive: any
 let tilesetPrimitive: any
+let view2: any
 export const addCity = (viewer: any, active: boolean) => {
   if (active) {
-    const view2 = new CesiumVideo3d(Cesium, viewer,{
+    view2 = new CesiumVideo3d(Cesium, viewer,{
       far: 300,
-      url: 'http://localhost:3015/src/views/Cesium/video.mp4',
+      url: '/src/views/Cesium/video.mp4',
       type: 3,
       position: {x:121.5061830727844, y:31.22923471021075, z: 50},
       rotation: {x: 1,y: 1,z: 1}
@@ -53,6 +54,7 @@ export const addCity = (viewer: any, active: boolean) => {
     if (primitive) {
       primitive.removeAll()
       primitive = null
+      view2.destroy()
     }
   }
 }

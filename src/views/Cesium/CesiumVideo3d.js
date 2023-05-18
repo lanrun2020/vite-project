@@ -1,7 +1,111 @@
 import ECEF from "./CoordinateTranslate";
 let CesiumVideo3d = (function () {
 
-    var videoShed3dShader = "\r\n\r\n\r\n\r\nuniform float mixNum;\r\nuniform sampler2D colorTexture;\r\nuniform sampler2D stcshadow; \r\nuniform sampler2D videoTexture;\r\nuniform sampler2D depthTexture;\r\nuniform mat4 _shadowMap_matrix; \r\nuniform vec4 shadowMap_lightPositionEC; \r\nuniform vec4 shadowMap_normalOffsetScaleDistanceMaxDistanceAndDarkness; \r\nuniform vec4 shadowMap_texelSizeDepthBiasAndNormalShadingSmooth; \r\nvarying vec2 v_textureCoordinates;\r\nvec4 toEye(in vec2 uv, in float depth){\r\n    vec2 xy = vec2((uv.x * 2.0 - 1.0),(uv.y * 2.0 - 1.0));\r\n    vec4 posInCamera =czm_inverseProjection * vec4(xy, depth, 1.0);\r\n    posInCamera =posInCamera / posInCamera.w;\r\n    return posInCamera;\r\n}\r\nfloat getDepth(in vec4 depth){\r\n    float z_window = czm_unpackDepth(depth);\r\n    z_window = czm_reverseLogDepth(z_window);\r\n    float n_range = czm_depthRange.near;\r\n    float f_range = czm_depthRange.far;\r\n    return (2.0 * z_window - n_range - f_range) / (f_range - n_range);\r\n}\r\nfloat _czm_sampleShadowMap(sampler2D shadowMap, vec2 uv){\r\n    return texture2D(shadowMap, uv).r;\r\n}\r\nfloat _czm_shadowDepthCompare(sampler2D shadowMap, vec2 uv, float depth){\r\n    return step(depth, _czm_sampleShadowMap(shadowMap, uv));\r\n}\r\nfloat _czm_shadowVisibility(sampler2D shadowMap, czm_shadowParameters shadowParameters){\r\n    float depthBias = shadowParameters.depthBias;\r\n    float depth = shadowParameters.depth;\r\n    float nDotL = shadowParameters.nDotL;\r\n    float normalShadingSmooth = shadowParameters.normalShadingSmooth;\r\n    float darkness = shadowParameters.darkness;\r\n    vec2 uv = shadowParameters.texCoords;\r\n    depth -= depthBias;\r\n    vec2 texelStepSize = shadowParameters.texelStepSize;\r\n    float radius = 1.0;\r\n    float dx0 = -texelStepSize.x * radius;\r\n    float dy0 = -texelStepSize.y * radius;\r\n    float dx1 = texelStepSize.x * radius;\r\n    float dy1 = texelStepSize.y * radius;\r\n    float visibility = \r\n    (\r\n    _czm_shadowDepthCompare(shadowMap, uv, depth)\r\n    +_czm_shadowDepthCompare(shadowMap, uv + vec2(dx0, dy0), depth) +\r\n    _czm_shadowDepthCompare(shadowMap, uv + vec2(0.0, dy0), depth) +\r\n    _czm_shadowDepthCompare(shadowMap, uv + vec2(dx1, dy0), depth) +\r\n    _czm_shadowDepthCompare(shadowMap, uv + vec2(dx0, 0.0), depth) +\r\n    _czm_shadowDepthCompare(shadowMap, uv + vec2(dx1, 0.0), depth) +\r\n    _czm_shadowDepthCompare(shadowMap, uv + vec2(dx0, dy1), depth) +\r\n    _czm_shadowDepthCompare(shadowMap, uv + vec2(0.0, dy1), depth) +\r\n    _czm_shadowDepthCompare(shadowMap, uv + vec2(dx1, dy1), depth)\r\n    ) * (1.0 / 9.0)\r\n    ;\r\n    return visibility;\r\n}\r\nvec3 pointProjectOnPlane(in vec3 planeNormal, in vec3 planeOrigin, in vec3 point){\r\n    vec3 v01 = point -planeOrigin;\r\n    float d = dot(planeNormal, v01) ;\r\n    return (point - planeNormal * d);\r\n}\r\nfloat ptm(vec3 pt){\r\n    return sqrt(pt.x*pt.x + pt.y*pt.y + pt.z*pt.z);\r\n}\r\nvoid main() \r\n{ \r\n    const float PI = 3.141592653589793;\r\n    vec4 color = texture2D(colorTexture, v_textureCoordinates);\r\n    vec4 currD = texture2D(depthTexture, v_textureCoordinates);\r\n    if(currD.r>=1.0){\r\n        gl_FragColor = color;\r\n        return;\r\n    }\r\n    \r\n    float depth = getDepth(currD);\r\n    vec4 positionEC = toEye(v_textureCoordinates, depth);\r\n    vec3 normalEC = vec3(1.0);\r\n    czm_shadowParameters shadowParameters; \r\n    shadowParameters.texelStepSize = shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.xy; \r\n    shadowParameters.depthBias = shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.z; \r\n    shadowParameters.normalShadingSmooth = shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.w; \r\n    shadowParameters.darkness = shadowMap_normalOffsetScaleDistanceMaxDistanceAndDarkness.w; \r\n    shadowParameters.depthBias *= max(depth * 0.01, 1.0); \r\n    vec3 directionEC = normalize(positionEC.xyz - shadowMap_lightPositionEC.xyz); \r\n    float nDotL = clamp(dot(normalEC, -directionEC), 0.0, 1.0); \r\n    vec4 shadowPosition = _shadowMap_matrix * positionEC; \r\n    shadowPosition /= shadowPosition.w; \r\n    if (any(lessThan(shadowPosition.xyz, vec3(0.0))) || any(greaterThan(shadowPosition.xyz, vec3(1.0)))) \r\n    { \r\n        gl_FragColor = color;\r\n        return;\r\n    }\r\n\r\n    shadowParameters.texCoords = shadowPosition.xy; \r\n    shadowParameters.depth = shadowPosition.z; \r\n    shadowParameters.nDotL = nDotL; \r\n    float visibility = _czm_shadowVisibility(stcshadow, shadowParameters); \r\n\r\n    vec4 videoColor = texture2D(videoTexture,shadowPosition.xy);\r\n    if(visibility==1.0){\r\n        gl_FragColor = mix(color,vec4(videoColor.xyz,1.0),mixNum*videoColor.a);\r\n    }else{\r\n        if(abs(shadowPosition.z-0.0)<0.01){\r\n            return;\r\n        }\r\n        gl_FragColor = color;\r\n    }\r\n} ";
+    var videoShed3dShader = `
+    uniform float mixNum;
+    uniform sampler2D colorTexture;
+    uniform sampler2D stcshadow;
+    uniform sampler2D videoTexture;
+    uniform sampler2D depthTexture;
+    uniform mat4 _shadowMap_matrix;
+    uniform vec4 shadowMap_lightPositionEC;
+    uniform vec4 shadowMap_normalOffsetScaleDistanceMaxDistanceAndDarkness;
+    uniform vec4 shadowMap_texelSizeDepthBiasAndNormalShadingSmooth;
+    varying vec2 v_textureCoordinates;
+    vec4 toEye(in vec2 uv, in float depth){
+        vec2 xy = vec2((uv.x * 2.0 - 1.0),(uv.y * 2.0 - 1.0));
+        vec4 posInCamera =czm_inverseProjection * vec4(xy, depth, 1.0);
+        posInCamera =posInCamera / posInCamera.w;
+        return posInCamera;
+    }
+    float getDepth(in vec4 depth){
+        float z_window = czm_unpackDepth(depth);
+        z_window = czm_reverseLogDepth(z_window);
+        float n_range = czm_depthRange.near;
+        float f_range = czm_depthRange.far;
+        return (2.0 * z_window - n_range - f_range) / (f_range - n_range);
+    }
+    float _czm_sampleShadowMap(sampler2D shadowMap, vec2 uv){
+        return texture2D(shadowMap, uv).r;
+    }
+    float _czm_shadowDepthCompare(sampler2D shadowMap, vec2 uv, float depth){
+        return step(depth, _czm_sampleShadowMap(shadowMap, uv));
+    }
+    float _czm_shadowVisibility(sampler2D shadowMap, czm_shadowParameters shadowParameters){
+    float depthBias = shadowParameters.depthBias;
+    float depth = shadowParameters.depth;
+    float nDotL = shadowParameters.nDotL;
+    float normalShadingSmooth = shadowParameters.normalShadingSmooth;
+    float darkness = shadowParameters.darkness;
+    vec2 uv = shadowParameters.texCoords;
+    depth -= depthBias;
+    vec2 texelStepSize = shadowParameters.texelStepSize;
+    float radius = 1.0;
+    float dx0 = -texelStepSize.x * radius;
+    float dy0 = -texelStepSize.y * radius;
+    float dx1 = texelStepSize.x * radius;
+    float dy1 = texelStepSize.y * radius;
+    float visibility = (
+        _czm_shadowDepthCompare(shadowMap, uv, depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx0, dy0), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(0.0, dy0), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx1, dy0), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx0, 0.0), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx1, 0.0), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx0, dy1), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(0.0, dy1), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx1, dy1), depth)
+        ) * (1.0 / 9.0);
+        return visibility;
+    }
+    vec3 pointProjectOnPlane(in vec3 planeNormal, in vec3 planeOrigin, in vec3 point){
+        vec3 v01 = point -planeOrigin;
+        float d = dot(planeNormal, v01) ;
+        return (point - planeNormal * d);
+    }
+    float ptm(vec3 pt){
+        return sqrt(pt.x*pt.x + pt.y*pt.y + pt.z*pt.z);
+    }
+    void main() {
+        const float PI = 3.141592653589793;
+        vec4 color = texture2D(colorTexture, v_textureCoordinates);
+        vec4 currD = texture2D(depthTexture, v_textureCoordinates);
+        if(currD.r>=1.0){
+            gl_FragColor = color;
+            return;
+        }
+        float depth = getDepth(currD);
+        vec4 positionEC = toEye(v_textureCoordinates, depth);
+        vec3 normalEC = vec3(1.0);
+        czm_shadowParameters shadowParameters;
+        shadowParameters.texelStepSize = shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.xy;
+        shadowParameters.depthBias = shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.z;
+        shadowParameters.normalShadingSmooth = shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.w;
+        shadowParameters.darkness = shadowMap_normalOffsetScaleDistanceMaxDistanceAndDarkness.w;
+        shadowParameters.depthBias *= max(depth * 0.01, 1.0);
+        vec3 directionEC = normalize(positionEC.xyz - shadowMap_lightPositionEC.xyz);
+        float nDotL = clamp(dot(normalEC, -directionEC), 0.0, 1.0);
+        vec4 shadowPosition = _shadowMap_matrix * positionEC;
+        shadowPosition /= shadowPosition.w;
+        if (any(lessThan(shadowPosition.xyz, vec3(0.0))) || any(greaterThan(shadowPosition.xyz, vec3(1.0))))
+        {
+            gl_FragColor = color;
+            return;
+        }
+        shadowParameters.texCoords = shadowPosition.xy;
+        shadowParameters.depth = shadowPosition.z;
+        shadowParameters.nDotL = nDotL;
+        float visibility = _czm_shadowVisibility(stcshadow, shadowParameters);
+            vec4 videoColor = texture2D(videoTexture,shadowPosition.xy);
+        if(visibility==1.0){
+             gl_FragColor = mix(color,vec4(videoColor.xyz,1.0),mixNum*videoColor.a);
+         }else{
+                if(abs(shadowPosition.z-0.0)<0.01){
+                    return;
+                }
+                gl_FragColor = color;
+            }
+        }`
     var Cesium=null
 
     var videoShed3d=function(cesium,viewer, param) {
