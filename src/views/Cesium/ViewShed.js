@@ -2,7 +2,7 @@
 /* eslint-disable no-underscore-dangle */
 // ViewShed.js
 import Cesium from "@/utils/importCesium"
-const viewPosition = [121.5061830727844, 31.22923471021075]
+const viewPosition = [121.5061830727844, 31.22923471021075, 50]
 
 function getHeading(fromPosition, toPosition) {
   const finalPosition = new Cesium.Cartesian3()
@@ -47,9 +47,9 @@ export default class ViewShed {
   constructor(viewer, options = {}) {
     this.viewer = viewer
     // this.viewPosition = options.viewPosition || Cesium.Cartesian3.fromDegrees(99.25, 26.86, 100)
-    this.viewPosition = options.viewPosition || Cesium.Cartesian3.fromDegrees(...viewPosition, 200)
+    this.viewPosition = options.viewPosition || Cesium.Cartesian3.fromDegrees(...viewPosition)
     this.viewPositionEnd = options.viewPositionEnd
-    this.viewDistance = this.viewPositionEnd ? Cesium.Cartesian3.distance(this.viewPosition, this.viewPositionEnd) : (options.viewDistance || 600.0)
+    this.viewDistance = this.viewPositionEnd ? Cesium.Cartesian3.distance(this.viewPosition, this.viewPositionEnd) : (options.viewDistance || 300.0)
     this.viewHeading = this.viewPositionEnd ? getHeading(this.viewPosition, this.viewPositionEnd) : (options.viewHeading || 0.0)
     this.viewPitch = this.viewPositionEnd ? getPitch(this.viewPosition, this.viewPositionEnd) : (options.viewPitch || 0.0)
     this.horizontalViewAngle = options.horizontalViewAngle || 90.0
@@ -60,144 +60,111 @@ export default class ViewShed {
     this.softShadows = (typeof options.softShadows === 'boolean') ? options.softShadows : true
     this.size = options.size || 2048
     this.VideoShead3D_FS = `
-      uniform float dis;
-      uniform sampler2D videoTexture;
-      uniform sampler2D colorTexture;
-      uniform sampler2D depthTexture;
-      uniform sampler2D shadowMap;
-      uniform mat4 _shadowMap_matrix;
-      uniform vec4 shadowMap_lightPositionEC;
-      uniform vec4 shadowMap_lightDirectionEC;
-      uniform vec3 shadowMap_lightUp;
-      uniform vec3 shadowMap_lightDir;
-      uniform vec3 shadowMap_lightRight;
-      uniform mat4 camera_view_matrix;
-      uniform mat4 camera_projection_matrix;
-      uniform vec4 shadowMap_normalOffsetScaleDistanceMaxDistanceAndDarkness;
-      uniform vec4 shadowMap_texelSizeDepthBiasAndNormalShadingSmooth;
-      uniform samplerCube shadowMap_textureCube;
-      varying vec2 v_textureCoordinates;
-      vec4 toEye(in vec2 uv, in float depth) {
-        vec2 xy = vec2((uv.x * 2.0 - 1.0), (uv.y * 2.0 - 1.0));
-        vec4 posInCamera = czm_inverseProjection * vec4(xy, depth, 1.0);
-        posInCamera = posInCamera / posInCamera.w;
+    uniform float mixNum;
+    uniform sampler2D colorTexture;
+    uniform sampler2D stcshadow;
+    uniform sampler2D videoTexture;
+    uniform sampler2D depthTexture;
+    uniform mat4 _shadowMap_matrix;
+    uniform vec4 shadowMap_lightPositionEC;
+    uniform vec4 shadowMap_normalOffsetScaleDistanceMaxDistanceAndDarkness;
+    uniform vec4 shadowMap_texelSizeDepthBiasAndNormalShadingSmooth;
+    varying vec2 v_textureCoordinates;
+    vec4 toEye(in vec2 uv, in float depth){
+        vec2 xy = vec2((uv.x * 2.0 - 1.0),(uv.y * 2.0 - 1.0));
+        vec4 posInCamera =czm_inverseProjection * vec4(xy, depth, 1.0);
+        posInCamera =posInCamera / posInCamera.w;
         return posInCamera;
-      }
-      float getDepth(in vec4 depth) {
+    }
+    float getDepth(in vec4 depth){
         float z_window = czm_unpackDepth(depth);
         z_window = czm_reverseLogDepth(z_window);
         float n_range = czm_depthRange.near;
         float f_range = czm_depthRange.far;
         return (2.0 * z_window - n_range - f_range) / (f_range - n_range);
-      }
-      float _czm_sampleShadowMap(sampler2D shadowMap, vec2 uv) {
+    }
+    float _czm_sampleShadowMap(sampler2D shadowMap, vec2 uv){
         return texture2D(shadowMap, uv).r;
-      }
-      float _czm_shadowDepthCompare(sampler2D shadowMap, vec2 uv, float depth) {
+    }
+    float _czm_shadowDepthCompare(sampler2D shadowMap, vec2 uv, float depth){
         return step(depth, _czm_sampleShadowMap(shadowMap, uv));
-      }
-      struct zx_shadowParameters
-        {
-            vec3 texCoords;
-            float depthBias;
-            float depth;
-            float nDotL;
-            vec2 texelStepSize;
-            float normalShadingSmooth;
-            float darkness;
-        };
-      vec3 pointProjectOnPlane(in vec3 planeNormal, in vec3 planeOrigin, in vec3 point){
-        vec3 v01 = point - planeOrigin;
-        float d = dot(planeNormal, v01);
-        return (point - planeNormal * d);
-      }
-      float ptm(vec3 pt){
-        return sqrt(pt.x * pt.x + pt.y * pt.y + pt.z * pt.z);
-      }
-      vec3 getNormalEC(){
-        return vec3(1.);
-      }
-      float czm_shadowVisibility(samplerCube shadowMap, zx_shadowParameters shadowParameters)
-      {
-          float depthBias = shadowParameters.depthBias;
-          float depth = shadowParameters.depth;
-          float nDotL = shadowParameters.nDotL;
-          float normalShadingSmooth = shadowParameters.normalShadingSmooth;
-          float darkness = shadowParameters.darkness;
-          vec3 uvw = shadowParameters.texCoords;
-          depth -= depthBias;
-          float visibility = czm_shadowDepthCompare(shadowMap, uvw, depth);
-          return czm_private_shadowVisibility(visibility, nDotL, normalShadingSmooth, darkness);
-      }
-      float shadow(in vec4 positionEC){
-        vec3 normalEC=getNormalEC();
-        zx_shadowParameters shadowParameters;
-        shadowParameters.texelStepSize=shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.xy;
-        shadowParameters.depthBias=shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.z;
-        shadowParameters.normalShadingSmooth=shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.w;
-        shadowParameters.darkness=shadowMap_normalOffsetScaleDistanceMaxDistanceAndDarkness.w;
-        vec3 directionEC=positionEC.xyz-shadowMap_lightPositionEC.xyz;
-        float distance=length(directionEC);
-        directionEC=normalize(directionEC);
-        float radius=shadowMap_lightPositionEC.w;
-        if(distance>radius){
-            return 2.0;
-        }
-        vec3 directionWC=czm_inverseViewRotation*directionEC;
-        shadowParameters.depth=distance/radius-0.0003;
-        shadowParameters.nDotL=clamp(dot(normalEC,-directionEC),0.,1.);
-        shadowParameters.texCoords=directionWC;
-        float visibility=czm_shadowVisibility(shadowMap_textureCube,shadowParameters);
+    }
+    float _czm_shadowVisibility(sampler2D shadowMap, czm_shadowParameters shadowParameters){
+    float depthBias = shadowParameters.depthBias;
+    float depth = shadowParameters.depth;
+    float nDotL = shadowParameters.nDotL;
+    float normalShadingSmooth = shadowParameters.normalShadingSmooth;
+    float darkness = shadowParameters.darkness;
+    vec2 uv = shadowParameters.texCoords;
+    depth -= depthBias;
+    vec2 texelStepSize = shadowParameters.texelStepSize;
+    float radius = 1.0;
+    float dx0 = -texelStepSize.x * radius;
+    float dy0 = -texelStepSize.y * radius;
+    float dx1 = texelStepSize.x * radius;
+    float dy1 = texelStepSize.y * radius;
+    float visibility = (
+        _czm_shadowDepthCompare(shadowMap, uv, depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx0, dy0), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(0.0, dy0), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx1, dy0), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx0, 0.0), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx1, 0.0), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx0, dy1), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(0.0, dy1), depth) +
+        _czm_shadowDepthCompare(shadowMap, uv + vec2(dx1, dy1), depth)
+        ) * (1.0 / 9.0);
         return visibility;
-      }
-      bool visible(in vec4 result){
-          result.x/=result.w;
-          result.y/=result.w;
-          result.z/=result.w;
-          return result.x>=-1.&&result.x<=1.
-          &&result.y>=-1.&&result.y<=1.
-          &&result.z>=-1.&&result.z<=1.;
-      }
-      void main(){
-        // 釉色 = 结构二维(颜色纹理, 纹理坐标)
-        gl_FragColor = texture2D(colorTexture, v_textureCoordinates);
-        // 深度 = 获取深度(结构二维(深度纹理, 纹理坐标))
-        float depth = getDepth(texture2D(depthTexture, v_textureCoordinates));
-        // 视角 = (纹理坐标, 深度)
-        vec4 viewPos = toEye(v_textureCoordinates, depth);
+    }
+    vec3 pointProjectOnPlane(in vec3 planeNormal, in vec3 planeOrigin, in vec3 point){
+        vec3 v01 = point -planeOrigin;
+        float d = dot(planeNormal, v01) ;
+        return (point - planeNormal * d);
+    }
+    float ptm(vec3 pt){
+        return sqrt(pt.x*pt.x + pt.y*pt.y + pt.z*pt.z);
+    }
+    void main() {
+        const float PI = 3.141592653589793;
+        vec4 color = texture2D(colorTexture, v_textureCoordinates);
+        vec4 currD = texture2D(depthTexture, v_textureCoordinates);
+        if(currD.r>=1.0){
+            gl_FragColor = color;
+            return;
+        }
+        float depth = getDepth(currD);
+        vec4 positionEC = toEye(v_textureCoordinates, depth);
         vec3 normalEC = vec3(1.0);
-        vec3 directionEC = normalize(viewPos.xyz - shadowMap_lightPositionEC.xyz);
-        vec4 shadowPosition = _shadowMap_matrix * viewPos;
+        czm_shadowParameters shadowParameters;
+        shadowParameters.texelStepSize = shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.xy;
+        shadowParameters.depthBias = shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.z;
+        shadowParameters.normalShadingSmooth = shadowMap_texelSizeDepthBiasAndNormalShadingSmooth.w;
+        shadowParameters.darkness = shadowMap_normalOffsetScaleDistanceMaxDistanceAndDarkness.w;
+        shadowParameters.depthBias *= max(depth * 0.01, 1.0);
+        vec3 directionEC = normalize(positionEC.xyz - shadowMap_lightPositionEC.xyz);
+        float nDotL = clamp(dot(normalEC, -directionEC), 0.0, 1.0);
+        vec4 shadowPosition = _shadowMap_matrix * positionEC;
         shadowPosition /= shadowPosition.w;
-        if (any(lessThan(shadowPosition.xyz, vec3(0.0))) || any(greaterThan(shadowPosition.xyz, vec3(1.0)))) {
-          return;
+        if (any(lessThan(shadowPosition.xyz, vec3(0.0))) || any(greaterThan(shadowPosition.xyz, vec3(1.0))))
+        {
+            gl_FragColor = color;
+            return;
         }
-        // 世界坐标
-        vec4 wordPos = czm_inverseView * viewPos;
-        // 虚拟相机中坐标
-        vec4 vcPos = camera_view_matrix * wordPos;
-        float near = .001 * dis;
-        float dis2 = length(vcPos.xyz);
-        // 可视区颜色
-        vec4 helsing_visibleAreaColor=vec4(0.,1.,0.,.5);
-        vec4 helsing_invisibleAreaColor=vec4(1.,0.,1.,.1);
-        if(dis2 > near && dis2 < dis){
-            // 透视投影
-            vec4 posInEye = camera_projection_matrix * vcPos;
-            if(visible(posInEye)){
-                float vis = shadow(viewPos);
-                if(vis > 0.3){
-                    vec3 directionWC = czm_inverseViewRotation * directionEC;
-                    vec4 videoColor = texture2D(videoTexture, directionWC.xy);
-                    // vec4 videoColor = texture2D(videoTexture, v_textureCoordinates);
-                    gl_FragColor = videoColor;
-                } else{
-                    gl_FragColor = helsing_visibleAreaColor;
+        shadowParameters.texCoords = shadowPosition.xy;
+        shadowParameters.depth = shadowPosition.z;
+        shadowParameters.nDotL = nDotL;
+        float visibility = _czm_shadowVisibility(stcshadow, shadowParameters);
+        vec4 videoColor = texture2D(videoTexture,shadowPosition.xy);
+        if(visibility==1.0){
+             gl_FragColor = mix(color,vec4(videoColor.xyz,1.0),mixNum*videoColor.a);
+         }else{
+                if(abs(shadowPosition.z-0.0)<0.01){
+                    gl_FragColor = color;
+                    return;
                 }
+                gl_FragColor = color;
             }
-        }
-      }
-      `
+        }`
     this.update()
   }
 
@@ -231,17 +198,13 @@ export default class ViewShed {
   // 创建阴影贴图
   createShadowMap() {
     this.shadowMap = new Cesium.ShadowMap({
-      darkness: 0.5,
-      context: (this.viewer.scene).context,
+      context: this.viewer.scene.context,
       lightCamera: this.lightCamera,
-      enabled: this.enabled,
-      isPointLight: true,
-      pointLightRadius: this.viewDistance,
-      cascadesEnabled: true,
-      size: this.size,
-      softShadows: this.softShadows,
-      normalOffset: false,
-      fromLightSource: false
+      enabled: false,
+      isPointLight: false,
+      isSpotLight: true,
+      pointLightRadius: 300,
+      cascadesEnabled: false,
     })
     this.viewer.scene.shadowMap = this.shadowMap
   }
@@ -312,10 +275,10 @@ export default class ViewShed {
         dis: () => {
           return 600
         },
-        // mixNum: () => {
-        //   return 0.5
-        // },
-        shadowMap: () => {
+        mixNum: () => {
+          return 1.0
+        },
+        stcshadow: () => {
           return that.shadowMap._shadowMapTexture
         },
         shadowMap_lightUp: () => {

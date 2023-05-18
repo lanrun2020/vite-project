@@ -1,6 +1,7 @@
 // 城市 白膜建筑
 import Cesium from "@/utils/importCesium"
 import CesiumVideo3d from './CesiumVideo3d'
+import ViewShed from './ViewShed'
 let primitive: any
 let tilesetPrimitive: any
 let view2: any
@@ -11,8 +12,9 @@ export const addCity = (viewer: any, active: boolean) => {
       url: '/src/views/Cesium/video.mp4',
       type: 3,
       position: {x:121.5061830727844, y:31.22923471021075, z: 50},
-      rotation: {x: 1,y: 1,z: 1}
+      rotation: {x: 0,y: 0} //x垂直方向偏转，y水平方向偏转
     })
+    // const vew = new ViewShed(viewer)
     setTimeout(() => {
       viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(121.5061830727844, 31.22923471021075, 3000),

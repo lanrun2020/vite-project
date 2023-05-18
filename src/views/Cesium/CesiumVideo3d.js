@@ -96,7 +96,7 @@ let CesiumVideo3d = (function () {
         shadowParameters.depth = shadowPosition.z;
         shadowParameters.nDotL = nDotL;
         float visibility = _czm_shadowVisibility(stcshadow, shadowParameters);
-            vec4 videoColor = texture2D(videoTexture,shadowPosition.xy);
+        vec4 videoColor = texture2D(videoTexture,shadowPosition.xy);
         if(visibility==1.0){
              gl_FragColor = mix(color,vec4(videoColor.xyz,1.0),mixNum*videoColor.a);
          }else{

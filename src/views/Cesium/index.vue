@@ -1,9 +1,8 @@
 <template>
   <div id="cesiumContainer">
-    <!-- <img style="position: absolute;top:0;left:400px;zIndex:100;width:400px;" id="myImage" src="../../assets/guoqi.png" /> -->
     <!-- <video id="myVideo" style="width: 400px;height: 400px;" autoplay loop controls >
-2     <source src="./video.mp4" type="video/mp4">
-5   </video> -->
+     <source src="./video.mp4" type="video/mp4">
+    </video> -->
     <toolbox :toolList="toolList" @toolChecked="toolChecked"></toolbox>
   </div>
 </template>
@@ -23,6 +22,8 @@ import "./wallMaterial";
 import "./planeLineMaterial";
 import "./circleMaterial";
 import "./circleRotateMaterial";
+import "./rotationMaterial";
+import "./rotationMaterial2"
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
@@ -48,9 +49,6 @@ import { addMoveCar } from "./addMoveCar";
 import { addPlaneLine } from "./addPlaneLine";
 import { addPlaneLineByTime } from "./addPlaneLineByTime";
 import { addBillboard } from "./addBillboard";
-import ViewShed from './ViewShed'
-import CesiumVideo3d from './CesiumVideo3d'
-import { nextTick } from "process";
 type toolItemType = {
   title: string;
   value: number;
