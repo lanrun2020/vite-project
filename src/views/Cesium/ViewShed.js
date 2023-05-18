@@ -189,6 +189,7 @@ export default class ViewShed {
                 if(vis > 0.3){
                     vec3 directionWC = czm_inverseViewRotation * directionEC;
                     vec4 videoColor = texture2D(videoTexture, directionWC.xy);
+                    // vec4 videoColor = texture2D(videoTexture, v_textureCoordinates);
                     gl_FragColor = videoColor;
                 } else{
                     gl_FragColor = helsing_visibleAreaColor;

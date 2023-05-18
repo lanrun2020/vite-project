@@ -1,9 +1,9 @@
 <template>
   <div id="cesiumContainer">
     <!-- <img style="position: absolute;top:0;left:400px;zIndex:100;width:400px;" id="myImage" src="../../assets/guoqi.png" /> -->
-    <video id="myVideo" style="width: 400px;height: 400px;" autoplay loop controls >
+    <!-- <video id="myVideo" style="width: 400px;height: 400px;" autoplay loop controls >
 2     <source src="./video.mp4" type="video/mp4">
-5   </video>
+5   </video> -->
     <toolbox :toolList="toolList" @toolChecked="toolChecked"></toolbox>
   </div>
 </template>
@@ -49,6 +49,7 @@ import { addPlaneLine } from "./addPlaneLine";
 import { addPlaneLineByTime } from "./addPlaneLineByTime";
 import { addBillboard } from "./addBillboard";
 import ViewShed from './ViewShed'
+import CesiumVideo3d from './CesiumVideo3d'
 import { nextTick } from "process";
 type toolItemType = {
   title: string;
@@ -337,14 +338,34 @@ const initCesium = () => {
   //   duration: 1.6,
   // });
   // viewer.scene.screenSpaceCameraController.enableTit = false;
-  nextTick(() => {
-    setTimeout(() => {
-      addVideo()
-      const view = new ViewShed(viewer)
-    }, 2000);
-  })
   // addCity(viewer, true);
 };
+// 创建相机
+// const createLightCamera = () => {
+//     this.lightCamera = new Cesium.Camera(this.viewer.scene)
+//     this.lightCamera.position = this.viewPosition
+//     this.lightCamera.frustum.near = this.viewDistance * 0.001
+//     this.lightCamera.frustum.far = this.viewDistance
+//     const hr = Cesium.Math.toRadians(this.horizontalViewAngle)
+//     const vr = Cesium.Math.toRadians(this.verticalViewAngle)
+//     const aspectRatio =
+//         (this.viewDistance * Math.tan(hr / 2) * 2) /
+//         (this.viewDistance * Math.tan(vr / 2) * 2)
+//     this.lightCamera.frustum.aspectRatio = aspectRatio
+//     if (hr > vr) {
+//       this.lightCamera.frustum.fov = hr
+//     } else {
+//       this.lightCamera.frustum.fov = vr
+//     }
+//     this.lightCamera.setView({
+//       destination: this.viewPosition,
+//       orientation: {
+//         heading: Cesium.Math.toRadians(this.viewHeading || 0),
+//         pitch: Cesium.Math.toRadians(this.viewPitch || 0),
+//         roll: 0
+//       }
+//     })
+//   }
 //投射视频到模型
 const addVideo = () => {
   const dom = document.getElementById('myVideo')
