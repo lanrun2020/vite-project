@@ -10,7 +10,11 @@ interface Options {
   reverse?: boolean
   gradual?: boolean,
   outLineShow?: boolean,
-  outLineWidth?: number
+  outLineWidth?: number,
+  radiusLine?: boolean,
+  radiusLineNumber?: number,
+  angleLine?: boolean,
+  angleLineNumber?: number,
 }
 
 export default class RotationMaterialProperty {
@@ -21,11 +25,15 @@ export default class RotationMaterialProperty {
   private _gradual: boolean //是否渐变
   private _outLineShow: boolean //是否展示圆环
   private _outLineWidth: number //圆环宽度
+  private _radiusLine: boolean //半径刻度线，从圆心向外分层级
+  private _radiusLineNumber: number //分段数量
+  private _angleLine: boolean //角度线，按角度划分
+  private _angleLineNumber: number //角度线，按角度划分
   private _reverse: boolean //逆向旋转
   private _definitionChanged: any
   private duration: number
   private _time: number
-  constructor(options?: Options){
+  constructor(options?: Options) {
     this._definitionChanged = new Cesium.Event()
     this._color = options?.color ?? new Cesium.Color(0.0, 0.0, 1.0, 1.0)
     this.duration = options?.duration ?? 10000
@@ -37,6 +45,10 @@ export default class RotationMaterialProperty {
     this._reverse = options?.reverse ?? false
     this._outLineShow = options?.outLineShow ?? true
     this._outLineWidth = options?.outLineWidth ?? 0.01
+    this._radiusLine = options?.radiusLine ?? false
+    this._radiusLineNumber = options?.radiusLineNumber ?? 5.0
+    this._angleLine = options?.angleLine ?? false
+    this._angleLineNumber = options?.angleLineNumber ?? 5.0
     this.conbineProp()
     this.init()
   }
@@ -56,6 +68,10 @@ export default class RotationMaterialProperty {
     result.gradual = this._gradual
     result.outLineShow = this._outLineShow
     result.outLineWidth = this._outLineWidth
+    result.radiusLine = this._radiusLine
+    result.radiusLineNumber = this._radiusLineNumber
+    result.angleLine = this._angleLine
+    result.angleLineNumber = this._angleLineNumber
     result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._speed
     return result
   }
@@ -83,26 +99,26 @@ export default class RotationMaterialProperty {
     Cesium.Material.RotationType = 'Rotation'
     Cesium.Material.RotationSource =
       // eslint-disable-next-line no-multi-str
-      `float eagleFuc(float x2,float y2, float eagle) { //计算此位置的角度的弧度值
-        float x = x2 * cos(eagle) - y2 * sin(eagle);
-        float y = x2 * sin(eagle) + y2 * cos(eagle);
+      `float angleFuc(float x2,float y2, float angle) { //计算此位置的角度的弧度值
+        float x = x2 * cos(angle) - y2 * sin(angle);
+        float y = x2 * sin(angle) + y2 * cos(angle);
         if(x>0.0){
           if(y<0.0){
-            return atan(y/x) + 2.0*PI;
+            return atan(y/x) + 2.0*PI; //四象限
           }
           if(y>0.0){
-            return atan(y/x);
+            return atan(y/x); //第一象限
           }
         }else{
           if(x<0.0){
-            return atan(y/x)+PI;
-          }else{
-            if(y>0.0){
+            return atan(y/x)+PI; //第二三象限
+          }else{ //x=0即在y轴上时
+            if(y>0.0){ //y轴正半轴
               return PI/2.0;
             }else{
-              if(y<0.0){
+              if(y<0.0){ //y轴负半轴
                 return -PI/2.0;
-              }else{
+              }else{ //x=0,y=0
                 return 0.0;
               }
             }
@@ -117,15 +133,20 @@ export default class RotationMaterialProperty {
           float x = materialInput.st.s;
           float y = materialInput.st.t;
           float dis = sqrt((x-0.5)*(x-0.5) + (y-0.5)*(y-0.5));
-          float alpha2 = (dis - (0.5 - outLineWidth/2.0));
+          float alpha2 = (dis - (0.5 - outLineWidth/2.0)); //用于计算最外层透明度alpha
           alpha2 = alpha2 > 0.0 ? alpha2 : 0.0;
-          float alpha1 = (1.0 - eagleFuc(x-0.5,y-0.5,time)/(2.0*PI));
+          float alpha1 = (1.0 - angleFuc(x-0.5,y-0.5,time)/(2.0*PI)); //用于计算渐变透明度
           float modValue = mod(alpha1, 1.0/edge);
           modValue = reverse ? (1.0/edge - modValue) : modValue;
           float gradualAlpha = gradual ? modValue : 1.0;
           alpha1 = step(modValue, percent/edge) * gradualAlpha * edge / percent;
           alpha1 = alpha1 > 0.0 ? alpha1 : 0.0;
-          float a = outLineShow ? (alpha2/(outLineWidth/2.0) + alpha1) : alpha1;
+          float alpha3 = step(0.96*(0.5/radiusLineNumber),mod(dis,0.5/radiusLineNumber)) + step(dis,0.004); //圆心到半径的多层环线
+          alpha3 = alpha3 * 0.6; //环线透明度降低一点
+          float alpha4 = step(0.98/angleLineNumber, mod(angleFuc(x-0.5,y-0.5,0.0)/(2.0*PI), 1.0/angleLineNumber));
+          float a = outLineShow ? (alpha2/(outLineWidth/2.0) + alpha1) : alpha1; //计算最终透明度
+          a = radiusLine ? (a + alpha3) : a;
+          a = angleLine ? (a + alpha4) : a;
           material.alpha = color.a * a;
           material.diffuse = color.rgb;
           return material;
@@ -146,6 +167,10 @@ export default class RotationMaterialProperty {
           reverse: this._reverse, //是否逆向旋转
           outLineShow: this._outLineShow, //是否需要展示椭圆的外围圆圈
           outLineWidth: this._outLineWidth, //0-1之间取值，从圆心到半径为1
+          radiusLine: this._radiusLine,
+          radiusLineNumber: this._radiusLineNumber,
+          angleLine: this._angleLine,
+          angleLineNumber: this._angleLineNumber,
         },
         source: Cesium.Material.RotationSource
       },

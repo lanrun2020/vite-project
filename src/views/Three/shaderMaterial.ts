@@ -547,8 +547,8 @@ export const getRotateScanMaterial = (options?: { side?: object, transparent?: b
   //modelViewMatrix模型视图矩阵
   //projectionMatrix投影矩阵
   //normalMatrix正规矩阵
-  const eagleFuc = `
-  float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
+  const angleFuc = `
+  float angleFuc(float x,float y) { //计算此位置的角度的弧度值
     if(x>0.0){
       if(y<0.0){
         return atan(y/x) + 2.0*PI;
@@ -581,22 +581,22 @@ export const getRotateScanMaterial = (options?: { side?: object, transparent?: b
       uniform float time;
       uniform float speed;
       uniform float PI;
-      `+ eagleFuc + `
+      `+ angleFuc + `
       //degrees 弧度转角度
-      float computeX(float eagle){ //eagle旋转角度
-        return sqrt((vUv.x-0.5)*(vUv.x-0.5) + (vUv.y-0.5)*(vUv.y-0.5)) * cos(radians(eagle + degrees(eagleFuc(vUv.x-0.5,vUv.y-0.5))  ));
+      float computeX(float angle){ //angle旋转角度
+        return sqrt((vUv.x-0.5)*(vUv.x-0.5) + (vUv.y-0.5)*(vUv.y-0.5)) * cos(radians(angle + degrees(angleFuc(vUv.x-0.5,vUv.y-0.5))  ));
       }
-      float computeY(float eagle){
-        return sqrt((vUv.x-0.5)*(vUv.x-0.5) + (vUv.y-0.5)*(vUv.y-0.5)) * sin(radians(eagle + degrees(eagleFuc(vUv.x-0.5,vUv.y-0.5))  ));
+      float computeY(float angle){
+        return sqrt((vUv.x-0.5)*(vUv.x-0.5) + (vUv.y-0.5)*(vUv.y-0.5)) * sin(radians(angle + degrees(angleFuc(vUv.x-0.5,vUv.y-0.5))  ));
       }
       void main() {
-        float eagle = fract(-speed*time)*360.0;//旋转的角度
+        float angle = fract(-speed*time)*360.0;//旋转的角度
         modelPos = position;
         vUv = uv; //记录初始位置,然后计算出旋转后的位置,初始位置保持不变,通过旋转角度计算旋转后的位置
         vUv2 = uv;
         // modelPos.z += 5.0;
-        vUv2.x = 0.5 + computeX(eagle); //旋转后的位置x
-        vUv2.y = 0.5 + computeY(eagle); //旋转后的位置y
+        vUv2.x = 0.5 + computeX(angle); //旋转后的位置x
+        vUv2.y = 0.5 + computeY(angle); //旋转后的位置y
         vec4 mvPosition = modelViewMatrix * vec4(modelPos, 1.0);
         gl_Position = projectionMatrix * mvPosition;
       }
@@ -606,9 +606,9 @@ export const getRotateScanMaterial = (options?: { side?: object, transparent?: b
       uniform float opacity;
       uniform vec3 color;
       uniform float PI;
-      `+ eagleFuc + `
+      `+ angleFuc + `
       void main() {
-        float e = eagleFuc(vUv2.x-0.5,vUv2.y-0.5)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
+        float e = angleFuc(vUv2.x-0.5,vUv2.y-0.5)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
         gl_FragColor = vec4(color, e * opacity);
       }`
   }
@@ -650,8 +650,8 @@ export const getRotateMaterialByY = (options?: { side?: object, transparent?: bo
   //modelViewMatrix模型视图矩阵
   //projectionMatrix投影矩阵
   //normalMatrix正规矩阵
-  const eagleFuc = `
-  float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
+  const angleFuc = `
+  float angleFuc(float x,float y) { //计算此位置的角度的弧度值
     if(x>0.0){
       if(y<0.0){
         return atan(y/x) + 2.0*PI;
@@ -685,21 +685,21 @@ export const getRotateMaterialByY = (options?: { side?: object, transparent?: bo
       uniform float time;
       uniform float speed;
       uniform float PI;
-      `+ eagleFuc + `
+      `+ angleFuc + `
       //degrees 弧度转角度
-      float computeX(float eagle){ //eagle旋转角度
-        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * cos(radians(eagle + degrees(eagleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
+      float computeX(float angle){ //angle旋转角度
+        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * cos(radians(angle + degrees(angleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
       }
-      float computeY(float eagle){
-        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * sin(radians(eagle + degrees(eagleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
+      float computeY(float angle){
+        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * sin(radians(angle + degrees(angleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
       }
       void main() {
-        float eagle = fract(-speed*time)*360.0;//旋转的角度
+        float angle = fract(-speed*time)*360.0;//旋转的角度
         modelPos = position;
         modelPos2 = position;//记录初始位置,然后计算出旋转后的位置,初始位置保持不变,通过旋转角度计算旋转后的位置
         // modelPos.z += 5.0;
-        modelPos2.x = 0.5 + computeX(eagle); //旋转后的位置x
-        modelPos2.z = 0.5 + computeY(eagle); //旋转后的位置z
+        modelPos2.x = 0.5 + computeX(angle); //旋转后的位置x
+        modelPos2.z = 0.5 + computeY(angle); //旋转后的位置z
         vec4 mvPosition = modelViewMatrix * vec4(modelPos, 1.0);
         gl_Position = projectionMatrix * mvPosition;
       }
@@ -709,9 +709,9 @@ export const getRotateMaterialByY = (options?: { side?: object, transparent?: bo
       uniform float opacity;
       uniform vec3 color;
       uniform float PI;
-      `+ eagleFuc + `
+      `+ angleFuc + `
       void main() {
-        float e = eagleFuc(modelPos2.x-0.5,modelPos2.z-0.5)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
+        float e = angleFuc(modelPos2.x-0.5,modelPos2.z-0.5)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
         gl_FragColor = vec4(color, e * opacity);
       }`
   }
@@ -749,8 +749,8 @@ export const getRotateMaterialByY = (options?: { side?: object, transparent?: bo
 // 立体旋转扫描材质 圆柱绕Y轴的旋转扫描材质
 export const getRotateMaterialByY2 = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number }) => {
   //常用矩阵
-  const eagleFuc = `
-  float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
+  const angleFuc = `
+  float angleFuc(float x,float y) { //计算此位置的角度的弧度值
     if(x>0.0){
       if(y<0.0){
         return atan(y/x) + 2.0*PI;
@@ -784,23 +784,23 @@ export const getRotateMaterialByY2 = (options?: { side?: object, transparent?: b
       uniform float time;
       uniform float speed;
       uniform float PI;
-      varying float eagle;
-      `+ eagleFuc + `
+      varying float angle;
+      `+ angleFuc + `
       //degrees 弧度转角度
-      float computeX(float eagle){ //eagle旋转角度
-        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * cos(radians(eagle + degrees(eagleFuc(modelPos.x,modelPos.z))  ));
+      float computeX(float angle){ //angle旋转角度
+        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * cos(radians(angle + degrees(angleFuc(modelPos.x,modelPos.z))  ));
       }
-      float computeY(float eagle){
-        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * sin(radians(eagle + degrees(eagleFuc(modelPos.x,modelPos.z))  ));
+      float computeY(float angle){
+        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * sin(radians(angle + degrees(angleFuc(modelPos.x,modelPos.z))  ));
       }
       void main() {
         vUv = uv;
-        eagle = fract(-speed*time)*360.0;//旋转的角度
+        angle = fract(-speed*time)*360.0;//旋转的角度
         modelPos = position;
         modelPos2 = position;//记录初始位置,然后计算出旋转后的位置,初始位置保持不变,通过旋转角度计算旋转后的位置
         // modelPos.z += 5.0;
-        modelPos2.x = computeX(eagle); //旋转后的位置x
-        modelPos2.z = computeY(eagle); //旋转后的位置z
+        modelPos2.x = computeX(angle); //旋转后的位置x
+        modelPos2.z = computeY(angle); //旋转后的位置z
         vec4 mvPosition = modelViewMatrix * vec4(modelPos, 1.0);
         gl_Position = projectionMatrix * mvPosition;
       }
@@ -812,10 +812,10 @@ export const getRotateMaterialByY2 = (options?: { side?: object, transparent?: b
       uniform vec3 color;
       uniform float PI;
       uniform float time;
-      varying float eagle;
-      `+ eagleFuc + `
+      varying float angle;
+      `+ angleFuc + `
       void main() {
-        float e = eagleFuc(modelPos2.x,modelPos2.z)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
+        float e = angleFuc(modelPos2.x,modelPos2.z)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
         bool b = bool(sin(e) - mod(time*4.0-modelPos2.y,8.0));
         gl_FragColor = vec4(color, sin(e) - mod(time*4.0-modelPos2.y,4.0));
       }`
@@ -959,8 +959,8 @@ export const getFlashMaterial = (options?: { side?: object, transparent?: boolea
 // 浮动旋转材质，随时间变化循环浮动旋转
 // options?:{side?: object, transparent?: boolean,color?: THREE.Color,speed?: number, opacity?: number}
 export const getUpDownRotateMaterial = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number, bool?: boolean }) => {
-  const eagleFuc = `
-  float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
+  const angleFuc = `
+  float angleFuc(float x,float y) { //计算此位置的角度的弧度值
     if(x>0.0){
       if(y<0.0){
         return atan(y/x) + 2.0*PI;
@@ -992,20 +992,20 @@ export const getUpDownRotateMaterial = (options?: { side?: object, transparent?:
       uniform float speed;
       varying vec3 modelPos;
       varying vec3 modelPos2;
-      `+ eagleFuc + `
-      float computeX(float eagle){ //eagle旋转角度
-        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * cos(radians(eagle + degrees(eagleFuc(modelPos.x,modelPos.z))  ));
+      `+ angleFuc + `
+      float computeX(float angle){ //angle旋转角度
+        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * cos(radians(angle + degrees(angleFuc(modelPos.x,modelPos.z))  ));
       }
-      float computeY(float eagle){
-        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * sin(radians(eagle + degrees(eagleFuc(modelPos.x,modelPos.z))  ));
+      float computeY(float angle){
+        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * sin(radians(angle + degrees(angleFuc(modelPos.x,modelPos.z))  ));
       }
       void main() {
-        float eagle = fract(-speed*time*0.2)*360.0;//旋转的角度
+        float angle = fract(-speed*time*0.2)*360.0;//旋转的角度
         modelPos = position;
         modelPos2 = position;
         modelPos2.y += sin(time*5.0 - PI);
-        modelPos2.x = computeX(eagle); //旋转后的位置x
-        modelPos2.z = computeY(eagle); //旋转后的位置z
+        modelPos2.x = computeX(angle); //旋转后的位置x
+        modelPos2.z = computeY(angle); //旋转后的位置z
         vec4 mvPosition = modelViewMatrix * vec4(modelPos2, 1.0);
         gl_Position = projectionMatrix * mvPosition;
       }
@@ -1058,8 +1058,8 @@ export const getUpDownRotateMaterial = (options?: { side?: object, transparent?:
 }
 // 立体旋转扫描材质 圆柱绕中心轴的旋转 垂直间隔栅格
 export const getRotateMaterialByY3 = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number, edge?: number }) => {
-  const eagleFuc = `
-  float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
+  const angleFuc = `
+  float angleFuc(float x,float y) { //计算此位置的角度的弧度值
     if(x>0.0){
       if(y<0.0){
         return atan(y/x) + 2.0*PI;
@@ -1093,21 +1093,21 @@ export const getRotateMaterialByY3 = (options?: { side?: object, transparent?: b
       uniform float time;
       uniform float speed;
       uniform float PI;
-      `+ eagleFuc + `
+      `+ angleFuc + `
       //degrees 弧度转角度
-      float computeX(float eagle){ //eagle旋转角度
-        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * cos(radians(eagle + degrees(eagleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
+      float computeX(float angle){ //angle旋转角度
+        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * cos(radians(angle + degrees(angleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
       }
-      float computeY(float eagle){
-        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * sin(radians(eagle + degrees(eagleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
+      float computeY(float angle){
+        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * sin(radians(angle + degrees(angleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
       }
       void main() {
-        float eagle = fract(-speed*time*0.5)*360.0;//旋转的角度
+        float angle = fract(-speed*time*0.5)*360.0;//旋转的角度
         modelPos = position;
         modelPos2 = position;//记录初始位置,然后计算出旋转后的位置,初始位置保持不变,通过旋转角度计算旋转后的位置
         // modelPos.z += 5.0;
-        modelPos2.x = 0.5 + computeX(eagle); //旋转后的位置x
-        modelPos2.z = 0.5 + computeY(eagle); //旋转后的位置z
+        modelPos2.x = 0.5 + computeX(angle); //旋转后的位置x
+        modelPos2.z = 0.5 + computeY(angle); //旋转后的位置z
         vec4 mvPosition = modelViewMatrix * vec4(modelPos, 1.0);
         gl_Position = projectionMatrix * mvPosition;
       }
@@ -1118,9 +1118,9 @@ export const getRotateMaterialByY3 = (options?: { side?: object, transparent?: b
       uniform float edge;
       uniform vec3 color;
       uniform float PI;
-      `+ eagleFuc + `
+      `+ angleFuc + `
       void main() {
-        float e = eagleFuc(modelPos2.x-0.5,modelPos2.z-0.5)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
+        float e = angleFuc(modelPos2.x-0.5,modelPos2.z-0.5)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
         gl_FragColor = vec4(color, step(mod(e, 1.0/edge), 0.5/edge) * opacity);
       }`
   }

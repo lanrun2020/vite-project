@@ -59,7 +59,7 @@ export default class CircleRotateMaterialProperty {
     Cesium.CircleRotateMaterialProperty = CircleRotateMaterialProperty
     Cesium.Material.CircleRotateType = 'CircleRotate'
     Cesium.Material.CircleRotateSource =
-    `float eagleFuc(float x,float y) { //计算此位置的角度的弧度值
+    `float angleFuc(float x,float y) { //计算此位置的角度的弧度值
       if(x>0.0){
         if(y<0.0){
           return atan(y/x) + 2.0*PI;
@@ -93,7 +93,7 @@ export default class CircleRotateMaterialProperty {
         float a = step(m, sp*(thickness));\n\
         float x = materialInput.st.s;\n\
         float y = materialInput.st.t;
-        material.alpha = eagleFuc(x-0.5,y-0.5)/PI/3.0;\n\
+        material.alpha = angleFuc(x-0.5,y-0.5)/PI/3.0;\n\
         material.diffuse = color.rgb;\n\
         return material;\n\
     }`

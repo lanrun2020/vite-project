@@ -31,6 +31,8 @@ export const addScanEllipse = (viewer: any, active: boolean, point: { lng: numbe
           percent: 0.4,
           gradual: true,
           reverse: true,
+          radiusLine: true,
+          radiusLineNumber: 6.0,
         }),
       },
     }))
@@ -52,6 +54,7 @@ export const addScanEllipse = (viewer: any, active: boolean, point: { lng: numbe
           edge: 1.0,
           percent: 0.2,
           gradual: true,
+          radiusLine: true,
         }),
       },
     }))
