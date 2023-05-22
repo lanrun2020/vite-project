@@ -108,7 +108,8 @@ export const addBillboard = async (viewer: any, active: boolean) => {
         semiMinorAxis: 1000,
         // 椭圆长半轴长度
         semiMajorAxis: 1000,
-        height: 1,
+        // height: 1,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         material:circleMaterial,
       },
     }));
@@ -119,7 +120,8 @@ export const addBillboard = async (viewer: any, active: boolean) => {
         semiMinorAxis: 1000,
         // 椭圆长半轴长度
         semiMajorAxis: 1000,
-        height: 1,
+        // height: 1,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         material:circleMaterial2,
       },
     }));
@@ -131,7 +133,8 @@ export const addBillboard = async (viewer: any, active: boolean) => {
         semiMinorAxis: 1000,
         // 椭圆长半轴长度
         semiMajorAxis: 1000,
-        height: 1,
+        // height: 1,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         material:circleMaterial3,
         stRotation: new Cesium.CallbackProperty(() => {
               // 设置旋转角度
@@ -166,29 +169,27 @@ export const addBillboard = async (viewer: any, active: boolean) => {
     })
     entities.push(viewer.entities.add({
       polyline: {
-        positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+        positions: Cesium.Cartesian3.fromDegreesArray([
           115.59777,
           34.03883,
-          1,
           115.69777,
           34.05883,
-          1,
         ]), // 多个点坐标构成线条路径
         width: 4,
+        clampToGround: true,
         material: lineMaterial,
       },
     }));
     entities.push(viewer.entities.add({
       polyline: {
-        positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+        positions: Cesium.Cartesian3.fromDegreesArray([
           115.59777,
           34.03883,
-          1,
           115.63777,
           34.06883,
-          1,
         ]), // 多个点坐标构成线条路径
         width: 4,
+        clampToGround: true,
         material: Cesium.Color.RED,
       },
     }));

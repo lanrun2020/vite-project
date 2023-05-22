@@ -1,79 +1,80 @@
 // 圆形扩散扫描效果
 import Cesium from "@/utils/importCesium"
-import greenPng from "@/assets/green.png";
-let entities: Array<any> = []
 
-const positionDefalut = { lng:120, lat:35 }
-// 创建扩散圆组
-export const addSpreadEllipse = (
-  viewer: any,
-  active: boolean,
-  position: { lng: number; lat: number } = positionDefalut,
-  maxr = 60000,
-  speed = 200,
-  n = 3
-) => {
+let entities:Array<typeof Cesium.viewer.entity> = []
+const defaultPoint = { lng: 121.4861830727844, lat:31.22723471021075 }
+export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: number, lat: number } = defaultPoint) => {
   if (active) {
-    if(entities?.length) {
-      viewer.flyTo(entities)
+    if (entities.length) {
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(defaultPoint.lng, defaultPoint.lat, 5000.0),
+        duration: 1.6
+      });
       return
     }
-    for (let i = 0; i < n; i++) {
-      addEllipse(viewer, position, (i / n) * maxr, maxr, speed);
-    }
-    viewer.flyTo(entities)
+    entities.push(viewer.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(point.lng, point.lat),
+      ellipse: {
+        // 椭圆短半轴长度
+        semiMinorAxis: 500,
+        // 椭圆长半轴长度
+        semiMajorAxis: 500,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        material: new Cesium.DiffuseMaterialProperty({
+          color: new Cesium.Color(0.0, 1.0, 0.0, 1.0),
+          speed: 1.0,
+          repeat: 5.0,
+          thickness: 0.1,
+          reverseColor: true,
+        }),
+      },
+    }))
+    entities.push(viewer.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(point.lng + 0.006, point.lat + 0.008),
+      ellipse: {
+        // 椭圆短半轴长度
+        semiMinorAxis: 500,
+        // 椭圆长半轴长度
+        semiMajorAxis: 500,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        // height: 0.0,
+        // extrudedHeight: 0,
+        material: new Cesium.DiffuseMaterialProperty({
+          color: new Cesium.Color(0.0, 1.0, 1.0, 1.0),
+          speed: 1.0,
+          reverseColor: false,
+          thickness: 0.1,
+        }),
+      },
+    }))
+    entities.push(viewer.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(point.lng - 0.006, point.lat + 0.008),
+      ellipse: {
+        // 椭圆短半轴长度
+        semiMinorAxis: 400,
+        // 椭圆长半轴长度
+        semiMajorAxis: 400,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        // height: 0.0,
+        // extrudedHeight: 0,
+        material: new Cesium.DiffuseMaterialProperty({
+          color: new Cesium.Color(1.0, 0.0, 0.0, 1.0),
+          speed: 1.0,
+          reverse: true,
+          thickness: 0.1,
+        }),
+      },
+    }))
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(defaultPoint.lng, defaultPoint.lat, 5000.0),
+      duration: 1.6
+    });
   } else {
-    destroyEntities(viewer)
+    if (entities.length) {
+      entities.forEach((entity) => {
+        viewer.entities.remove(entity)
+      })
+      entities = []
+    }
   }
 };
-// 创建扩散圆
-const addEllipse = (
-  viewer: any,
-  position: { lng: number; lat: number },
-  startR: number,
-  maxR: number,
-  speed: number
-) => {
-  entities.push(viewer.entities.add({
-    position: Cesium.Cartesian3.fromDegrees(position.lng, position.lat),
-    ellipse: {
-      // 椭圆短半轴长度
-      semiMinorAxis: new Cesium.CallbackProperty(() => {
-        if (startR <= maxR) {
-          startR += speed;
-        } else {
-          startR = 0;
-        }
-        return startR;
-      },false),
-      // 椭圆长半轴长度
-      semiMajorAxis: new Cesium.CallbackProperty(() => {
-        if (startR <= maxR) {
-          startR = startR + speed;
-        } else {
-          startR = 0;
-        }
-        return startR + 200;
-      },false),
-      height: 10,
-      extrudedHeight: 10000,
-      material: new Cesium.ImageMaterialProperty({
-        image: greenPng, // 材质贴图
-        color: new Cesium.CallbackProperty(() => {
-          return Cesium.Color.WHITE.withAlpha(1 - startR / maxR + 0.05);
-        },false),
-        transparent: true, // 材质是否透明（贴图为png格式图片时适用）
-        // repeat: new Cesium.Cartesian2(4, 4),//贴图重复参数
-      }),
-    },
-  }));
-};
-
-const destroyEntities = (viewer: any) => {
-  if (entities?.length) {
-    entities.forEach((entity) => {
-      viewer.entities.remove(entity)
-    })
-    entities = []
-  }
-}

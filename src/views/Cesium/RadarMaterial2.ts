@@ -44,14 +44,14 @@ export default class radarMaterialsProperty {
   private speed: number
   private _time: number
   constructor(options?: { color?: typeof Cesium.Color, repeat?: number, thickness?: number, duration?: number, speed?: number, translucent?: boolean, gradual?: boolean, gradualValue?: number, U?: object }) {
-    this.material = new Cesium.Material({ fabric, translucent: options?.translucent || false })
-    this.material.uniforms.color = options?.color || new Cesium.Color(.1, 1, 0, 1)
-    this.material.uniforms.repeat = (options?.repeat || 10) * 2
-    this.material.uniforms.thickness = options?.thickness || 0.5
-    this.material.uniforms.gradual = options?.gradual || false ? 1.0 : 0.0
-    this.material.uniforms.gradualValue = options?.gradualValue || 0.5
-    this.duration = options?.duration || 10000
-    this.speed = options?.speed || 1
+    this.material = new Cesium.Material({ fabric, translucent: options?.translucent ?? false })
+    this.material.uniforms.color = options?.color ?? new Cesium.Color(.1, 1, 0, 1)
+    this.material.uniforms.repeat = (options?.repeat ?? 10) * 2
+    this.material.uniforms.thickness = options?.thickness ?? 0.5
+    this.material.uniforms.gradual = (options?.gradual ?? false) ? 1.0 : 0.0
+    this.material.uniforms.gradualValue = options?.gradualValue ?? 0.5
+    this.duration = options?.duration ?? 10000
+    this.speed = options?.speed ?? 1
     this._time = (new Date()).getTime()
   }
   close() {

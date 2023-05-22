@@ -1,22 +1,42 @@
 //圆的多页扇形旋转扫描
 import Cesium from '@/utils/importCesium'
 
+interface Options {
+  color?: typeof Cesium.Color,
+  duration?: number,
+  speed?: number,
+  edge?: number,
+  percent?: number,
+  reverse?: boolean
+  gradual?: boolean,
+  outLineShow?: boolean,
+  outLineWidth?: number
+}
+
 export default class RotationMaterialProperty {
-  private _color: object
-  private _speed: number
-  private _repeat: number
-  private _thickness: number
+  private _color: object //颜色及透明度
+  private _speed: number //旋转速度
+  private _edge: number //扇形数量
+  private _percent: number //颜色占比
+  private _gradual: boolean //是否渐变
+  private _outLineShow: boolean //是否展示圆环
+  private _outLineWidth: number //圆环宽度
+  private _reverse: boolean //逆向旋转
   private _definitionChanged: any
   private duration: number
   private _time: number
-  constructor(options?: { color?: object, duration?: number, speed?: number, repeat?: number, thickness?: number }) {
+  constructor(options?: Options){
     this._definitionChanged = new Cesium.Event()
-    this._color = options?.color || new Cesium.Color(0.0, 0.0, 1.0, 1.0)
-    this.duration = options?.duration || 10000
+    this._color = options?.color ?? new Cesium.Color(0.0, 0.0, 1.0, 1.0)
+    this.duration = options?.duration ?? 10000
     this._time = (new Date()).getTime()
-    this._speed = options?.speed || 1.0
-    this._repeat = options?.repeat || 1.0
-    this._thickness = options?.thickness || 0.5
+    this._speed = options?.speed ?? 1.0
+    this._edge = options?.edge ?? 1.0
+    this._percent = options?.percent ?? 1.0
+    this._gradual = options?.gradual ?? true
+    this._reverse = options?.reverse ?? false
+    this._outLineShow = options?.outLineShow ?? true
+    this._outLineWidth = options?.outLineWidth ?? 0.01
     this.conbineProp()
     this.init()
   }
@@ -28,11 +48,14 @@ export default class RotationMaterialProperty {
       result = {}
     }
     result.color = this._color
-    result.repeat = this._repeat
-    result.thickness = this._thickness
     result.duration = this.duration
     result.speed = this._speed
-    result.color = this._color
+    result.edge = this._edge
+    result.percent = this._percent
+    result.reverse = this._reverse
+    result.gradual = this._gradual
+    result.outLineShow = this._outLineShow
+    result.outLineWidth = this._outLineWidth
     result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._speed
     return result
   }
@@ -86,16 +109,26 @@ export default class RotationMaterialProperty {
           }
         }
       }
-      czm_material czm_getMaterial(czm_materialInput materialInput)\n\
-      {\n\
-          czm_material material = czm_getDefaultMaterial(materialInput);\n\
+      czm_material czm_getMaterial(czm_materialInput materialInput)
+      {
+          czm_material material = czm_getDefaultMaterial(materialInput);
           float time = czm_frameNumber * speed * 0.05;
-          float x = materialInput.st.s;\n\
-          float y = materialInput.st.t;\n\
-          float a = (1.0 - eagleFuc(x-0.5,y-0.5,time)/PI/2.0);\n\
-          material.alpha = color.a * step(mod(a, 1.0/edge),0.5/edge);\n\
-          material.diffuse = color.rgb;\n\
-          return material;\n\
+          time = reverse ? -time : time;
+          float x = materialInput.st.s;
+          float y = materialInput.st.t;
+          float dis = sqrt((x-0.5)*(x-0.5) + (y-0.5)*(y-0.5));
+          float alpha2 = (dis - (0.5 - outLineWidth/2.0));
+          alpha2 = alpha2 > 0.0 ? alpha2 : 0.0;
+          float alpha1 = (1.0 - eagleFuc(x-0.5,y-0.5,time)/(2.0*PI));
+          float modValue = mod(alpha1, 1.0/edge);
+          modValue = reverse ? (1.0/edge - modValue) : modValue;
+          float gradualAlpha = gradual ? modValue : 1.0;
+          alpha1 = step(modValue, percent/edge) * gradualAlpha * edge / percent;
+          alpha1 = alpha1 > 0.0 ? alpha1 : 0.0;
+          float a = outLineShow ? (alpha2/(outLineWidth/2.0) + alpha1) : alpha1;
+          material.alpha = color.a * a;
+          material.diffuse = color.rgb;
+          return material;
       }`
     // material.alpha:透明度;
     // material.diffuse：颜色;
@@ -104,10 +137,15 @@ export default class RotationMaterialProperty {
       fabric: {
         type: Cesium.Material.RotationType,
         uniforms: {
-          color: new Cesium.Color(0.0, 0.0, 0.0, 1.0),
+          color: this._color,
           PI: Math.PI,
-          edge: 4.0,
-          speed: 1.0,
+          edge: this._edge,
+          speed: this._speed,
+          percent: this._percent,
+          gradual: this._gradual, //是否渐变
+          reverse: this._reverse, //是否逆向旋转
+          outLineShow: this._outLineShow, //是否需要展示椭圆的外围圆圈
+          outLineWidth: this._outLineWidth, //0-1之间取值，从圆心到半径为1
         },
         source: Cesium.Material.RotationSource
       },
