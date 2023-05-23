@@ -14,6 +14,7 @@
     <el-button @click="test2">测试2</el-button>
     <el-button @click="test3">测试3</el-button>
     <el-button @click="screenFull">全屏</el-button>
+    <input type="file" @change="changeFile" />
 
     <el-table :data="tableData" border :span-method="objectSpanMethod" style="width: 100%; margin-top: 20px">
       <el-table-column prop="id" label="ID" width="180">
@@ -34,6 +35,7 @@
 import { fetchTest, fetchHome } from "@/apis/an-system";
 import { reactive, ref, toRef } from "vue";
 import { computed, onMounted, provide, watch } from "vue";
+import SparkMD5 from 'spark-md5'
 import { toRefs } from "vue";
 import myMarker from "./myMarker.vue";
 // ref会返回一个可变的响应式对象,只包含一个名为 value 的 property
@@ -89,6 +91,48 @@ const tableData = [{
 // reactive会返回一个响应式的对象状态
 const state = reactive({ count: 0 });
 
+const changeFile = async (e: Event) => {
+  const files = e.target.files
+  if (!files.length) {
+    return
+  }
+  const file = files[0]
+  const chunks = createChunks(file, 10 * 1024 * 1024)
+  console.log(chunks);
+  const res = await hash(chunks)
+  console.log(res);
+}
+
+//文件切片
+const createChunks = (file: File, chunksSize: number) => {
+  const result:Blob[] = []
+  for (let i = 0; i < file.size; i += chunksSize) {
+    result.push(file.slice(i, i + chunksSize))
+  }
+  return result
+}
+
+const hash = (chunks:Blob[]) => {
+  return new Promise((reslove) => {
+    const spark = new SparkMD5()
+    function _read(i:number) {
+      if (i >= chunks.length) {
+        reslove(spark.end())
+        return
+      }
+      const blob = chunks[i]
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const bytes = e.target.result
+        spark.append(bytes)
+        _read(i + 1)
+      }
+      reader.readAsArrayBuffer(blob)
+    }
+    _read(0)
+  })
+  
+}
 const sum = computed(() => {
   return num1.value + num2.value;
 });
@@ -191,12 +235,13 @@ const screenFull = () => {
     }
   }
 }
+
 #home {
   height: 100%;
   padding: 10px;
+
   :deep(.el-table__row) {
     color: rgb(0, 0, 0);
   }
 }
-
 </style>
