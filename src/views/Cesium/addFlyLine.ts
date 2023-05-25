@@ -1,9 +1,9 @@
 // 迁徙线
 import Cesium from "@/utils/importCesium"
 let entities: Array<any> = []
-const startPoint = { longitude: 110, latitude: 32 }
+const startPoint = { longitude: 170, latitude: 32 }
 const endPoint = [
-  { longitude: 113, latitude: 32 },
+  { longitude: -170, latitude: 32 },
   { longitude: 112, latitude: 31 },
   { longitude: 110, latitude: 30 },
   { longitude: 108, latitude: 32 },
@@ -99,7 +99,7 @@ const generateCurve = (startPoint: any, endPoint: any) => {
     points: [startPoint, midPoint, endPoint], // 控制点,points.length必须 ≥ 2
   });
   const curvePoints: Array<any> = [];
-  for (let i = 0, len = 200; i <= len; i++) {
+  for (let i = 1, len = 200; i < len; i++) {
     curvePoints.push(spline.evaluate(i / len)); // 传时间参数，返回曲线上给定时间点的新实例,时间段划分越多，曲线越平滑
   }
   return curvePoints; // 返回曲线上的多个点坐标集合

@@ -281,6 +281,8 @@ export const addBillboard = async (viewer: any, active: boolean) => {
         leaderLine: leaderLine,
       }
     })
+    console.log(viewer.scene);
+    
     viewer.scene.postRender.addEventListener(renderFuc = () => {
       const positionArrNew = arr.map((item) => {
         return Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, item.position._value)
@@ -297,9 +299,15 @@ export const addBillboard = async (viewer: any, active: boolean) => {
           const positionvector = Cesium.Cartesian3.subtract(pointB, pointA, new Cesium.Cartesian3());
           const vector = Cesium.Matrix4.multiplyByPointAsVector(Cesium.Matrix4.inverse(transform, new Cesium.Matrix4()), positionvector, new Cesium.Cartesian3());
           const direction = Cesium.Cartesian3.normalize(vector, new Cesium.Cartesian3());
-          if (direction.z < 0) {//地球背侧
-            item.box.style.display = 'none'
-            item.leaderLine.hide()
+          if (viewer.scene.mode === 3) { //三维展示时
+            if (direction.z < 0) {//地球背侧
+              item.box.style.display = 'none'
+              item.leaderLine.hide()
+            } else {
+              item.box.style.display = 'block'
+              item.leaderLine.position()
+              item.leaderLine.show()
+            }
           } else {
             item.box.style.display = 'block'
             item.leaderLine.position()

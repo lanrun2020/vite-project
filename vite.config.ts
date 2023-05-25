@@ -27,6 +27,11 @@ export default defineConfig({
         target: 'http://localhost:8088/map',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/map/, '')
+      },
+      '/cesiumtif': {
+        target: 'http://localhost:8080/geoserver/cesium/wms',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/cesiumtif/, '')
       }
     }
   },

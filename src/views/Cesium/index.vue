@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import Toolbox from "./toolbox.vue";
-import { ref, Ref, onMounted } from "vue";
+import { ref, Ref, onMounted, onBeforeUnmount } from "vue";
 import { fetchCesium } from "@/apis/an-system";
 import { addPolygon2 } from "./polygon";
 import Cesium from '@/utils/importCesium'
@@ -49,6 +49,8 @@ import { addMoveCar } from "./addMoveCar";
 import { addPlaneLine } from "./addPlaneLine";
 import { addPlaneLineByTime } from "./addPlaneLineByTime";
 import { addBillboard } from "./addBillboard";
+import { addWedgeScan } from "./addWedgeScan";
+import { addGeoJsonData } from "./addGeoJsonData";
 type toolItemType = {
   title: string;
   value: number;
@@ -185,6 +187,16 @@ let toolList: Ref<toolItemType[]> = ref([
     title: "billboard",
     value: 25,
     active: false,
+  },
+  {
+    title: "视锥扫描",
+    value: 26,
+    active: false,
+  },
+  {
+    title: "加载geojson数据",
+    value: 27,
+    active: false,
   }
 ])
 onMounted(async () => {
@@ -192,6 +204,11 @@ onMounted(async () => {
   let res = await fetchCesium();
   initCesium();
 });
+onBeforeUnmount(() => {
+  if (viewer) {
+    viewer.destroy();
+  }
+})
 const toolChecked = (active: boolean, value: number) => {
   if (!active) {
     viewer.camera.flyTo({
@@ -281,6 +298,12 @@ const toolChecked = (active: boolean, value: number) => {
     case 25:
       addBillboard(viewer, active);
       break;
+    case 26:
+      addWedgeScan(viewer, active);
+      break;
+    case 27:
+      addGeoJsonData(viewer, active);
+      break;
     default: break;
   }
 };
@@ -289,12 +312,12 @@ const initCesium = () => {
     viewer.destroy();
   }
 
-  const overlay = new Cesium.TileMapServiceImageryProvider({
-    url:'/map',
-    fileExtension: 'png',
-    // fileExtension:'png',
-    maximumLevel:19,
-  })
+  // const overlay = new Cesium.TileMapServiceImageryProvider({
+  //   url:'/map',
+  //   fileExtension: 'png',
+  //   // fileExtension:'png',
+  //   maximumLevel:19,
+  // })
   viewer = new Cesium.Viewer("cesiumContainer", {
     animation: true, // 是否显示时钟clock动画控件
     baseLayerPicker: false, // 是否显示图层选择控件
@@ -305,10 +328,10 @@ const initCesium = () => {
     infoBox: false, // 是否显示点击要素之后显示的信息
     fullscreenButton: false, // 是否显示全屏按钮
     selectionIndicator: false, // 是否显示选中指示器
-    terrainProvider: Cesium.createWorldTerrain({
-      requestVertexNormals: true,
-      requestWaterMask: false
-    }),
+    // terrainProvider: Cesium.createWorldTerrain({
+    //   requestVertexNormals: true,
+    //   requestWaterMask: false
+    // }),
     // imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
     //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
     // })
@@ -329,6 +352,25 @@ const initCesium = () => {
   //   maximumLevel: 18
   // })
   // viewer.imageryLayers.addImageryProvider(layer);
+
+  // const tiflayer = new Cesium.WebMapServiceImageryProvider({
+  //   url: '/cesiumtif',
+  //   layers: 'cesium:map4',
+  //   parameters: {
+  //     service: 'WMS',
+  //     format: 'image/png',
+  //     srs: 'EPSG:4326',
+  //     crs: 'EPSG:4326',
+  //     transparent: true,
+  //   }
+  // })
+  // viewer.imageryLayers.addImageryProvider(tiflayer);
+  const overlay = new Cesium.UrlTemplateImageryProvider({
+    url:'/map/{z}/{x}/{y}.png',
+    fileExtension: 'png',
+    // fileExtension:'png',
+    maximumLevel:9,
+  })
   viewer.imageryLayers.addImageryProvider(overlay);
 
   // viewer.camera.flyTo({

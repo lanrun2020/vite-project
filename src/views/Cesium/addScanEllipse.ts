@@ -49,7 +49,7 @@ export const addScanEllipse = (viewer: any, active: boolean, point: { lng: numbe
         material: new Cesium.RotationMaterialProperty({
           color: new Cesium.Color(0.0, 1.0, 1.0, 1.0),
           speed: 0.5,
-          outLineShow: true,
+          outLineShow: false,
           outLineWidth: 0.02,
           edge: 1.0,
           percent: 0.2,
