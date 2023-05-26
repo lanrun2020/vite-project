@@ -1,4 +1,4 @@
-// 动态墙
+// 视锥扫描 楔形实体
 import Cesium from "@/utils/importCesium"
 import { chengdu } from "./geo"
 let entity: Array<object> = []
