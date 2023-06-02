@@ -1,7 +1,5 @@
 // 卫星扫描
 import Cesium from "@/utils/importCesium"
-import { number } from "echarts"
-import { fa } from "element-plus/lib/locale"
 import radarMaterialsProperty from "./RadarMaterial2"
 let entities: Array<object>  = []
 let primitives: any

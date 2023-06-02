@@ -1,16 +1,29 @@
 // 着色器
 import Cesium from "@/utils/importCesium"
 // let entities: Array<any> = []
+let primitiveShader
 export const addShader = (viewer: any, active: boolean) => {
   if (active) {
-    const position = new Cesium.Cartographic(0, 0, 1000.0);
-    const primitive = viewer.scene.primitives.add(
+    const position = new Cesium.Cartographic(0, 0, 2000.0);
+    if(primitiveShader){
+      viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(0, 0, 50000),
+      });
+      return
+    }
+    primitiveShader = viewer.scene.primitives.add(
       new CustomPrimitive(position)
     );
     viewer.camera.flyTo({
       destination: Cesium.Cartesian3.fromDegrees(0, 0, 50000),
       // duration: 0.1,
     });
+  } else {
+    if (primitiveShader){
+      primitiveShader.destroy()
+      viewer.scene.primitives.remove(primitiveShader)
+    }
+    primitiveShader = null
   }
 }
 /**
@@ -71,6 +84,12 @@ class CustomPrimitive {
     }
 
     frameState.commandList.push(this.drawCommand);
+  }
+  isDestroyed(){
+    return this.show
+  }
+  destroy(){
+    this.show = false
   }
 }
 

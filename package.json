@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@turf/turf": "^6.5.0",
     "@types/three": "^0.139.0",
     "axios": "^0.27.2",
     "cesium": "1.95",

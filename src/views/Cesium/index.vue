@@ -24,6 +24,7 @@ import "./circleMaterial";
 import "./circleRotateMaterial";
 import "./rotationMaterial";
 import "./diffuseMaterial";
+import "./cylinderMaterial";
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
@@ -51,6 +52,8 @@ import { addPlaneLineByTime } from "./addPlaneLineByTime";
 import { addBillboard } from "./addBillboard";
 import { addWedgeScan } from "./addWedgeScan";
 import { addGeoJsonData } from "./addGeoJsonData";
+import { addParticleSystem } from "./addParticleSystem";
+import { addCircleWall } from "./addCircleWall";
 type toolItemType = {
   title: string;
   value: number;
@@ -197,6 +200,16 @@ let toolList: Ref<toolItemType[]> = ref([
     title: "加载geojson数据",
     value: 27,
     active: false,
+  },
+  {
+    title: "粒子系统",
+    value: 28,
+    active: false,
+  },
+  {
+    title: "圆形墙",
+    value: 29,
+    active: false,
   }
 ])
 onMounted(async () => {
@@ -304,6 +317,12 @@ const toolChecked = (active: boolean, value: number) => {
     case 27:
       addGeoJsonData(viewer, active);
       break;
+    case 28:
+      addParticleSystem(viewer, active);
+      break;
+    case 29:
+      addCircleWall(viewer, active);
+      break;
     default: break;
   }
 };
@@ -346,6 +365,16 @@ const initCesium = () => {
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
 
   viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
+  var pos = Cesium.Cartesian3.fromDegrees(61.296382224724795,35.628536117000692);
+  console.log(pos);
+  //Cartesian3转经纬度坐标
+  //Cartographic坐标
+  var carto = viewer.scene.globe.ellipsoid.cartesianToCartographic(pos);
+  console.log(carto);
+  //经纬度
+  var lon = Cesium.Math.toDegrees(carto.longitude);
+  var lat = Cesium.Math.toDegrees(carto.latitude);
+  console.log(lon,lat);
   // var layer = new Cesium.UrlTemplateImageryProvider({
   //   url: "http://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
   //   minimumLevel: 4,
@@ -355,7 +384,7 @@ const initCesium = () => {
 
   // const tiflayer = new Cesium.WebMapServiceImageryProvider({
   //   url: '/cesiumtif',
-  //   layers: 'cesium:map4',
+  //   layers: 'cesium:map9',
   //   parameters: {
   //     service: 'WMS',
   //     format: 'image/png',
@@ -365,13 +394,13 @@ const initCesium = () => {
   //   }
   // })
   // viewer.imageryLayers.addImageryProvider(tiflayer);
-  const overlay = new Cesium.UrlTemplateImageryProvider({
-    url:'/map/{z}/{x}/{y}.png',
-    fileExtension: 'png',
-    // fileExtension:'png',
-    maximumLevel:9,
-  })
-  viewer.imageryLayers.addImageryProvider(overlay);
+  // const overlay = new Cesium.UrlTemplateImageryProvider({
+  //   url:'/map/{z}/{x}/{y}.png',
+  //   fileExtension: 'png',
+  //   // fileExtension:'png',
+  //   maximumLevel:9,
+  // })
+  // viewer.imageryLayers.addImageryProvider(overlay);
 
   // viewer.camera.flyTo({
   //   destination: Cesium.Cartesian3.fromDegrees(110, 30, 10000000),

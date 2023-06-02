@@ -1,10 +1,10 @@
 // 城市 白膜建筑
 import Cesium from "@/utils/importCesium"
 import CesiumVideo3d from './CesiumVideo3d'
-import ViewShed from './ViewShed'
 let primitive: any
 let tilesetPrimitive: any
 let view2: any
+let handler: typeof Cesium.ScreenSpaceEventHandler
 export const addCity = (viewer: any, active: boolean) => {
   if (active) {
     view2 = new CesiumVideo3d(Cesium, viewer,{
@@ -32,6 +32,7 @@ export const addCity = (viewer: any, active: boolean) => {
       );
       return
     }
+    const inspectorViewModel = new Cesium.Cesium3DTilesInspector('cesiumContainer',viewer.scene).viewModel
     primitive = viewer.scene.primitives.add(new Cesium.PrimitiveCollection());
     new Cesium.Cesium3DTileset({
       url: "/city/tileset.json",
@@ -40,6 +41,7 @@ export const addCity = (viewer: any, active: boolean) => {
         tilesetPrimitive = data
         primitive.add(tilesetPrimitive)
         loadTilesShader(tilesetPrimitive)
+        inspectorViewModel.tileset = tilesetPrimitive
         viewer.zoomTo(
           tilesetPrimitive,
           new Cesium.HeadingPitchRange(
@@ -52,15 +54,60 @@ export const addCity = (viewer: any, active: boolean) => {
       .catch(function (error: Error) {
         console.log(error);
       });
+      //createEdgeDetectionStage 创建一个检测边缘的后处理阶段。当颜色在边缘上时，将颜色写入设置为1.0的输出纹理中
+      //length边缘长度，默认0.5
+      const silhouetteBlue = Cesium.PostProcessStageLibrary.createEdgeDetectionStage();
+      silhouetteBlue.uniforms.color = Cesium.Color.BLUE;
+      silhouetteBlue.uniforms.length = 0.01;
+      silhouetteBlue.selected = [];
+
+      const silhouetteGreen = Cesium.PostProcessStageLibrary.createEdgeDetectionStage();
+      silhouetteGreen.uniforms.color = Cesium.Color.LIME;
+      silhouetteGreen.uniforms.length = 0.01;
+      silhouetteGreen.selected = [];
+      //createSilhouetteStage 创建一个应用轮廓效果的后期处理阶段。轮廓效果将来自边缘检测通道的颜色与输入的颜色纹理进行合成
+      viewer.scene.postProcessStages.add(
+        Cesium.PostProcessStageLibrary.createSilhouetteStage([
+          silhouetteBlue,
+          silhouetteGreen,
+        ])
+      );
+      const scene = viewer.scene
+      const selected = {
+        feature: undefined,
+        originalColor: new Cesium.Color(),
+      };
+      handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+      handler.setInputAction((event: any) => {
+          const feature = inspectorViewModel.feature;
+          console.log(feature);
+          silhouetteBlue.selected = [];
+          // const pickedFeature = viewer.scene.pick(event.position);//pick返回具有' primitive'属性的对象，该对象包含场景中的第一个（顶部）基本体在特定的窗口坐标处
+          const pickedFeatures = viewer.scene.drillPick(event.position);//drillPick返回所有对象的对象列表，每个对象包含一个' primitive'属性。特定的窗口坐标位置。
+          if(pickedFeatures && pickedFeatures.length){
+            for(const picked of pickedFeatures){
+              if(picked.constructor === Cesium.Cesium3DTileFeature){
+                if (!Cesium.defined(picked)) {
+                  return;
+                }
+                // Highlight the feature if it's not already selected.
+                if (picked !== selected.feature) { //选取符合条件的第一个
+                  silhouetteBlue.selected = [picked];
+                  break
+                }
+              }
+            }
+          }
+      }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
   } else {
     if (primitive) {
       primitive.removeAll()
       primitive = null
       view2.destroy()
+      handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)//移除事件
     }
   }
 }
-
 const loadTilesShader = (tileset: any) => {
   tileset.style = new Cesium.Cesium3DTileStyle({
     color: {

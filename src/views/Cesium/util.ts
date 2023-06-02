@@ -99,4 +99,15 @@ const setCameraControl = (viewer: any, value = true) => { // 控制鼠标是否�
   viewer.scene.screenSpaceCameraController.enableTranslate = value //拖动地图
   viewer.scene.screenSpaceCameraController.enableZoom = value //缩放地图
 }
-export { pointsTurnToScreen, computeCirclularFlight, calcPoints, getHeading, getPitch, getRoutePoints, getDistance, getMidPoint, setCameraControl }
+
+//设置相机视角跟随实体
+const trackedEntity = (viewer: typeof Cesium.Viewer, entity: any, callback:any) => {
+  const render = () => {
+    const position = entity.position.getValue(viewer.clock.currentTime,new Cesium.Cartesian3())
+    viewer.camera.lookAt(position, new Cesium.Cartesian3(0.0, -4790000.0, 3930000.0));
+    const renderId = requestAnimationFrame(render)
+    callback(renderId)
+  }
+  render()
+}
+export { pointsTurnToScreen, computeCirclularFlight, calcPoints, getHeading, getPitch, getRoutePoints, getDistance, getMidPoint, setCameraControl, trackedEntity }
