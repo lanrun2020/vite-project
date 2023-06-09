@@ -375,6 +375,7 @@ const initCesium = () => {
   var lon = Cesium.Math.toDegrees(carto.longitude);
   var lat = Cesium.Math.toDegrees(carto.latitude);
   console.log(lon,lat);
+  console.log(Cesium.JulianDate.fromDate(new Date('2023-06-05 13:39:56')));
   // var layer = new Cesium.UrlTemplateImageryProvider({
   //   url: "http://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
   //   minimumLevel: 4,

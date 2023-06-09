@@ -3,7 +3,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
 import flagImg from '../../assets/guoqi.png'
 import terrain from '../../assets/floor5.jpeg'
-import { getFlowMaterial, getFlagMaterial, getSeaMaterial, getWaterMaterial, getScanMaterial, getFlowMaterialByY, getRotateScanMaterial, getRotateMaterialByY, getRotateMaterialByY2, getRotateMaterialByY3, getUpDownRotateMaterial } from './shaderMaterial'
+import cloud from '../../assets/cloud.png'
+import lavatile from '../../assets/lavatile.jpg'
+import { getFlowMaterial, getSunMaterial, getFlagMaterial, getSeaMaterial, getWaterMaterial, getScanMaterial, getFlowMaterialByY, getRotateScanMaterial, getRotateMaterialByY, getRotateMaterialByY2, getRotateMaterialByY3, getUpDownRotateMaterial } from './shaderMaterial'
 const THREE = T
 let that: materialScene
 export default class materialScene {
@@ -33,10 +35,11 @@ export default class materialScene {
 
     //添加场景物体
     // this.addCubeAndPlane();
+    this.addShaderTorus()
     // this.addCircle();
     // this.addCircle3();
     // this.addCylinder();
-    this.addFlag();
+    // this.addFlag();
     // this.addTextPlane();
     // this.addPlane();
     // this.addRotationCylinder()
@@ -152,6 +155,30 @@ export default class materialScene {
     plane.rotation.set(Math.PI / 2, 0, 0)
     this.scene.add(cube)
     this.scene.add(plane)
+  }
+
+  addShaderTorus() {
+    const SunMaterial = getSunMaterial({url1:cloud, url2:lavatile}) //流动材质
+    this.shaderMaterialList.push(SunMaterial) //用于刷新材质的时间参数
+    SunMaterial.uniforms[ 'texture1' ].value.wrapS = SunMaterial.uniforms[ 'texture1' ].value.wrapT = THREE.RepeatWrapping;
+    SunMaterial.uniforms[ 'texture2' ].value.wrapS = SunMaterial.uniforms[ 'texture2' ].value.wrapT = THREE.RepeatWrapping;
+    /*
+    THREE.RepeatWrapping 是 three.js 中 TextureLoader 类的 wrapS 和 wrapT 属性的一种取值，用于设置纹理在超出其纹理坐标范围时如何包装。
+    THREE.RepeatWrapping 表示当纹理坐标超出 [0,1] 范围时，纹理会被无缝重复平铺以填充超出部分。
+    例如，如果将 repeat 属性设置为 (2, 2)，则每个纹理图像都会沿着 u 轴和 v 轴方向重复两次。
+    这种包装方式通常用于创建具有连续性和规律性的纹理，例如地板、墙壁等表面。在创建这些表面时，
+    我们可以使用 THREE.RepeatWrapping 设置纹理的重复次数，并通过调整 offset 属性来控制纹理在表面上的起始位置
+    在 three.js 中，除了 THREE.RepeatWrapping 之外，还有以下两个与纹理包装（wrapping）相关的常量：
+    THREE.ClampToEdgeWrapping：这是 TextureLoader 类中 wrapS 和 wrapT 属性的默认值。
+    它表示当纹理坐标超出 [0,1] 范围时，超出部分会被截断并拉伸到边缘。这种包装方式通常用于避免出现纹理重复和无缝平铺而导致的边缘问题。
+    THREE.MirroredRepeatWrapping：这种包装方式与 THREE.RepeatWrapping 类似，不同的是它会使用镜像翻转来填充超出范围的部分。
+    例如，如果将 repeat 属性设置为 (2, 2)，则每个纹理图像都会沿着 u 轴和 v 轴方向重复两次，并且每个重复的纹理图像会被镜像翻转以填充超出部分。
+    这些包装方式可以通过设置 TextureLoader 类的相应属性（wrapS、wrapT、repeat 和 offset）来进行配置，从而控制纹理在表面上的映射方式
+    */
+    const mesh = new THREE.Mesh( new THREE.TorusGeometry( 0.65, 0.3, 30, 30 ), SunMaterial );
+    mesh.rotation.x = 0.3;
+    mesh.rotation.y = 350;
+    this.scene.add( mesh );
   }
 
   addTextPlane() {
