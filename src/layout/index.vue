@@ -52,6 +52,9 @@
             <el-menu-item index="/threejs/sceneBuild">
               SceneBuild
             </el-menu-item>
+            <el-menu-item index="/threejs/loadDxf">
+              loadDxf
+            </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
         <el-menu-item index="/cesium">

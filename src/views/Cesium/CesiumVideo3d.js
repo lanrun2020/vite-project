@@ -160,10 +160,10 @@ let CesiumVideo3d = (function () {
                 gl_FragColor = color;
             }
         }`
-    var Cesium=null
+    var Cesium = null
 
-    var videoShed3d = function(cesium,viewer, param) {
-        Cesium=cesium
+    var videoShed3d = function (cesium, viewer, param) {
+        Cesium = cesium
         this.ECEF = new ECEF();
         this.param = param;
         var option = this._initCameraParam();
@@ -173,10 +173,17 @@ let CesiumVideo3d = (function () {
             Video: 3
         }
         this.near = option.near ? option.near : 0.1;
-        if (option || (option = {}), this.viewer = viewer, this._cameraPosition = option.cameraPosition, this._position = option.position,
-            this.type = option.type, this._alpha = option.alpha || 1, this.url = option.url, this.color = option.color,
-            this._debugFrustum = Cesium.defaultValue(option.debugFrustum, !0), this._aspectRatio = option.aspectRatio || this._getWinWidHei(),
-            this._camerafov = option.fov || Cesium.Math.toDegrees(this.viewer.scene.camera.frustum.fov), this.texture = option.texture || new Cesium.Texture({
+        if (option || (option = {}),
+            this.viewer = viewer,
+            this._cameraPosition = option.cameraPosition,
+            this._position = option.position,
+            this.type = option.type,
+            this._alpha = option.alpha || 1, this.url = option.url,
+            this.color = option.color,
+            this._debugFrustum = Cesium.defaultValue(option.debugFrustum, !0),
+            this._aspectRatio = option.aspectRatio || this._getWinWidHei(),
+            this._camerafov = option.fov || Cesium.Math.toDegrees(this.viewer.scene.camera.frustum.fov),
+            this.texture = option.texture || new Cesium.Texture({
                 context: this.viewer.scene.context,
                 source: {
                     width: 1,
@@ -184,7 +191,11 @@ let CesiumVideo3d = (function () {
                     arrayBufferView: new Uint8Array([255, 255, 255, 255])
                 },
                 flipY: !1
-            }), this._videoPlay = Cesium.defaultValue(option.videoPlay, !0), this.defaultShow = Cesium.defaultValue(option.show, !0), !this.cameraPosition || !this.position) return void console.log('初始化失败：请确认相机位置与视点位置正确!');
+            }),
+            this._videoPlay = Cesium.defaultValue(option.videoPlay, !0),
+            this.defaultShow = Cesium.defaultValue(option.show, !0),
+            !this.cameraPosition || !this.position)
+            return void console.log('初始化失败：请确认相机位置与视点位置正确!');
         switch (this.type) {
             default:
             case this.optionType.Video:
@@ -198,9 +209,9 @@ let CesiumVideo3d = (function () {
                 this.activeColor(this.color),
                     this.deActiveVideo();
         }
-        this._createShadowMap(),
-            this._getOrientation(),
-            this._addCameraFrustum()
+        this._createShadowMap()
+        this._getOrientation()
+        this._addCameraFrustum()
         this._addPostProcess()
         this.viewer.scene.primitives.add(this)
     }
@@ -220,7 +231,7 @@ let CesiumVideo3d = (function () {
             },
             set: function (e) {
                 this._aspectRatio = e,
-                    this._changeVideoWidHei()
+                    this._changeScene()
             }
         },
         debugFrustum: {
@@ -238,7 +249,7 @@ let CesiumVideo3d = (function () {
             },
             set: function (e) {
                 this._camerafov = e,
-                    this._changeCameraFov()
+                    this._changeScene()
             }
         },
         cameraPosition: {
@@ -246,7 +257,7 @@ let CesiumVideo3d = (function () {
                 return this._cameraPosition
             },
             set: function (e) {
-                e && (this._cameraPosition = e, this._changeCameraPos())
+                e && (this._cameraPosition = e, this._changeScene())
             }
         },
         position: {
@@ -254,7 +265,7 @@ let CesiumVideo3d = (function () {
                 return this._position
             },
             set: function (e) {
-                e && (this._position = e, this._changeViewPos())
+                e && (this._position = e, this._changeScene())
             }
         },
         videoPlay: {
@@ -262,8 +273,8 @@ let CesiumVideo3d = (function () {
                 return this._videoPlay
             },
             set: function (e) {
-                this._videoPlay = Boolean(e),
-                    this._videoEle && (this.videoPlay ? this._videoEle.paly() : this._videoEle.pause())
+                this._videoPlay = Boolean(e)
+                this._videoEle && (this.videoPlay ? this._videoEle.play() : this._videoEle.pause())
             }
         },
         params: {
@@ -291,8 +302,17 @@ let CesiumVideo3d = (function () {
         }
     })
     videoShed3d.prototype._initCameraParam = function () {
-        var viewPoint = this.ECEF.enu_to_ecef({ longitude: this.param.position.x * 1, latitude: this.param.position.y * 1, altitude: this.param.position.z * 1 },
-            { distance: this.param.far, azimuth: this.param.rotation.y * 1, elevation: this.param.rotation.x * 1 });
+        var viewPoint = this.ECEF.enu_to_ecef(
+            {
+                longitude: this.param.position.x * 1,
+                latitude: this.param.position.y * 1,
+                altitude: this.param.position.z * 1
+            },
+            {
+                distance: this.param.far,
+                azimuth: this.param.rotation.y * 1,
+                elevation: this.param.rotation.x * 1
+            });
         var position = Cesium.Cartesian3.fromDegrees(viewPoint.longitude, viewPoint.latitude, viewPoint.altitude);
         var cameraPosition = Cesium.Cartesian3.fromDegrees(this.param.position.x * 1, this.param.position.y * 1, this.param.position.z * 1);
         return {
@@ -313,23 +333,26 @@ let CesiumVideo3d = (function () {
         if (e) {
             this.param.rotation = e;
             var option = this._initCameraParam();
+            this.cameraPosition = option.cameraPosition;
             this.position = option.position;
         }
     }
     /**
-     * 相机位置
+     * 改变位置
      */
-    videoShed3d.prototype._changeCameraPosition = function (e) {
+    videoShed3d.prototype._changePosition = function (e) {
         if (e) {
             this.param.position = e;
             var option = this._initCameraParam();
             this.cameraPosition = option.cameraPosition;
+            this.position = option.position;
         }
     }
     videoShed3d.prototype._changeFar = function (e) {
         if (e) {
             this.param.far = e;
             var option = this._initCameraParam();
+            this.cameraPosition = option.cameraPosition;
             this.position = option.position;
         }
     }
@@ -337,7 +360,7 @@ let CesiumVideo3d = (function () {
         if (e) {
             this.param.near = e;
             this.near = this.param.near;
-            this._changeCameraPos();
+            this._changeScene();
         }
     }
     /**获取三维地图容器像素大小
@@ -346,41 +369,14 @@ let CesiumVideo3d = (function () {
         var viewer = this.viewer.scene;
         return viewer.canvas.clientWidth / viewer.canvas.clientHeight;
     }
-    videoShed3d.prototype._changeCameraFov = function () {
+    //更新场景
+    videoShed3d.prototype._changeScene = function () {
         this.viewer.scene.postProcessStages.remove(this.postProcess)
-        this.viewer.scene.primitives.remove(this.cameraFrustum),
-            this._createShadowMap(this.cameraPosition, this.position),
-            this._getOrientation(),
-            this._addCameraFrustum(),
-            this._addPostProcess()
-    }
-    videoShed3d.prototype._changeVideoWidHei = function () {
-        this.viewer.scene.postProcessStages.remove(this.postProcess),
-            this.viewer.scene.primitives.remove(this.cameraFrustum)
-        this._createShadowMap(this.cameraPosition, this.position),
-            this._getOrientation(),
-            this._addCameraFrustum(),
-            this._addPostProcess()
-    }
-    videoShed3d.prototype._changeCameraPos = function () {
-        this.viewer.scene.postProcessStages.remove(this.postProcess),
-            this.viewer.scene.primitives.remove(this.cameraFrustum),
-            this.viewShadowMap.destroy(),
-            this.cameraFrustum.destroy(),
-            this._createShadowMap(this.cameraPosition, this.position),
-            this._getOrientation(),
-            this._addCameraFrustum(),
-            this._addPostProcess()
-    }
-    videoShed3d.prototype._changeViewPos = function () {
-        this.viewer.scene.postProcessStages.remove(this.postProcess),
-            this.viewer.scene.primitives.remove(this.cameraFrustum),
-            this.viewShadowMap.destroy(),
-            this.cameraFrustum.destroy(),
-            this._createShadowMap(this.cameraPosition, this.position),
-            this._getOrientation(),
-            this._addCameraFrustum(),
-            this._addPostProcess()
+        this.viewer.scene.primitives.remove(this.cameraFrustum)
+        this._createShadowMap()
+        this._getOrientation()
+        this._addCameraFrustum()
+        this._addPostProcess()
     }
     videoShed3d.prototype._switchShow = function () {
         this.show ? !this.postProcess && this._addPostProcess() : (this.viewer.scene.postProcessStages.remove(this.postProcess), delete this.postProcess, this.postProcess = null),
@@ -394,15 +390,15 @@ let CesiumVideo3d = (function () {
         var t = document.createElement("SOURCE");
         t.type = "video/mp4",
             t.src = url;
-        var i = document.createElement("SOURCE");
-        i.type = "video/quicktime",
-            i.src = url;
+        // var i = document.createElement("SOURCE");
+        // i.type = "video/quicktime",
+        //     i.src = url;
         var a = document.createElement("VIDEO");
         return a.setAttribute("autoplay", !0),
             a.setAttribute("loop", !0),
             a.setAttribute("crossorigin", !0),
             a.appendChild(t),
-            a.appendChild(i),
+            // a.appendChild(i),
             // document.body.appendChild(a),
             this._videoEle = a,
             a
@@ -469,7 +465,7 @@ let CesiumVideo3d = (function () {
         this.viewer.scene.postProcessStages.remove(this.postProcess),
             this.viewer.scene.primitives.remove(this.cameraFrustum),
             //this._videoEle && this._videoEle.parentNode.removeChild(this._videoEle),
-            this.activeVideoListener && this.viewer.clock.onTick.removeEventListener(this.activeVideoListener),
+            this.activeVideoListener && this.viewer && this.viewer.clock.onTick.removeEventListener(this.activeVideoListener),
             this.activeVideoListener && delete this.activeVideoListener,
             delete this.postProcess,
             delete this.viewShadowMap,
@@ -556,60 +552,60 @@ let CesiumVideo3d = (function () {
         var ge = this._createGeometry(positions, sts, indices);
         return ge;
     },
-    videoShed3d.prototype._createGeometry = function (positions, sts, indices) {
-        /* var Cesium = this.Cesium;*/
-        return new Cesium.Geometry({
-            attributes: {
-                position: new Cesium.GeometryAttribute({
-                    componentDatatype: Cesium.ComponentDatatype.DOUBLE,
-                    componentsPerAttribute: 3,
-                    values: positions
-                }),
-                normal: new Cesium.GeometryAttribute({
-                    componentDatatype: Cesium.ComponentDatatype.FLOAT,
-                    componentsPerAttribute: 3,
-                    values: new Float32Array([255.0, 0.0, 0.0, 255.0, 0.0, 0.0, 255.0, 0.0, 0.0, 255.0, 0.0, 0.0])
-                    // values: new Float32Array([0.0, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0])
-                }),
-                st: new Cesium.GeometryAttribute({
-                    componentDatatype: Cesium.ComponentDatatype.FLOAT,
-                    componentsPerAttribute: 2,
-                    values: sts
-                })
-            },
-            indices: indices,
-            primitiveType: Cesium.PrimitiveType.TRIANGLES,
-            vertexFormat: new Cesium.VertexFormat({
-                position: true,
-                color: true
-            }),
-            boundingSphere: Cesium.BoundingSphere.fromVertices(positions)
-        });
-    },
-    //创建视锥
-    videoShed3d.prototype._addCameraFrustum = function () {
-        var e = this;
-        this.cameraFrustum = new Cesium.Primitive({
-            geometryInstances: new Cesium.GeometryInstance({
-                geometry: new Cesium.FrustumOutlineGeometry({
-                    origin: e.cameraPosition,
-                    orientation: e.orientation,
-                    frustum: this.viewShadowMap._lightCamera.frustum,
-                    _drawNearPlane: !0
-                }),
+        videoShed3d.prototype._createGeometry = function (positions, sts, indices) {
+            /* var Cesium = this.Cesium;*/
+            return new Cesium.Geometry({
                 attributes: {
-                    color: Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(0, 0.5, 0.5))
-                }
+                    position: new Cesium.GeometryAttribute({
+                        componentDatatype: Cesium.ComponentDatatype.DOUBLE,
+                        componentsPerAttribute: 3,
+                        values: positions
+                    }),
+                    normal: new Cesium.GeometryAttribute({
+                        componentDatatype: Cesium.ComponentDatatype.FLOAT,
+                        componentsPerAttribute: 3,
+                        values: new Float32Array([255.0, 0.0, 0.0, 255.0, 0.0, 0.0, 255.0, 0.0, 0.0, 255.0, 0.0, 0.0])
+                        // values: new Float32Array([0.0, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0])
+                    }),
+                    st: new Cesium.GeometryAttribute({
+                        componentDatatype: Cesium.ComponentDatatype.FLOAT,
+                        componentsPerAttribute: 2,
+                        values: sts
+                    })
+                },
+                indices: indices,
+                primitiveType: Cesium.PrimitiveType.TRIANGLES,
+                vertexFormat: new Cesium.VertexFormat({
+                    position: true,
+                    color: true
+                }),
+                boundingSphere: Cesium.BoundingSphere.fromVertices(positions)
+            });
+        },
+        //创建视锥
+        videoShed3d.prototype._addCameraFrustum = function () {
+            var e = this;
+            this.cameraFrustum = new Cesium.Primitive({
+                geometryInstances: new Cesium.GeometryInstance({
+                    geometry: new Cesium.FrustumOutlineGeometry({
+                        origin: e.cameraPosition,//视锥起始位置
+                        orientation: e.orientation,//视锥方向
+                        frustum: this.viewShadowMap._lightCamera.frustum,
+                        _drawNearPlane: !0
+                    }),
+                    attributes: {
+                        color: Cesium.ColorGeometryInstanceAttribute.fromColor(new Cesium.Color(0, 0.5, 0.5))
+                    }
+                }),
+                appearance: new Cesium.PerInstanceColorAppearance({
+                    translucent: !1,
+                    flat: !0
+                }),
+                asynchronous: !1,
+                show: this.debugFrustum && this.show
             }),
-            appearance: new Cesium.PerInstanceColorAppearance({
-                translucent: !1,
-                flat: !0
-            }),
-            asynchronous: !1,
-            show: this.debugFrustum && this.show
-        }),
-            this.viewer.scene.primitives.add(this.cameraFrustum)
-    }
+                this.viewer.scene.primitives.add(this.cameraFrustum)
+        }
     videoShed3d.prototype._addPostProcess = function () {
         var e = this,
             t = videoShed3dShader,
@@ -644,7 +640,7 @@ let CesiumVideo3d = (function () {
 
             }
         }),
-        this.viewer.scene.postProcessStages.add(this.postProcess);
+            this.viewer.scene.postProcessStages.add(this.postProcess);
     }
     return videoShed3d;
 })()

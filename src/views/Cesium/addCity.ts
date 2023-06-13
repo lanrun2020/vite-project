@@ -14,6 +14,12 @@ export const addCity = (viewer: any, active: boolean) => {
       position: {x:121.5061830727844, y:31.22923471021075, z: 50},
       rotation: {x: 0,y: 0} //x垂直方向偏转，y水平方向偏转
     })
+    let y = 0.00001
+    setInterval(() => {
+      y += 0.00001
+      view2._changePosition({x:121.5061830727844+y, y:31.22923471021075, z: 50})//改变位置
+      // view2._changeRotation({x:30 , y:0})//改变偏转角度
+    },100)
     // const vew = new ViewShed(viewer)
     setTimeout(() => {
       viewer.camera.flyTo({
@@ -32,7 +38,7 @@ export const addCity = (viewer: any, active: boolean) => {
       );
       return
     }
-    const inspectorViewModel = new Cesium.Cesium3DTilesInspector('cesiumContainer',viewer.scene).viewModel
+    // const inspectorViewModel = new Cesium.Cesium3DTilesInspector('cesiumContainer',viewer.scene).viewModel
     primitive = viewer.scene.primitives.add(new Cesium.PrimitiveCollection());
     new Cesium.Cesium3DTileset({
       url: "/city/tileset.json",
@@ -41,7 +47,7 @@ export const addCity = (viewer: any, active: boolean) => {
         tilesetPrimitive = data
         primitive.add(tilesetPrimitive)
         loadTilesShader(tilesetPrimitive)
-        inspectorViewModel.tileset = tilesetPrimitive
+        // inspectorViewModel.tileset = tilesetPrimitive
         viewer.zoomTo(
           tilesetPrimitive,
           new Cesium.HeadingPitchRange(
@@ -79,8 +85,8 @@ export const addCity = (viewer: any, active: boolean) => {
       };
       handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
       handler.setInputAction((event: any) => {
-          const feature = inspectorViewModel.feature;
-          console.log(feature);
+          // const feature = inspectorViewModel.feature;
+          // console.log(feature);
           silhouetteBlue.selected = [];
           // const pickedFeature = viewer.scene.pick(event.position);//pick返回具有' primitive'属性的对象，该对象包含场景中的第一个（顶部）基本体在特定的窗口坐标处
           const pickedFeatures = viewer.scene.drillPick(event.position);//drillPick返回所有对象的对象列表，每个对象包含一个' primitive'属性。特定的窗口坐标位置。

@@ -13,11 +13,11 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: 'home',
-        component: () => import('../views/Home/index.vue'),
+        component: import('../views/Home/index.vue'),
       },
       {
         path: 'cesium',
-        component: () => import('../views/Cesium/index.vue'),
+        component: import('../views/Cesium/index.vue'), //若采用懒加载,页面加载缓慢
       },
       {
         path: 'webgl',
@@ -77,7 +77,11 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'sceneBuild',
         component: () => import('../views/Three/sceneBuild.vue'),
-      }
+      },
+      {
+        path: 'loadDxf',
+        component: () => import('../views/Three/loadDxf.vue'),
+      },
     ],
   },
   {
