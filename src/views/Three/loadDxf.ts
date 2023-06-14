@@ -5,6 +5,7 @@ let that: loadDxfFile
 export default class loadDxfFile {
   private dom!: HTMLElement
   private scene!: THREE.Scene
+  private helper!: THREE.GridHelper
   private camera!: THREE.PerspectiveCamera
   private renderer!: THREE.WebGLRenderer
   private controls: OrbitControls
@@ -24,7 +25,7 @@ export default class loadDxfFile {
     this.setCamera();
     this.setLight();
     this.setControls();
-    this.addModel();
+    // this.addModel();
     window.addEventListener('resize', this.onWindowResize);
     this.animate();
   }
@@ -33,16 +34,24 @@ export default class loadDxfFile {
   setScene() {
     this.scene = new THREE.Scene();
     // Grid 添加网格辅助对象
-    const helper = new THREE.GridHelper(100, 30, 0x303030, 0x303030); //长度1000 划分为50份
-    this.scene.add(helper);
+    this.helper = new THREE.GridHelper(30000, 100, 0x303030, 0x303030); //长度 划分段
+    console.log(this.helper);
+    
+    this.helper.rotation.x = Math.PI / 2
+    this.scene.add(this.helper);
     // 辅助三维坐标系
-    const axesHelper = new THREE.AxesHelper(500);
-    this.scene.add(axesHelper)
+    const axesHelper = new THREE.AxesHelper(50000);
+    // this.scene.add(axesHelper)
   }
 
   // 设置渲染器
   setRenderer() {
-    this.renderer = new THREE.WebGLRenderer();
+    //抗锯齿
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      precision: 'highp'
+    });
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     this.renderer.setClearColor(0x041336);
@@ -52,8 +61,10 @@ export default class loadDxfFile {
   // 设置透视相机
   setCamera() {
     // 第二参数就是 长度和宽度比 默认采用浏览器  返回以像素为单位的窗口的内部宽度和高度
-    this.camera = new THREE.PerspectiveCamera(75, this.dom.offsetWidth / this.dom.offsetHeight, 1, 1000);
-    this.camera.position.set(0, 30, 50)
+    this.camera = new THREE.PerspectiveCamera(75, this.dom.offsetWidth / this.dom.offsetHeight, 1, 200000);
+    this.camera.position.set(0, 0, 5000)
+    console.log(this.camera.position);
+    
   }
 
   // 设置光源
@@ -72,17 +83,31 @@ export default class loadDxfFile {
   setControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement) //轨道控制器
     this.controls.update();
-    this.controls.enableDamping = true; // 阻尼（惯性）是否启用
-    this.controls.dampingFactor = 0.05; // 阻尼系数
-    this.controls.screenSpacePanning = false; //定义平移时如何平移相机的位置。如果为 true，则相机在屏幕空间中平移。否则，相机会在与相机向上方向正交的平面中平移。OrbitControls 默认为 true；MapControls 为 false。
+    //按键引用
+    this.controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.PAN
+    }
+    console.log(this.controls);
+    
+    this.controls.enableDamping = false; // 阻尼（惯性）是否启用
+    // this.controls.dampingFactor = 0.05; // 阻尼系数
+    this.controls.enableRotate = false; //启用或禁用摄像机水平或垂直旋转
+    // this.controls.enablePan = false; //启用或禁用摄像机平移
+    // this.controls.enableZoom = false; //启用或禁用摄像机的缩放
+    this.controls.screenSpacePanning = true; //定义平移时如何平移相机的位置。如果为 true，则相机在屏幕空间中平移。否则，相机会在与相机向上方向正交的平面中平移。OrbitControls 默认为 true；MapControls 为 false。
     // controls.minDistance = 50; //移动最小距离
-    this.controls.maxDistance = 1500; //移动最大距离
+    this.controls.maxDistance = 20000; //移动最大距离
     this.controls.maxPolarAngle = Math.PI; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
   }
 
   // 渲染
   render() {
     if (this.renderer && this.scene && this.camera) {
+      // this.controls.getZoom()
+      // console.log(this.camera.position);
+      // const scale = this.camera.position.z / 5000;
       this.renderer.render(this.scene, this.camera);
     }
   }
