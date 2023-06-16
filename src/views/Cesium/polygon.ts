@@ -69,10 +69,14 @@ const addPolygon = (viewer: any, longitude: number, latitude: number) => {
         material: Cesium.Material.fromType("Stripe"),
       }),
     })
+    primitive.myData = {
+      id:'polygon1',
+    }
     primitiveArr.push(primitive)
     viewer.scene.primitives.add(
       primitive
     );
+    console.log(viewer.scene.primitives);
   }
 }
 const polygonFilter2 = (checkPoint: { lat: number, lng: number }, polygonPoints: Array<any>) => { //首尾相连边

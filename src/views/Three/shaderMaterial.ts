@@ -1237,3 +1237,39 @@ export const getSunMaterial = (options?: { url1?:string,url2?:string, side?: obj
   })
   return material
 }
+
+// 测试材质
+export const getTestMaterial = () => {
+  const tubeShader = {
+    vertexshader: `
+			varying vec2 vUv;
+			void main()
+			{
+				vUv = uv;
+				vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+				gl_Position = projectionMatrix * mvPosition;
+			}
+      `,
+    fragmentshader: `
+    uniform float time;
+    varying vec2 vUv;
+    void main( void ) {
+      // Normalized pixel coordinates (from 0 to 1)
+      vec3 rayPosition = vec3(0.0,0.0,0.0);
+      vec3 rayTarget = vec3(vUv*2.0 - 1.0,fract(time*0.4));
+      vec3 rayDir = normalize(rayTarget - rayPosition);
+      // Output to screen
+      gl_FragColor = vec4(rayDir, 1.0);
+    }`
+  }
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      'time': { value: 1.0 },
+    },
+    side: THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+    transparent: true,// 是否透明
+    vertexShader: tubeShader.vertexshader, // 顶点着色器
+    fragmentShader: tubeShader.fragmentshader // 片元着色器
+  })
+  return material
+}

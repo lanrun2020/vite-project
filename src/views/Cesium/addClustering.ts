@@ -35,7 +35,7 @@ export const addClustering = (viewer: any, active: boolean) => {
     viewer.zoomTo(datasource);
 
     dataSourcePromise.then(function (dataSource: any) {
-      const pixelRange = 15; // 聚合的像素范围
+      const pixelRange = 50; // 聚合的像素范围
       const minimumClusterSize = 3; // 点聚合的最小个数
       const enabled = true; // 是否开启点聚合
 
@@ -76,6 +76,8 @@ export const addClustering = (viewer: any, active: boolean) => {
         } else {
           removeListener = dataSource.clustering.clusterEvent.addEventListener(
             function (clusteredEntities: any, cluster: any) {
+              //cluster聚合的组
+              //clusteredEntities组内实体point
               cluster.label.show = false;
               cluster.billboard.show = true;
               cluster.billboard.id = cluster.label.id;
@@ -86,20 +88,20 @@ export const addClustering = (viewer: any, active: boolean) => {
                 .fromText(clusteredEntities.length, Cesium.Color.ORANGE, 40)
                 .toDataURL();
               cluster.billboard.image = pinNum;
-              // if (clusteredEntities.length >= 50) {
-              //   cluster.billboard.image = pin50;
-              // } else if (clusteredEntities.length >= 40) {
-              //   cluster.billboard.image = pin40;
-              // } else if (clusteredEntities.length >= 30) {
-              //   cluster.billboard.image = pin30;
-              // } else if (clusteredEntities.length >= 20) {
-              //   cluster.billboard.image = pin20;
-              // } else if (clusteredEntities.length >= 10) {
-              //   cluster.billboard.image = pin10;
-              // } else {
-              //   cluster.billboard.image =
-              //     singleDigitPins[clusteredEntities.length - 2];
-              // }
+              if (clusteredEntities.length >= 50) {
+                cluster.billboard.image = pin50;
+              } else if (clusteredEntities.length >= 40) {
+                cluster.billboard.image = pin40;
+              } else if (clusteredEntities.length >= 30) {
+                cluster.billboard.image = pin30;
+              } else if (clusteredEntities.length >= 20) {
+                cluster.billboard.image = pin20;
+              } else if (clusteredEntities.length >= 10) {
+                cluster.billboard.image = pin10;
+              } else {
+                cluster.billboard.image =
+                  singleDigitPins[clusteredEntities.length - 2];
+              }
             }
           );
         }

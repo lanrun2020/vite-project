@@ -82,6 +82,10 @@ const routes: Array<RouteRecordRaw> = [
         path: 'loadDxf',
         component: () => import('../views/Three/loadDxf.vue'),
       },
+      {
+        path: 'cloud',
+        component: () => import('../views/Three/cloud.vue'),
+      },
     ],
   },
   {

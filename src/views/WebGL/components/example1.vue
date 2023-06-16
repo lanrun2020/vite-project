@@ -21,7 +21,7 @@ const init = () => {
   const vertexShaderSource = `
             void main () {
                 gl_PointSize = 20.0;
-                gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+                gl_Position = vec4(0.0, 0.0, 0.0, 1.0); //中心位置为0,0
             }
         `;
 
@@ -38,7 +38,8 @@ const init = () => {
   // 清空画布
   gl.clear(gl.COLOR_BUFFER_BIT);
   //开始绘制，显示器显示结果
-  gl.drawArrays(gl.POINTS, 0, 5);
+  gl.drawArrays(gl.POINTS, 0, 5);//从下标0开始绘制5个点
+  //gl.drawArrays()方法的作用就是通知GPU执行着色器代码，然后根据着色器代码在Canvas画布上进行渲染绘制
 
   //声明初始化着色器函数
   function initShader(vertexShaderSource: any, fragmentShaderSource: any) {

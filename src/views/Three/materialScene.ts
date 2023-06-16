@@ -5,7 +5,7 @@ import flagImg from '../../assets/guoqi.png'
 import terrain from '../../assets/floor5.jpeg'
 import cloud from '../../assets/cloud.png'
 import lavatile from '../../assets/lavatile.jpg'
-import { getFlowMaterial, getSunMaterial, getFlagMaterial, getSeaMaterial, getWaterMaterial, getScanMaterial, getFlowMaterialByY, getRotateScanMaterial, getRotateMaterialByY, getRotateMaterialByY2, getRotateMaterialByY3, getUpDownRotateMaterial } from './shaderMaterial'
+import { getFlowMaterial, getTestMaterial, getSunMaterial, getFlagMaterial, getSeaMaterial, getWaterMaterial, getScanMaterial, getFlowMaterialByY, getRotateScanMaterial, getRotateMaterialByY, getRotateMaterialByY2, getRotateMaterialByY3, getUpDownRotateMaterial } from './shaderMaterial'
 const THREE = T
 let that: materialScene
 export default class materialScene {
@@ -34,8 +34,8 @@ export default class materialScene {
     this.setControls();
 
     //添加场景物体
-    // this.addCubeAndPlane();
-    this.addShaderTorus()
+    this.addCubeAndPlane();
+    // this.addShaderTorus()
     // this.addCircle();
     // this.addCircle3();
     // this.addCylinder();
@@ -153,8 +153,22 @@ export default class materialScene {
     const plane = new THREE.Mesh(planeGeometry, flowMaterial)
     plane.position.set(0, 0.1, 10)
     plane.rotation.set(Math.PI / 2, 0, 0)
-    this.scene.add(cube)
-    this.scene.add(plane)
+
+     //创建一个长方体2
+     const geometry2 = new THREE.BoxGeometry(10, 10, 10);
+     const testMaterial = getTestMaterial() //流动材质
+     this.shaderMaterialList.push(testMaterial) //用于刷新材质的时间参数
+     const cube2 = new THREE.Mesh(geometry2, testMaterial);
+     cube2.position.set(0, 0, 0)
+
+     //创建一个球体
+     const geometry3 = new THREE.SphereGeometry(10, 32, 32);
+     const Sphere = new THREE.Mesh(geometry3, testMaterial);
+     Sphere.position.set(0, 40, 0)
+    // this.scene.add(cube)
+    // this.scene.add(plane)
+    this.scene.add(cube2)
+    this.scene.add(Sphere)
   }
 
   addShaderTorus() {
