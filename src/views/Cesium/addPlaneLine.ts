@@ -162,7 +162,12 @@ const addPlane = (item: any, num: number, start: any, primitives: any, startInde
         czm_material material = czm_getDefaultMaterial(materialInput);\n\
         float dis = materialInput.s;\n\
         bool b = bool(step(dis, curP/allP));\n\
-        material.alpha = b ? color.a : 0.0;\n\
+        //虚线
+        float sp = 1.0/50.0;
+        float m = mod(dis, sp);
+        float a2 = 1.0 - step(sp*0.5,m);
+        float a = color.a * a2;
+        material.alpha = b ? a : 0.0;\n\
         material.diffuse = color.rgb;\n\
         return material;\n\
     }`

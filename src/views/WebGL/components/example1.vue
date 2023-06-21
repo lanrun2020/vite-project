@@ -11,7 +11,6 @@ onMounted(() => {
   init()
 })
 const init = () => {
-  console.log('init');
   //通过getElementById()方法获取canvas画布
   const canvas = document.getElementById('webgl') as HTMLCanvasElement;
   //通过方法getContext()获取WebGL上下文
@@ -34,9 +33,9 @@ const init = () => {
 
   //初始化着色器
   const program = initShader(vertexShaderSource, fragShaderSource);
-  gl.clearColor(0, 0, 0, 1)
+  gl.clearColor(0, 0, 0, 1)//将透明色设置为黑色，完全不透明
   // 清空画布
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT);//使用指定的透明颜色清除颜色缓冲
   //开始绘制，显示器显示结果
   gl.drawArrays(gl.POINTS, 0, 5);//从下标0开始绘制5个点
   //gl.drawArrays()方法的作用就是通知GPU执行着色器代码，然后根据着色器代码在Canvas画布上进行渲染绘制

@@ -11,7 +11,6 @@ onMounted(() => {
   init()
 })
 const init = () => {
-  console.log('init');
   //通过getElementById()方法获取canvas画布
   const canvas = document.getElementById('webgl2') as HTMLCanvasElement;
   //通过方法getContext()获取WebGL上下文

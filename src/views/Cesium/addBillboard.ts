@@ -285,7 +285,6 @@ export const addBillboard = async (viewer: any, active: boolean) => {
       }
     })
     console.log(viewer.scene);
-    
     viewer.scene.postRender.addEventListener(renderFuc = () => {
       const positionArrNew = arr.map((item) => {
         return Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, item.position._value)

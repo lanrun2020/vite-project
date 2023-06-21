@@ -7,7 +7,9 @@
       <el-tab-pane label="example2">
         <example2></example2>
       </el-tab-pane>
-      <el-tab-pane label="example3">3</el-tab-pane>
+      <el-tab-pane label="example3">
+        <example3></example3>
+      </el-tab-pane>
       <el-tab-pane label="example4">4</el-tab-pane>
     </el-tabs>
   </div>
@@ -16,6 +18,8 @@
 <script setup lang='ts'>
 import example1 from './components/example1.vue';
 import example2 from './components/example2.vue';
+import example3 from './components/example3.vue';
+
 </script>
 
 <style scoped lang="scss">
