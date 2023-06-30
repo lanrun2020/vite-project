@@ -29,8 +29,8 @@ const init = () => {
 
   sun = new THREE.Vector3();
   // 辅助三维坐标系
-  // const axesHelper = new THREE.AxesHelper(500);
-  // scene.add(axesHelper)
+  const axesHelper = new THREE.AxesHelper(500);
+  scene.add(axesHelper)
 
   // Water
 
@@ -51,6 +51,8 @@ const init = () => {
       fog: scene.fog !== undefined
     }
   );
+  console.log(water);
+  
 
   water.rotation.x = - Math.PI / 2;
 

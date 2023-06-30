@@ -1,6 +1,10 @@
 // 城市 白膜建筑
 import Cesium from "@/utils/importCesium"
 import CesiumVideo3d from './CesiumVideo3d'
+import waterImg from '../../assets/waterNormals.jpg'
+import userImg from '../../assets/user.png'
+import WaterMirrorMaterialsProperty from './waterMaterial'
+const waterMaterial = new WaterMirrorMaterialsProperty({ normalMap:waterImg })
 let primitive: any
 let tilesetPrimitive: any
 let view2: any
@@ -14,13 +18,31 @@ export const addCity = (viewer: any, active: boolean) => {
       position: {x:121.5061830727844, y:31.22923471021075, z: 50},
       rotation: {x: 0,y: 0} //x垂直方向偏转，y水平方向偏转
     })
-    let y = 0.00001
-    setInterval(() => {
-      y += 0.00001
-      view2._changePosition({x:121.5061830727844+y, y:31.22923471021075, z: 50})//改变位置
-      // view2._changeRotation({x:30 , y:0})//改变偏转角度
-    },100)
+    // let y = 0.00001
+    // setInterval(() => {
+    //   y += 0.00001
+    //   view2._changePosition({x:121.5061830727844+y, y:31.22923471021075, z: 50})//改变位置
+    //   // view2._changeRotation({x:30 , y:0})//改变偏转角度
+    // },100)
     // const vew = new ViewShed(viewer)
+    // 流动水面效果
+    viewer.scene.primitives.add(
+      new Cesium.Primitive({
+          geometryInstances: new Cesium.GeometryInstance({
+              geometry: new Cesium.RectangleGeometry({
+                  rectangle: Cesium.Rectangle.fromDegrees(
+                      121.5061830727844, 31.22923471021075,
+                      121.5461830727844, 31.25923471021075,
+                  ),
+                  height: 10,
+                  vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT,
+              }),
+          }),
+          appearance: new Cesium.MaterialAppearance({
+            material: waterMaterial.getMaterial(), faceForward: !1, closed: !0
+          }),
+      })
+    );
     setTimeout(() => {
       viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(121.5061830727844, 31.22923471021075, 3000),

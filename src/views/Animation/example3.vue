@@ -19,6 +19,12 @@
     <div class="img3">img3</div>
   </div>
   <div class="mask-box"></div>
+  <div class="img-box">
+    <div class="item-img"></div>
+    <div class="item-img"></div>
+    <div class="item-img"></div>
+    <div class="item-img"></div>
+  </div>
  </div>
 </template>
 
@@ -140,5 +146,18 @@ import xbutton from '../../components/xbutton.vue'
         mask-position: 0 0;
         -webkit-mask-position: 0 0;
     }
+}
+.img-box{
+  width: 60%;
+  height: 100px;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  border: 1px solid #000;
+  .item-img{
+    width: 24%;
+    background: url('../../assets/guoqi.png');
+    background-size: 100% 100%;
+  }
 }
 </style>

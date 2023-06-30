@@ -122,15 +122,15 @@ const init = () => {
 const render = () => {
     const vertexs2: number[] = [
       0, 0.8, 0,
-      -0.1, 0, 0,
-      0.1, 0, 0
+      -0.08, 0, 0,
+      0.08, 0, 0
     ];
     let buffers2 = new Float32Array(vertexs2)
     gl.bindBuffer(gl.ARRAY_BUFFER, aPosAttBuffer); // 绑定缓冲
     gl.bufferData(gl.ARRAY_BUFFER, buffers2, gl.STATIC_DRAW); // 传入数据
   const matrixUniformLocation = gl.getUniformLocation(program, "aMatrix")
   // 计算旋转矩阵
-  const angle = performance.now() / 2000 * Math.PI
+  const angle = performance.now() / 15000 * Math.PI
   const rotationMatrix = mat3.fromRotation(mat3.create(), angle)
   // 将矩阵传递给着色器程序
   // gl.useProgram(gl.program)

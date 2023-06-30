@@ -383,6 +383,20 @@ const initCesium = () => {
   //经纬度
   var lon = Cesium.Math.toDegrees(carto.longitude);
   var lat = Cesium.Math.toDegrees(carto.latitude);
+  setTimeout(() => {
+    viewer.render();
+    let canvas = viewer.scene.canvas;
+            let image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+            // console.log(image);
+            // let link = document.createElement("a");
+            // let blob = dataURLtoBlob(image);
+            // console.log(blob);
+            // let objurl = URL.createObjectURL(blob);
+            // link.download = "scene.png";
+            // link.href = objurl;
+            // link.click();
+  }, 4000)
+
   // console.log(lon,lat);
   // console.log(Cesium.JulianDate.fromDate(new Date('2023-06-05 13:39:56')));
   // var layer = new Cesium.UrlTemplateImageryProvider({
@@ -419,6 +433,19 @@ const initCesium = () => {
   // viewer.scene.screenSpaceCameraController.enableTit = false;
   // addCity(viewer, true);
 };
+function dataURLtoBlob(dataurl) {
+            let arr = dataurl.split(','),
+                mime = arr[0].match(/:(.*?);/)[1],
+                bstr = atob(arr[1]),
+                n = bstr.length,
+                u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], {
+                type: mime
+            });
+        }
 // 创建相机
 // const createLightCamera = () => {
 //     this.lightCamera = new Cesium.Camera(this.viewer.scene)
