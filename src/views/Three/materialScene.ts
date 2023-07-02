@@ -5,7 +5,7 @@ import flagImg from '../../assets/guoqi.png'
 import terrain from '../../assets/floor5.jpeg'
 import cloud from '../../assets/cloud.png'
 import lavatile from '../../assets/lavatile.jpg'
-import { getFlowMaterial, getTestMaterial, getSunMaterial, getFlagMaterial, getSeaMaterial, getWaterMaterial, getScanMaterial, getFlowMaterialByY, getRotateScanMaterial, getRotateMaterialByY, getRotateMaterialByY2, getRotateMaterialByY3, getUpDownRotateMaterial } from './shaderMaterial'
+import { getFlowMaterial, getTestMaterial, getShieldMaterial, getSunMaterial, getFlagMaterial, getSeaMaterial, getWaterMaterial, getScanMaterial, getFlowMaterialByY, getRotateScanMaterial, getRotateMaterialByY, getRotateMaterialByY2, getRotateMaterialByY3, getUpDownRotateMaterial } from './shaderMaterial'
 const THREE = T
 let that: materialScene
 export default class materialScene {
@@ -162,12 +162,14 @@ export default class materialScene {
      cube2.position.set(0, 0, 0)
 
      //创建一个球体
+     const shieldMaterial = getShieldMaterial()
+     this.shaderMaterialList.push(shieldMaterial) //用于刷新材质的时间参数
      const geometry3 = new THREE.SphereGeometry(10, 32, 32);
-     const Sphere = new THREE.Mesh(geometry3, testMaterial);
-     Sphere.position.set(0, 40, 0)
+     const Sphere = new THREE.Mesh(geometry3, shieldMaterial);
+     Sphere.position.set(0, 0, 0)
     // this.scene.add(cube)
     // this.scene.add(plane)
-    this.scene.add(cube2)
+    // this.scene.add(cube2)
     this.scene.add(Sphere)
   }
 

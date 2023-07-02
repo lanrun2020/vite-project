@@ -1273,3 +1273,42 @@ export const getTestMaterial = () => {
   })
   return material
 }
+
+// 球体护盾特效
+export const getShieldMaterial = () => {
+  const tubeShader = {
+    vertexshader: `
+			varying vec2 vUv;
+      varying float vIntensity;
+			void main()
+			{
+				vUv = uv;
+        vec4 worldPosition = modelMatrix * vec4(position,1.0);
+        vec3 worldNormal = normalize(modelMatrix * vec4(normal,0.0)).xyz;
+
+        vec3 dirToCamera = normalize(cameraPosition - worldNormal.xyz);
+        vIntensity = 1.0 - dot(worldNormal, dirToCamera);
+        vIntensity = pow(vIntensity, 1.0);
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+      `,
+    fragmentshader: `
+    uniform float time;
+    varying vec2 vUv;
+    varying float vIntensity;
+
+    void main( void ) {
+      gl_FragColor = vec4(vec3(vIntensity), 1.0);
+    }`
+  }
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      'time': { value: 1.0 },
+    },
+    side: THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+    transparent: true,// 是否透明
+    vertexShader: tubeShader.vertexshader, // 顶点着色器
+    fragmentShader: tubeShader.fragmentshader // 片元着色器
+  })
+  return material
+}
