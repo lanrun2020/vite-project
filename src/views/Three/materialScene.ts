@@ -1,13 +1,14 @@
 import * as T from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
+import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js'
 import flagImg from '../../assets/guoqi.png'
 import terrain from '../../assets/floor5.jpeg'
 import cloud from '../../assets/cloud.png'
 import lavatile from '../../assets/lavatile.jpg'
-import { getFlowMaterial, getTestMaterial, getShieldMaterial, getSunMaterial, getFlagMaterial, getSeaMaterial, getWaterMaterial, getScanMaterial, getFlowMaterialByY, getRotateScanMaterial, getRotateMaterialByY, getRotateMaterialByY2, getRotateMaterialByY3, getUpDownRotateMaterial } from './shaderMaterial'
+import { getFlowMaterial, getTextMaterial, getTestMaterial, getShieldMaterial, getSunMaterial, getFlagMaterial, getSeaMaterial, getWaterMaterial, getScanMaterial, getFlowMaterialByY, getRotateScanMaterial, getRotateMaterialByY, getRotateMaterialByY2, getRotateMaterialByY3, getUpDownRotateMaterial } from './shaderMaterial'
 const THREE = T
 let that: materialScene
+let tool = []
 export default class materialScene {
   private dom!: HTMLElement
   private scene!: THREE.Scene
@@ -32,9 +33,22 @@ export default class materialScene {
     this.setCamera();
     this.setLight();
     this.setControls();
+    tool = [{
+      name: 'conveyor',
+      label: '传送带',
+      value: false,
+      method: 'addCubeAndPlane'
+    },{
+      name: 'Sphere',
+      label: '球形护盾',
+      value: false,
+      method: 'addSphere'
+    }
+    ]
+    this.addGUI();
 
     //添加场景物体
-    this.addCubeAndPlane();
+    // this.addCubeAndPlane();
     // this.addShaderTorus()
     // this.addCircle();
     // this.addCircle3();
@@ -46,7 +60,7 @@ export default class materialScene {
     // this.addBufferGeometry(); // 自定义几何缓存体
     // this.addWater();
     // this.addSea();
-    this.addPoints()
+    // this.addPoints()
 
     window.addEventListener('resize', this.onWindowResize);
     this.animate();
@@ -140,7 +154,31 @@ export default class materialScene {
     cancelAnimationFrame(this.requestId)
   }
 
+  addGUI() {
+    const gui = new GUI();
+    this.dom.appendChild(gui.domElement)
+    gui.domElement.style.position = 'absolute'
+    gui.domElement.style.right = '0px'
+    const parameters = {}
+    tool.forEach((item) => {
+      parameters[item.name] = item.value
+    })
+    console.log(parameters);
+    tool.forEach((item) => {
+      gui.add(parameters, item.name)
+      .name(item.label)
+      .onChange((value) => this.guiUpdate(value, item.name))
+    })
+  }
+  guiUpdate(value,name) {
+    const select = tool.find((item) => item.name === name)
+    // this.addCubeAndPlane()
+    that[select.method]()
+    // eval("that." + select.method + '()')
+  }
+  //传送带
   addCubeAndPlane() {
+    console.log('cube');
     //创建一个长方体
     const geometry = new THREE.BoxGeometry(50, 5, 10);
     const basicMaterial = new THREE.MeshBasicMaterial({ color: 0x666666, side: THREE.DoubleSide });
@@ -154,8 +192,14 @@ export default class materialScene {
     plane.position.set(0, 0.1, 10)
     plane.rotation.set(Math.PI / 2, 0, 0)
 
+    this.scene.add(cube)
+    this.scene.add(plane)
+  }
+
+  //球形护盾
+  addSphere() {
      //创建一个长方体2
-     const geometry2 = new THREE.BoxGeometry(10, 10, 10);
+     const geometry2 = new THREE.BoxGeometry(2, 2, 2);
      const testMaterial = getTestMaterial() //流动材质
      this.shaderMaterialList.push(testMaterial) //用于刷新材质的时间参数
      const cube2 = new THREE.Mesh(geometry2, testMaterial);
@@ -164,12 +208,12 @@ export default class materialScene {
      //创建一个球体
      const shieldMaterial = getShieldMaterial()
      this.shaderMaterialList.push(shieldMaterial) //用于刷新材质的时间参数
-     const geometry3 = new THREE.SphereGeometry(10, 32, 32);
+     const geometry3 = new THREE.SphereGeometry(10, 128, 128);
      const Sphere = new THREE.Mesh(geometry3, shieldMaterial);
      Sphere.position.set(0, 0, 0)
     // this.scene.add(cube)
     // this.scene.add(plane)
-    // this.scene.add(cube2)
+    this.scene.add(cube2)
     this.scene.add(Sphere)
   }
 
@@ -198,87 +242,25 @@ export default class materialScene {
   }
 
   addTextPlane() {
-    //创建一个长方体
-    const geometry = new THREE.BoxGeometry(14, 4, 0.1);
-    // const geometry = new THREE.CylinderGeometry(7.2, 7.2, 10, 32, 1, true);//true上下底面不封闭
-    const basicMaterial = new THREE.MeshBasicMaterial({ color: 0x666666, side: THREE.DoubleSide });
-    // const flowMaterial = getFlowMaterial() //流动材质
-    // this.shaderMaterialList.push(flowMaterial) //用于刷新材质的时间参数
-    const canvas = document.createElement("canvas");
-    canvas.width = 512;
-    canvas.height = 128;
-    const c = canvas.getContext('2d')!;
-    c.fillStyle = 'rgba(0,0,0,0.0)';
-    c.fillRect(0, 0, 512, 128);
-    // 文字
-    c.beginPath();
-    c.translate(256, 64);
-    c.fillStyle = "#00ffff"; //文本填充颜色
-    c.font = "bold 36px 宋体"; //字体样式设置
-    c.textBaseline = "middle"; //文本与fillText定义的纵坐标
-    c.textAlign = "center"; //文本居中(以fillText定义的横坐标)
-    c.fillText("起点", 0, 0);
-
-    const canvasTexture = new THREE.CanvasTexture(canvas);
-    canvasTexture.wrapS = THREE.RepeatWrapping;
-    const tubeShader = {
-      vertexshader: `
-      varying vec3 vp;
-      varying vec2 vUv;
-      uniform float time;
-      uniform float repeat;
-      void main() {
-        vp = position;
-        vUv = uv;
-        float dis = vUv.x;
-        vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-        gl_Position = projectionMatrix * viewMatrix  * modelPosition;
-      }
-          `,
-      fragmentshader: `
-      varying vec2 vUv;
-      uniform sampler2D u_map;
-      uniform float u_opacity;
-      uniform float time;
-      uniform vec3 color;
-      void main() {
-          vec2 vUv2 = vUv;
-          // vUv2.x = fract(vUv.x + time * 0.3);
-          gl_FragColor = texture2D(u_map, vUv2) + vec4(color, u_opacity * 0.2);;
-      }`
-    }
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        color: {
-          value: new THREE.Color(0x000000),
-          type: "v3"
-        },
-        time: {
-          value: 1,
-          type: "f"
-        },
-        repeat: { //周期
-          value: 1.5,
-          type: "f"
-        },
-        u_opacity: {
-          value: 0.0,
-          type: "f"
-        },
-        u_map: {
-          value: canvasTexture,
-          type: "t2"
-        }
-      },
-      // side: THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
-      transparent: true,// 是否透明
-      vertexShader: tubeShader.vertexshader, // 顶点着色器
-      fragmentShader: tubeShader.fragmentshader // 片元着色器
-    })
-    this.shaderMaterialList.push(material)
-    const cube = new THREE.Mesh(geometry, material);
-    cube.position.set(0, 12, 0)
-    this.scene.add(cube)
+    const textContent = '温度: 26℃'
+    const fontSize = 1
+    const tempCanvas = document.createElement("canvas")
+    const tempCtx = tempCanvas.getContext('2d')
+    tempCtx.font = "bold " + fontSize + "px 宋体"
+    const textWidth = tempCtx.measureText(textContent).width;
+    const material = getTextMaterial({ textContent,textWidth })
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(4, 2, 128, 128), material)
+    plane.position.set(6, 0, 3)
+    this.scene.add(plane)
+    const plane2 = new THREE.Mesh(new THREE.PlaneGeometry(4, 2, 128, 128), material)
+    plane2.position.set(6, 0, -3)
+    this.scene.add(plane2)
+    const plane3 = new THREE.Mesh(new THREE.PlaneGeometry(4, 2, 128, 128), material)
+    plane3.position.set(-6, 0, -3)
+    this.scene.add(plane3)
+    const plane4 = new THREE.Mesh(new THREE.PlaneGeometry(4, 2, 128, 128), material)
+    plane4.position.set(-6, 0, 3)
+    this.scene.add(plane4)
   }
 
   addFlag() {
@@ -329,16 +311,25 @@ export default class materialScene {
 
   addPoints() {
     const geometry = new THREE.BufferGeometry()
-    const vertices = new Float32Array([
-      -1.0, -1.0, 1.0,
-      1.0, -1.0, 1.0
-    ]);
+    const arr = []
+    const colors = []
+    const radius = 20
+    for (let i = -radius; i < radius; i++) {
+      for (let j = -radius; j < radius; j++) {
+        for (let k = -radius;k < radius;k++) {
+          arr.push(i,j,k)
+          colors.push(0.5*(i/radius+1),0.5*(j/radius+1),0.5*(k/radius+1))
+        }
+      }
+    }
+    const vertices = new Float32Array(arr);
+
     // itemSize = 3 因为每个顶点都是一个三元组。
     geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    // const material = new THREE.MeshBasicMaterial( { color: 0xff0000, side: THREE.DoubleSide } );
-    const material = new THREE.PointsMaterial({ size: 0.1, color: 0x888888 });
-    const mesh = new THREE.Points(geometry, material);
-    this.scene.add(mesh)
+    geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+    const material = new THREE.PointsMaterial({ size: 0.1, vertexColors:true }); //vertexColors采用顶点颜色
+    const Points = new THREE.Points(geometry, material);
+    this.scene.add(Points)
   }
 
   addPlane() {

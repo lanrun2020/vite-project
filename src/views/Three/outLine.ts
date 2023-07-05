@@ -14,6 +14,7 @@ import {
   CSS2DObject
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import TWEEN from "tween"
+import { getTextMaterial } from "./shaderMaterial";
 let that: outLine
 export default class outLine {
   private dom!: HTMLElement
@@ -81,6 +82,8 @@ export default class outLine {
   // 设置场景
   setScene() {
     this.scene = new THREE.Scene();
+    const axesHelper = new THREE.AxesHelper(500);
+    this.scene.add(axesHelper)
   }
 
   // 设置渲染器
@@ -570,6 +573,7 @@ export default class outLine {
           cube1.position.copy(mroot.position)
           cube1.position.y += size.y * 0.5
           that.addLabel(mroot, node.name, size.y / Scalar)
+          // that.addText(mroot, node.name, size.y / Scalar, size.y, Scalar)
         }, undefined, (error) => {
           console.log('模型加载错误', error);
         })
@@ -654,6 +658,19 @@ export default class outLine {
     const earthLabel = new CSS2DObject(div);
     earthLabel.position.set(0, height, 0);
     object.add(earthLabel);
+  }
+
+  addText(object: typeof THREE.Group, text: string, height: number, y: number, Scalar:number) {
+    const textContent = text
+    const fontSize = 1
+    const tempCanvas = document.createElement("canvas")
+    const tempCtx = tempCanvas.getContext('2d')
+    tempCtx.font = "bold " + fontSize + "px 宋体"
+    const textWidth = tempCtx.measureText(textContent).width;
+    const material = getTextMaterial({ textContent,textWidth })
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(textWidth*1, 2, 128, 128), material)
+    plane.position.set(0,(y + 1)/Scalar,0);
+    object.add(plane)
   }
 
 

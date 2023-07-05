@@ -132,6 +132,183 @@ export const getFlagMaterial = (options?: { side?: object, transparent?: boolean
   })
   return material
 }
+//字体朝向相机位置
+export const getTextMaterial2 = (options?: { textContent?:string, textWidth?:number, side?: object, transparent?: boolean, url?: string }) => {
+  const fontSize = 512 //值越大越清晰，此值决定了canvas画布像素
+  const textContent = options?.textContent ?? 'text'
+  const textWidth = ((options?.textWidth + 1) * fontSize) ?? 128*5;
+  const textHeight = fontSize*2.0;
+  const canvas = document.createElement("canvas");
+    canvas.width = textWidth;
+    canvas.height = textHeight;
+    const c = canvas.getContext('2d')!;
+    c.fillStyle = 'rgba(0,0,0,0.0)';
+    c.fillRect(0, 0, textWidth, textHeight);
+    // 文字
+    c.beginPath();
+    c.translate(textWidth/2, textHeight/2);
+    c.fillStyle = "#00ffff"; //文本填充颜色
+    c.font = "bold " + fontSize + "px 宋体"; //字体样式设置
+    c.textBaseline = "middle"; //文本与fillText定义的纵坐标
+    c.textAlign = "center"; //文本居中(以fillText定义的横坐标)
+    c.fillText(textContent, 0, 0);
+    const canvasTexture = new THREE.CanvasTexture(canvas);
+    canvasTexture.wrapS = THREE.RepeatWrapping;
+    const tubeShader = {
+      vertexshader: `
+      varying vec3 vp;
+      varying vec2 vUv;
+      uniform float repeat;
+      uniform float PI;
+      uniform float time;
+      mat3 rotate2d(float _angle){
+        float angle = radians(_angle);//角度转为弧度
+        return mat3(cos(angle),0.0,-sin(angle),
+                    0.0,1.0,0.0,
+                    -sin(angle),0.0,cos(angle)
+                    );
+      }
+      void main() {
+        vUv = uv;
+        // 获取模型中心点坐标
+        vec3 center = vec3(modelMatrix[3]);
+        vec3 cameraDir = normalize(cameraPosition - center); //相机与模型之间的朝向向量
+        float q = 0.0; //旋转弧度
+        if (cameraDir.z > 0.0) {
+          q = atan(cameraDir.x/cameraDir.z); //相机位置相对原点旋转的弧度
+        } else {
+          q = atan(cameraDir.x/cameraDir.z) + PI; //相机位置相对原点旋转的弧度
+        }
+        // 进行旋转变换,degrees弧度转角度,radians(角度转弧度)
+        float angle = q; // 旋转弧度（示例值）
+        //绕Y轴旋转的旋转矩阵
+        mat3 rotationMatrix = mat3(
+          cos(angle), 0.0, -sin(angle),
+                   0, 1.0, 0,
+          -sin(angle),0.0, cos(angle)
+        );
+        vec3 rotatedPosition = rotationMatrix * position;
+
+        // 将世界空间坐标转换为裁剪空间坐标
+        gl_Position = projectionMatrix * viewMatrix * vec4(rotatedPosition + center, 1.0);
+      }
+          `,
+      fragmentshader: `
+      varying vec2 vUv;
+      uniform sampler2D u_map;
+      uniform float u_opacity;
+      uniform vec3 color;
+      void main() {
+          vec2 vUv2 = vUv;
+          gl_FragColor = texture2D(u_map, vUv2) + vec4(color, u_opacity);;
+      }`
+    }
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        color: {
+          value: new THREE.Color(0x000000),
+          type: "v3"
+        },
+        repeat: { //周期
+          value: 1.5,
+          type: "f"
+        },
+        u_opacity: {
+          value: 0.2,
+          type: "f"
+        },
+        u_map: {
+          value: canvasTexture,
+          type: "t2"
+        },
+        PI: {
+          value: Math.PI,
+          type: "f"
+        },
+        time: {
+          value: 1.0,
+          type: "f"
+        }
+      },
+      side: THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+      transparent: true,// 是否透明
+      vertexShader: tubeShader.vertexshader, // 顶点着色器
+      fragmentShader: tubeShader.fragmentshader // 片元着色器
+    })
+  return material
+}
+//朝向屏幕
+export const getTextMaterial = (options?: { textContent?:string, textWidth?:number, side?: object, transparent?: boolean, url?: string }) => {
+  const fontSize = 512 //值越大越清晰，此值决定了canvas画布像素
+  const textContent = options?.textContent ?? 'text'
+  const textWidth = ((options?.textWidth + 1) * fontSize) ?? 128*5;
+  const textHeight = fontSize*2.0;
+  const canvas = document.createElement("canvas");
+    canvas.width = textWidth;
+    canvas.height = textHeight;
+    const c = canvas.getContext('2d')!;
+    c.fillStyle = 'rgba(0,0,0,0.0)';
+    c.fillRect(0, 0, textWidth, textHeight);
+    // 文字
+    c.beginPath();
+    c.translate(textWidth/2, textHeight/2);
+    c.fillStyle = "#00ffff"; //文本填充颜色
+    c.font = "bold " + fontSize + "px 宋体"; //字体样式设置
+    c.textBaseline = "middle"; //文本与fillText定义的纵坐标
+    c.textAlign = "center"; //文本居中(以fillText定义的横坐标)
+    c.fillText(textContent, 0, 0);
+    const canvasTexture = new THREE.CanvasTexture(canvas);
+    canvasTexture.wrapS = THREE.RepeatWrapping;
+    const tubeShader = {
+      vertexshader: `
+      varying vec3 vp;
+      varying vec2 vUv;
+      uniform float PI;
+      void main() {
+        vUv = uv;
+        // 模型的中心局部坐标 转换到 视图空间
+        vec4 mvPosition = modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+        // 在视图空间下,以模型中心做位置的上下偏移
+        mvPosition.xy += position.xy;
+        gl_Position = projectionMatrix * mvPosition;
+      }
+          `,
+      fragmentshader: `
+      varying vec2 vUv;
+      uniform sampler2D u_map;
+      uniform float u_opacity;
+      uniform vec3 color;
+      void main() {
+          vec2 vUv2 = vUv;
+          gl_FragColor = texture2D(u_map, vUv2) + vec4(color, u_opacity);;
+      }`
+    }
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        color: {
+          value: new THREE.Color(0x000000),
+          type: "v3"
+        },
+        u_opacity: {
+          value: 0.2,
+          type: "f"
+        },
+        u_map: {
+          value: canvasTexture,
+          type: "t2"
+        },
+        PI: {
+          value: Math.PI,
+          type: "f"
+        },
+      },
+      side: THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+      transparent: true,// 是否透明
+      vertexShader: tubeShader.vertexshader, // 顶点着色器
+      fragmentShader: tubeShader.fragmentshader // 片元着色器
+    })
+  return material
+}
 // 动态水面
 export const getSeaMaterial = (options?: { side?: object, transparent?: boolean, url?: string }) => {
   const tubeShader = {
@@ -1280,14 +1457,16 @@ export const getShieldMaterial = () => {
     vertexshader: `
 			varying vec2 vUv;
       varying float vIntensity;
+      varying float alpha;
 			void main()
 			{
 				vUv = uv;
-        vec4 worldPosition = modelMatrix * vec4(position,1.0);
-        vec3 worldNormal = normalize(modelMatrix * vec4(normal,0.0)).xyz;
+        vec4 worldPosition = modelMatrix * vec4(position,1.0); //通过模型矩阵将位置转世界坐标
+        vec3 worldNormal = normalize(modelMatrix * vec4(normal,0.0)).xyz; //通过模型矩阵将法线向量转世界坐标,再归一化
 
-        vec3 dirToCamera = normalize(cameraPosition - worldNormal.xyz);
-        vIntensity = 1.0 - dot(worldNormal, dirToCamera);
+        vec3 dirToCamera = normalize(cameraPosition - worldPosition.xyz);
+        vIntensity = 1.0 - dot(worldNormal, dirToCamera);//dot()点积
+        alpha = 1.0 - dot(worldNormal, dirToCamera);
         vIntensity = pow(vIntensity, 1.0);
 				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 			}
@@ -1296,16 +1475,88 @@ export const getShieldMaterial = () => {
     uniform float time;
     varying vec2 vUv;
     varying float vIntensity;
-
+    varying float alpha;
+    vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
+    vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
+    float snoise(vec3 v){
+      const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+      const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+    // First corner
+      vec3 i  = floor(v + dot(v, C.yyy) );
+      vec3 x0 =   v - i + dot(i, C.xxx) ;
+    // Other corners
+      vec3 g = step(x0.yzx, x0.xyz);
+      vec3 l = 1.0 - g;
+      vec3 i1 = min( g.xyz, l.zxy );
+      vec3 i2 = max( g.xyz, l.zxy );
+      //  x0 = x0 - 0. + 0.0 * C
+      vec3 x1 = x0 - i1 + 1.0 * C.xxx;
+      vec3 x2 = x0 - i2 + 2.0 * C.xxx;
+      vec3 x3 = x0 - 1. + 3.0 * C.xxx;
+    // Permutations
+      i = mod(i, 289.0 );
+      vec4 p = permute( permute( permute(
+                 i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+               + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+               + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+    // Gradients
+    // ( N*N points uniformly over a square, mapped onto an octahedron.)
+      float n_ = 1.0/7.0; // N=7
+      vec3  ns = n_ * D.wyz - D.xzx;
+      vec4 j = p - 49.0 * floor(p * ns.z *ns.z);  //  mod(p,N*N)
+      vec4 x_ = floor(j * ns.z);
+      vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)
+      vec4 x = x_ *ns.x + ns.yyyy;
+      vec4 y = y_ *ns.x + ns.yyyy;
+      vec4 h = 1.0 - abs(x) - abs(y);
+      vec4 b0 = vec4( x.xy, y.xy );
+      vec4 b1 = vec4( x.zw, y.zw );
+      vec4 s0 = floor(b0)*2.0 + 1.0;
+      vec4 s1 = floor(b1)*2.0 + 1.0;
+      vec4 sh = -step(h, vec4(0.0));
+      vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+      vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
+      vec3 p0 = vec3(a0.xy,h.x);
+      vec3 p1 = vec3(a0.zw,h.y);
+      vec3 p2 = vec3(a1.xy,h.z);
+      vec3 p3 = vec3(a1.zw,h.w);
+    //Normalise gradients
+      vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+      p0 *= norm.x;
+      p1 *= norm.y;
+      p2 *= norm.z;
+      p3 *= norm.w;
+    // Mix final noise value
+      vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+      m = m * m;
+      return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1),
+                                    dot(p2,x2), dot(p3,x3) ) );
+    }
     void main( void ) {
-      gl_FragColor = vec4(vec3(vIntensity), 1.0);
+      // vec2 nuv = vUv;
+      vec2 uv = vUv;
+      uv.y += time * 0.3;
+    float scale = .2;
+    float rate = 5.0;
+    float t = time/rate;
+    float result = 0.0;
+    //octaves
+    for (float i = 0.0; i < 5.0; i++){
+    	result += snoise(vec3((abs(uv.x - 0.5)*2.0)/scale, (uv.y)/scale, t*2.0))/pow(2.0, i);
+        scale /= 2.0;
+    }
+    result = (result + 1.0)/4.0;
+    result += .5;
+    result = pow(result, 2.0);
+    float g = pow(result, 4.0);
+    gl_FragColor = vec4(0, g, result, vIntensity);
     }`
   }
   const material = new THREE.ShaderMaterial({
     uniforms: {
       'time': { value: 1.0 },
     },
-    side: THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+    side: THREE.FrontSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
     transparent: true,// 是否透明
     vertexShader: tubeShader.vertexshader, // 顶点着色器
     fragmentShader: tubeShader.fragmentshader // 片元着色器

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <canvas id="webgl2" width="500" height="500" style="background-color: blue"></canvas>
+    <canvas id="webgl2"></canvas>
   </div>
 </template>
 
@@ -14,12 +14,12 @@ const init = () => {
   //通过getElementById()方法获取canvas画布
   const canvas = document.getElementById('webgl2') as HTMLCanvasElement;
   //通过方法getContext()获取WebGL上下文
-  const width=100, height=100; 
+  const width=100, height=100;
   // const canvas = document.createElement('canvas');
   canvas.width = width;
-  canvas.height = height;
+  // canvas.height = height;
   const ctx = canvas.getContext('2d')!;
-  ctx.fillStyle = '#00ffff';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0)';
   ctx.fillRect(0, 0, width, height);
   ctx.font = 24+'px " bold';
   ctx.fillStyle = '#2891FF';

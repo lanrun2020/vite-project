@@ -339,6 +339,9 @@ export default class cloudScene {
     }
 
     const gui = new GUI();
+    this.dom.appendChild(gui.domElement)
+    gui.domElement.style.position = 'absolute'
+    gui.domElement.style.right = '0px'
     gui.add(parameters, 'threshold', 0, 1, 0.01).name('阈值').onChange(update);
     gui.add(parameters, 'opacity', 0, 1, 0.01).name('不透明度').onChange(update);
     gui.add(parameters, 'range', 0, 1, 0.01).name('范围').onChange(update);
