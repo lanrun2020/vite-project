@@ -13,11 +13,11 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: 'home',
-        component: import('../views/Home/index.vue'),
+        component: () => import('../views/Home/index.vue'),
       },
       {
         path: 'cesium',
-        component: import('../views/Cesium/index.vue'), //若采用懒加载,页面加载缓慢
+        component: () => import('../views/Cesium/index.vue'), //若采用懒加载,页面加载缓慢
       },
       {
         path: 'webgl',
@@ -26,6 +26,10 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'graph',
         component: () => import('../views/Graph/index.vue'),
+      },
+      {
+        path: 'openlayers',
+        component: () => import('../views/OpenLayers/index.vue'),
       }
     ],
   },

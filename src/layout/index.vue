@@ -124,6 +124,14 @@
             <span>Graph</span>
           </template>
         </el-menu-item>
+        <el-menu-item index="/openlayers">
+          <el-icon>
+            <Compass />
+          </el-icon>
+          <template v-slot:title>
+            <span>Openlayers</span>
+          </template>
+        </el-menu-item>
       </el-menu>
 
       <el-container>
