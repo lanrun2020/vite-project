@@ -28,9 +28,9 @@ export default defineComponent({
     const map = ref(null)
     const view = new View({
       projection: "EPSG:4326", // 坐标系，有EPSG:4326和EPSG:3857
-      center: [113.5, 22.2], // 中心点
-      zoom: 13, // // 地图缩放级别(打开页面时默认级别)
-      extent: [113.4445, 22.0767, 113.7140, 22.4170], // 范围
+      center: [113.57, 22.2], // 中心点
+      zoom: 14, // // 地图缩放级别(打开页面时默认级别)
+      // extent: [113.4445, 22.0767, 113.7140, 22.4170], // 限制地图显示范围
       maxZoom: 20,
       // minZoom: 1,  // 地图缩放最小级别
     });

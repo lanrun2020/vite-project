@@ -19,7 +19,7 @@ export default defineConfig({
   },
   server: {
     cors: true,
-    open: false,
+    open: true,
     host: '0.0.0.0',
     port: 3015,
     proxy: {
