@@ -34,6 +34,7 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
       ellipse: {
         // 椭圆短半轴长度
         semiMinorAxis: 500,
+        stRotation:  -Math.PI/6.0, //采用纹理旋转，使用rotation对纹理无效，所以采用纹理旋转达到扇形偏转
         // 椭圆长半轴长度
         semiMajorAxis: 500,
         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
@@ -41,9 +42,12 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
         // extrudedHeight: 0,
         material: new Cesium.DiffuseMaterialProperty({
           color: new Cesium.Color(0.0, 1.0, 1.0, 1.0),
-          speed: 1.0,
-          reverseColor: false,
-          thickness: 0.1,
+          speed: 1.0, //圆环移动速度
+          reverse: false, //圆环扩散方向是否反转
+          reverseColor: false, //颜色渐变是否反转
+          thickness: 0.8,//圆环显示环高（0-1.0）
+          repeat: 8.0,//圆环重复次数
+          angle: 60,//扇形展示角度
         }),
       },
     }))

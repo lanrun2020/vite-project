@@ -24,6 +24,7 @@ import "./circleMaterial";
 import "./circleRotateMaterial";
 import "./rotationMaterial";
 import "./diffuseMaterial";
+import "./diffuseMaterial2";
 import "./cylinderMaterial";
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'

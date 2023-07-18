@@ -9,6 +9,7 @@ export default defineConfig({
   plugins: [vue(), cesium(), eslintPlugin({
     include: ['src/**/*.js', 'src/**/*.vue', 'src/*.js', 'src/*.vue']
   })],
+  base: './',
   // 配置别名
   resolve: {
     alias: {
