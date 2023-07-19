@@ -8,10 +8,11 @@ export default class Diffuse2MaterialProperty {
   private _gradual: boolean //是否渐变
   private _thickness: number //厚度
   private _reverse: boolean //扩散方向是否反向
+  private _angle: number //uv纹理旋转角度
   private _definitionChanged: any
   private duration: number
   private _time: number
-  constructor(options?: { color?: object, duration?: number, speed?: number, repeat: number,thickness: number, gradual?: boolean, reverse?: boolean }) {
+  constructor(options?: { color?: object, duration?: number, speed?: number, repeat: number,thickness: number, gradual?: boolean, reverse?: boolean, angle: number }) {
     this._definitionChanged = new Cesium.Event()
     this._color = options?.color ?? new Cesium.Color(0.0, 0.0, 1.0, 1.0)
     this.duration = options?.duration ?? 10000
@@ -21,6 +22,7 @@ export default class Diffuse2MaterialProperty {
     this._thickness = options?.thickness ?? 0.2
     this._reverse = options?.reverse ?? false
     this._gradual = options?.gradual ?? true
+    this._angle = options?.angle ?? 0
     this.conbineProp()
     this.init()
   }
@@ -38,6 +40,8 @@ export default class Diffuse2MaterialProperty {
     result.thickness = this._thickness
     result.reverse = this._reverse
     result.gradual = this._gradual
+    result.angle = this._angle
+
     result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._speed
     return result
   }
@@ -71,8 +75,19 @@ export default class Diffuse2MaterialProperty {
           float sp = 1.0/(repeat*2.0);\n\
           float x = materialInput.st.s;
           float y = materialInput.st.t;
-          float dis = distance(materialInput.st, vec2(0.0, 0.5));\n\
-          material.alpha = color.a * y;\n\
+          // float dis = distance(materialInput.st, vec2(0.0, 0.0));\n\
+          // 获取当前片元的纹理坐标
+          vec2 uv = materialInput.st;
+          // 计算旋转后的纹理坐标
+          float cosTheta = cos(radians(angle));
+          float sinTheta = sin(radians(angle));
+          mat2 rotationMatrix = mat2(cosTheta, -sinTheta, sinTheta, cosTheta);
+          float x1 = (uv.x - 0.5)*cosTheta + (uv.y - 0.5)*sinTheta + 0.5;
+          float y1 = (uv.y - 0.5)*cosTheta - (uv.x - 0.5)*sinTheta + 0.5;
+          // uv = rotationMatrix * uv;
+          float dis = 1.0 - distance(vec2(x1,y1), vec2(0.0, 0.0))+0.2;\n\
+
+          material.alpha = color.a * dis;\n\
           material.diffuse = color.rgb;\n\
           return material;\n\
       }`
@@ -90,6 +105,7 @@ export default class Diffuse2MaterialProperty {
           reverse: this._reverse,
           thickness: this._thickness,
           speed: this._speed,
+          angle: this._angle,
         },
         source: Cesium.Material.Diffuse2Source
       },
