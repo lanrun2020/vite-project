@@ -1,6 +1,7 @@
 // 圆形扩散扫描效果
 import Cesium from "@/utils/importCesium"
-
+import radarMaterialsProperty from "./RadarMaterial3"
+const radarMaterial3 = new radarMaterialsProperty({ color: new Cesium.Color(.1, 1, 0, 1), repeat: 10, thickness: 0.2 })
 let entities:Array<typeof Cesium.viewer.entity> = []
 const defaultPoint = { lng: 121.4861830727844, lat:31.22723471021075 }
 export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: number, lat: number } = defaultPoint) => {
@@ -90,7 +91,7 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
           thickness: 0.1,
         }),
       },
-    }))
+    }))    
     viewer.camera.flyTo({
       destination: Cesium.Cartesian3.fromDegrees(defaultPoint.lng, defaultPoint.lat, 5000.0),
       duration: 1.6
@@ -127,45 +128,52 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
       }
       return positionArr
     };
-    let g = [0,45]
-    entities.push(viewer.entities.add({
-      id: "sx",
-      polygon: {
-        hierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(calcPoints(point.lng + 0.006, point.lat + 0.008, 500,g[0],g[1]))),
-        material: new Cesium.Diffuse2MaterialProperty({
-          color: new Cesium.Color(1.0, 0.0, 0.0, 1.0),
-          speed: 1.0,
-          thickness: 0.8,
-          angle: g[1] <= 90 ? 0 : g[1] <= 180 ? -90 : g[1] <= 270 ? -180 : g[1] <= 360 ? -270 : 0,
+    const sxArr = [[0,45],[70,120],[140,200]]
+    // sxArr.forEach((g,index) => {
+    //    entities.push(viewer.entities.add({
+    //     id: "sx"+index,
+    //     polygon: {
+    //       hierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(calcPoints(point.lng + 0.006, point.lat + 0.008, 500,g[0],g[1]))),
+    //       material: new Cesium.Diffuse2MaterialProperty({
+    //         color: new Cesium.Color(1.0, 0.0, 0.0, 1.0),
+    //         speed: 1.0,
+    //         thickness: 0.8,
+    //         angle: Cesium.Cartesian3(point.lng + 0.006, point.lat + 0.008, 0),
+    //       }),
+    //     },
+    //   }));
+    // })
+    // console.log(entities);
+    const primitives = viewer.scene.primitives.add(new Cesium.PrimitiveCollection())
+    sxArr.forEach((g,index) => {
+      const center2 = Cesium.Cartesian3.fromDegrees(118, 30, 200000)
+      const modelMatrix2 = Cesium.Transforms.eastNorthUpToFixedFrame(center2);
+      const instance2 = new Cesium.GeometryInstance({
+        geometry: new Cesium.PolygonGeometry({
+          polygonHierarchy : new Cesium.PolygonHierarchy(
+            Cesium.Cartesian3.fromDegreesArray(calcPoints(point.lng + 0.006, point.lat + 0.008, 500,g[0],g[1]))
+          )
         }),
-      },
-    }));
-    g = [70,120]
-    entities.push(viewer.entities.add({
-      id: "sx2",
-      polygon: {
-        hierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(calcPoints(point.lng + 0.006, point.lat + 0.008, 500,g[0],g[1]))),
-        material: new Cesium.Diffuse2MaterialProperty({
-          color: new Cesium.Color(0.0, 0.0, 1.0, 1.0),
-          speed: 1.0,
-          thickness: 0.8,
-          angle: g[1] <= 90 ? 0 : g[1] <= 180 ? -90 : g[1] <= 270 ? -180 : g[1] <= 360 ? -270 : 0,
-        }),
-      },
-    }));
-    g = [140,180]
-    entities.push(viewer.entities.add({
-      id: "sx3",
-      polygon: {
-        hierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(calcPoints(point.lng + 0.006, point.lat + 0.008, 500,g[0],g[1]))),
-        material: new Cesium.Diffuse2MaterialProperty({
-          color: new Cesium.Color(0.0, 1.0, 0.0, 1.0),
-          speed: 1.0,
-          thickness: 0.8,
-          angle: g[1] <= 90 ? 0 : g[1] <= 180 ? -90 : g[1] <= 270 ? -180 : g[1] <= 360 ? -270 : 0,
-        }),
-      },
-    }));
+        // modelMatrix: modelMatrix2, // 提供位置参数
+      });
+      const primitive2 = new Cesium.Primitive({
+        geometryInstances: instance2,
+        appearance: new Cesium.MaterialAppearance({
+          material: new Cesium.Material({
+            fabric : {
+                type : 'Color',
+                uniforms : {
+                    color : new Cesium.Color(1.0, 1.0, 0.0, 1.0)
+                }
+            }
+          })
+        })
+      })
+      primitives.add(primitive2)
+    })
+    
+   
+
     //以下代码是计算鼠标点击点与某点正北放向夹角的
     // const getHeading = (fromPosition, toPosition) => {
     //   const finalPosition = new Cesium.Cartesian3()
