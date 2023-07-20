@@ -4,10 +4,12 @@ import Cesium from "@/utils/importCesium"
 let primitiveShader
 export const addShader = (viewer: any, active: boolean) => {
   if (active) {
-    const position = new Cesium.Cartographic(0, 0, 2000.0);
+    const lng = 110
+    const lat = 32
+    const position = new Cesium.Cartographic.fromCartesian( Cesium.Cartesian3.fromDegrees(lng, lat, 2000));
     if(primitiveShader){
       viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(0, 0, 50000),
+        destination: Cesium.Cartesian3.fromDegrees(lng, lat, 50000),
       });
       return
     }
@@ -15,7 +17,7 @@ export const addShader = (viewer: any, active: boolean) => {
       new CustomPrimitive(position)
     );
     viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(0, 0, 50000),
+      destination: Cesium.Cartesian3.fromDegrees(lng, lat, 50000),
       // duration: 0.1,
     });
   } else {

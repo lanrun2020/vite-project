@@ -9,11 +9,12 @@ export default class DiffuseMaterialProperty {
   private _thickness: number //厚度
   private _reverse: boolean //扩散方向是否反向
   private _reverseColor: boolean //颜色渐变是否反向
-  private _angle: number //扇形的角度,0-360
+  private _angle: number //扇形起始角度
+  private _angle2: number //终止
   private _definitionChanged: any
   private duration: number
   private _time: number
-  constructor(options?: { color?: object, duration?: number, speed?: number, repeat: number,thickness: number, gradual?: boolean, reverse?: boolean, reverseColor?: boolean, angle?: number }) {
+  constructor(options?: { color?: object, duration?: number, speed?: number, repeat: number,thickness: number, gradual?: boolean, reverse?: boolean, reverseColor?: boolean, angle?: number, angle2?: number }) {
     this._definitionChanged = new Cesium.Event()
     this._color = options?.color ?? new Cesium.Color(0.0, 0.0, 1.0, 1.0)
     this.duration = options?.duration ?? 10000
@@ -24,7 +25,8 @@ export default class DiffuseMaterialProperty {
     this._reverse = options?.reverse ?? false
     this._reverseColor = options?.reverseColor ?? false
     this._gradual = options?.gradual ?? true
-    this._angle = options?.angle ?? 360.0
+    this._angle = options?.angle ?? 0.0
+    this._angle2 = options?.angle2 ?? 360.0
     this.conbineProp()
     this.init()
   }
@@ -44,6 +46,7 @@ export default class DiffuseMaterialProperty {
     result.reverseColor = this._reverseColor
     result.gradual = this._gradual
     result.angle = this._angle
+    result.angle2 = this._angle2
     result.time = (((new Date()).getTime() - this._time) % this.duration) / this.duration * this._speed
     return result
   }
@@ -72,20 +75,23 @@ export default class DiffuseMaterialProperty {
     Cesium.Material.DiffuseSource =
       // eslint-disable-next-line no-multi-str
       `
-      float angleFuc(float x2,float y2, float angle) { //计算此位置的角度的弧度值(返回结果是0-2PI)
+      float angleFuc(float x,float y) { //计算此位置的角度的弧度值(返回结果是0-2PI)
         //atan()函数 第一象限是0至PI/2,第二象限是-PI/2至0,第三象限是0至PI/2,第四象限是-PI/2至0
-        float x = x2 * cos(angle) - y2 * sin(angle);
-        float y = x2 * sin(angle) + y2 * cos(angle);
         if(x>0.0){
           if(y<0.0){
-            return atan(y/x) + 2.0*PI; //第四象限,返回[3*PI/2,2PI]
+            return PI/2.0 - atan(y/x); //第四象限,返回[3*PI/2,2PI]
           }
           if(y>0.0){
-            return atan(y/x); //第一象限,返回[0,PI/2]
+            return PI/2.0 - atan(y/x); //第一象限,返回[0,PI/2]
           }
         }else{
           if(x<0.0){
-            return atan(y/x)+PI; //第二三象限,返回[PI/2,3PI/2]
+            if (y<0.0) {
+               return PI + PI/2.0 - atan(y/x); //第三象限,返回[PI/2,3PI/2]
+            }
+            if(y>0.0) {
+              return 3.0*PI/2.0 - atan(y/x); //第二象限,返回[PI/2,3PI/2]
+            }
           }else{ //x=0即在y轴上时
             if(y>0.0){ //y轴正半轴
               return PI/2.0;
@@ -99,6 +105,7 @@ export default class DiffuseMaterialProperty {
           }
         }
       }
+      float shouldDiscard;
       czm_material czm_getMaterial(czm_materialInput materialInput)\n\
       {\n\
           czm_material material = czm_getDefaultMaterial(materialInput);\n\
@@ -107,15 +114,18 @@ export default class DiffuseMaterialProperty {
           float y = materialInput.st.t;
           float dis = distance(materialInput.st, vec2(0.5, 0.5)) - fract(time * speed * (reverse ? -1.0 : 1.0));\n\
           float dis2 = sqrt((x-0.5)*(x-0.5) + (y-0.5)*(y-0.5));
-          float curAngle = angleFuc(x-0.5,y-0.5,0.0);
+          float curAngle = angleFuc(x-0.5,y-0.5);
           dis2 = reverseColor ? dis2 : (0.5 - dis2);
           float m = mod(dis, sp);\n\
           float a = step(m, sp*(thickness));\n\
-          float b = curAngle < radians(angle) ? 1.0:0.0;
-          material.alpha = color.a * dis2 * 2.0 * a * b;\n\
+          float b = (curAngle >= radians(angle) && curAngle <= radians(angle2)) ? 1.0:0.0;
+          material.alpha = color.a * dis2 * 2.0 * a;\n\
           material.diffuse = color.rgb;\n\
-          return material;\n\
-      }`
+          if (b > 0.0) {
+            shouldDiscard = 1.0;
+            return material;
+          }
+    }`
     // material.alpha:透明度;
     // material.diffuse：颜色;
     // fract(x) 返回 x 的小数部分
@@ -131,7 +141,8 @@ export default class DiffuseMaterialProperty {
           reverseColor: this._reverseColor,
           thickness: this._thickness,
           speed: this._speed,
-          angle: this._angle
+          angle: this._angle,
+          angle2: this._angle2
         },
         source: Cesium.Material.DiffuseSource
       },
