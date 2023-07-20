@@ -12,55 +12,69 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
       });
       return
     }
-    entities.push(viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(point.lng, point.lat),
-      ellipse: {
-        // 椭圆短半轴长度
-        semiMinorAxis: 500,
-        // 椭圆长半轴长度
-        semiMajorAxis: 500,
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        material: new Cesium.DiffuseMaterialProperty({
-          color: new Cesium.Color(0.0, 1.0, 0.0, 1.0),
-          speed: 1.0,
-          repeat: 5.0,
-          thickness: 0.1,
-          reverseColor: true,
-        }),
-      },
-    }))
+    // entities.push(viewer.entities.add({
+    //   position: Cesium.Cartesian3.fromDegrees(point.lng, point.lat),
+    //   ellipse: {
+    //     // 椭圆短半轴长度
+    //     semiMinorAxis: 500,
+    //     // 椭圆长半轴长度
+    //     semiMajorAxis: 500,
+    //     heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    //     material: new Cesium.DiffuseMaterialProperty({
+    //       color: new Cesium.Color(0.0, 1.0, 0.0, 1.0),
+    //       speed: 1.0,
+    //       repeat: 5.0,
+    //       thickness: 0.1,
+    //       reverseColor: true,
+    //     }),
+    //   },
+    // }))
     const sxArr = [
       {
+        lng: 121.4861830727844,
+        lat: 31.22723471021075,
         radius: 500,
         color: new Cesium.Color(0.0, 1.0, 1.0, 0.5),
         angle:[0, 45],
       },
       {
+        lng: 121.4861830727844,
+        lat: 31.22723471021075,
         radius: 500,
         color: new Cesium.Color(1.0, 0.0, 0.0, 0.5),
         angle:[45, 110],
       },
       {
+        lng: 121.4861830727844,
+        lat: 31.22723471021075,
         radius: 800,
         color: new Cesium.Color(0.0, 1.0, 0.0, 0.5),
         angle:[110, 145],
       },
       {
+        lng: 121.4861830727844,
+        lat: 31.22723471021075,
         radius: 1200,
         color: new Cesium.Color(1.0, 0.0, 0.0, 0.5),
         angle:[120, 140],
       },
       {
+        lng: 121.4961830727844,
+        lat: 31.22723471021075,
         radius: 900,
         color: new Cesium.Color(0.0, 0.0, 1.0, 0.5),
         angle:[145, 180],
       },
       {
+        lng: 121.4901830727844,
+        lat: 31.22723471021075,
         radius: 1000,
         color: new Cesium.Color(1.0, 1.0, 0.0, 0.5),
         angle:[180, 260],
       },
       {
+        lng: 121.5061830727844,
+        lat: 31.22723471021075,
         radius: 800,
         color: new Cesium.Color(1.0, 0.0, 1.0, 0.5),
         angle:[260, 340],
@@ -70,7 +84,8 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
       entities.push(viewer.entities.add({
         id:'entitySx' + index,
         angle: item.angle,
-        position: Cesium.Cartesian3.fromDegrees(point.lng + 0.006, point.lat + 0.008),
+        radius: item.radius,
+        position: Cesium.Cartesian3.fromDegrees(item.lng, item.lat),
         ellipse: {
           // 椭圆短半轴长度
           semiMinorAxis: item.radius,
@@ -93,60 +108,60 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
         },
       }))
     })
-    entities.push(viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(point.lng - 0.006, point.lat + 0.008),
-      ellipse: {
-        // 椭圆短半轴长度
-        semiMinorAxis: 400,
-        // 椭圆长半轴长度
-        semiMajorAxis: 400,
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        // height: 0.0,
-        // extrudedHeight: 0,
-        material: new Cesium.DiffuseMaterialProperty({
-          color: new Cesium.Color(1.0, 0.0, 0.0, 1.0),
-          speed: 1.0,
-          reverse: true,
-          thickness: 0.1,
-        }),
-      },
-    }))
+    // entities.push(viewer.entities.add({
+    //   position: Cesium.Cartesian3.fromDegrees(point.lng - 0.006, point.lat + 0.008),
+    //   ellipse: {
+    //     // 椭圆短半轴长度
+    //     semiMinorAxis: 400,
+    //     // 椭圆长半轴长度
+    //     semiMajorAxis: 400,
+    //     heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+    //     // height: 0.0,
+    //     // extrudedHeight: 0,
+    //     material: new Cesium.DiffuseMaterialProperty({
+    //       color: new Cesium.Color(1.0, 0.0, 0.0, 1.0),
+    //       speed: 1.0,
+    //       reverse: true,
+    //       thickness: 0.1,
+    //     }),
+    //   },
+    // }))
     viewer.camera.flyTo({
       destination: Cesium.Cartesian3.fromDegrees(defaultPoint.lng, defaultPoint.lat, 5000.0),
       duration: 1.6
     });
 
     // 根据中心点 起始偏移角度,终止角度，求扇形
-    const calcPoints = (
-      x1: number,
-      y1: number,
-      radius: number,
-      angle1: number,
-      angle2: number,
-    ) => {
-      const m = Cesium.Transforms.eastNorthUpToFixedFrame(
-        Cesium.Cartesian3.fromDegrees(x1, y1)
-      );
-      const positionArr: Array<number> = [];
-      positionArr.push(x1);
-      positionArr.push(y1);
-      for (let i = angle1; i <= angle2; i++) {
-        const ry = radius * Math.cos(Cesium.Math.toRadians(i));
-        const rx = radius * Math.sin(Cesium.Math.toRadians(i));
-        const translation = Cesium.Cartesian3.fromElements(rx, ry, 0);
-        const d = Cesium.Matrix4.multiplyByPoint(
-          m,
-          translation,
-          new Cesium.Cartesian3()
-        );
-        const c = Cesium.Cartographic.fromCartesian(d);
-        const x2 = Cesium.Math.toDegrees(c.longitude);
-        const y2 = Cesium.Math.toDegrees(c.latitude);
-        positionArr.push(x2);
-        positionArr.push(y2);
-      }
-      return positionArr
-    };
+    // const calcPoints = (
+    //   x1: number,
+    //   y1: number,
+    //   radius: number,
+    //   angle1: number,
+    //   angle2: number,
+    // ) => {
+    //   const m = Cesium.Transforms.eastNorthUpToFixedFrame(
+    //     Cesium.Cartesian3.fromDegrees(x1, y1)
+    //   );
+    //   const positionArr: Array<number> = [];
+    //   positionArr.push(x1);
+    //   positionArr.push(y1);
+    //   for (let i = angle1; i <= angle2; i++) {
+    //     const ry = radius * Math.cos(Cesium.Math.toRadians(i));
+    //     const rx = radius * Math.sin(Cesium.Math.toRadians(i));
+    //     const translation = Cesium.Cartesian3.fromElements(rx, ry, 0);
+    //     const d = Cesium.Matrix4.multiplyByPoint(
+    //       m,
+    //       translation,
+    //       new Cesium.Cartesian3()
+    //     );
+    //     const c = Cesium.Cartographic.fromCartesian(d);
+    //     const x2 = Cesium.Math.toDegrees(c.longitude);
+    //     const y2 = Cesium.Math.toDegrees(c.latitude);
+    //     positionArr.push(x2);
+    //     positionArr.push(y2);
+    //   }
+    //   return positionArr
+    // };
     // const sxArr = [[0, 45], [70, 120], [140, 200]]
     // sxArr.forEach((g,index) => {
     //    entities.push(viewer.entities.add({
@@ -215,33 +230,52 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
       return Cesium.Math.toDegrees(Math.atan2(finalPosition.x, finalPosition.y))
     }
     handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-    let pickEntity = [] //记录拾取的实体
+    let pickEntity = null //记录拾取的实体
+    // 获取两点之间距离
+    const getDistance = (start, end) => {
+      const geodesic = new Cesium.EllipsoidGeodesic();
+      geodesic.setEndPoints(start, end); //设置测地线起点终点
+      return geodesic.surfaceDistance //返回距离
+    }
     handler.setInputAction(function (event) {
       const pickedObjectArrays = viewer.scene.drillPick(event.endPosition);
       const cartesian = viewer.camera.pickEllipsoid(event.endPosition, viewer.scene.globe.ellipsoid);
-      let angle = getHeading(Cesium.Cartesian3.fromDegrees(point.lng + 0.006, point.lat + 0.008), cartesian)
-      if (angle < 0){
-        angle += 360
-      }
       //夹角从正北方向顺时针旋转 范围0-360
       if(pickedObjectArrays && pickedObjectArrays.length){
+        if(pickEntity){ //先将之前选中的恢复默认
+          pickEntity.ellipse.material._color.alpha = 0.6
+        }
+        //将第一个entity取出来求圆心位置
+        // const car3 = pickedObjectArrays[0].id.position._value
+        // let angle = getHeading(car3, cartesian)
+        // if (angle < 0){
+        //   angle += 360
+        // }
+        // const distance = getDistance(Cesium.Cartographic.fromCartesian(car3,viewer.scene.globe.ellipsoid), Cesium.Cartographic.fromCartesian(cartesian,viewer.scene.globe.ellipsoid))
         pickedObjectArrays.forEach((item) => {
           if(item && item.id){
             if (!item.id._angle){
               return
             }
-            pickEntity.push(item.id)
+            //求圆心位置
+            const car3 = item.id.position._value
+            let angle = getHeading(car3, cartesian)
+            if (angle < 0){
+              angle += 360
+            }
+            const distance = getDistance(Cesium.Cartographic.fromCartesian(car3,viewer.scene.globe.ellipsoid), Cesium.Cartographic.fromCartesian(cartesian,viewer.scene.globe.ellipsoid))
             const color = item.id.ellipse.material._color.clone()
             //判断哪个扇形角度符合在夹角范围内就修改哪个圆材质alpha为1.0,如果不符合材质透明度设置为默认值0.5
             if (angle > item.id._angle[0] && angle < item.id._angle[1]){
-              color.alpha = 2.5
-              //此时已经有一个扇形被选中
-              //将其他变成默认
-              pickEntity.forEach((entity) => {
-                const color = entity.ellipse.material._color.clone()
+              if(distance < item.id._radius){
+                color.alpha = 2.5
+                if(pickEntity){ //先将之前选中的恢复默认,保证只选中一个扇形
+                  pickEntity.ellipse.material._color.alpha = 0.6
+                }
+                pickEntity = item.id
+              } else {
                 color.alpha = 0.6
-                entity.ellipse.material._color = color
-            })
+              }
             } else {
               color.alpha = 0.6
             }
@@ -249,13 +283,9 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
           }
         })
       } else {
-        if(pickEntity.length){
-          pickEntity.forEach((entity) => {
-              const color = entity.ellipse.material._color.clone()
-              color.alpha = 0.6
-              entity.ellipse.material._color = color
-          })
-          pickEntity = []
+        if(pickEntity){
+            pickEntity.ellipse.material._color.alpha = 0.6
+            pickEntity = null
         }
       }
     }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
@@ -266,9 +296,6 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
       viewer.entities.remove(entity)
     })
     entities = []
-  }
-  if (primitives) {
-    primitives.removeAll()
   }
 }
 };
