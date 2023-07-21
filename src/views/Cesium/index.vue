@@ -54,6 +54,7 @@ import { addBillboard } from "./addBillboard";
 import { addWedgeScan } from "./addWedgeScan";
 import { addGeoJsonData } from "./addGeoJsonData";
 import { addParticleSystem } from "./addParticleSystem";
+import { addParticleSystem2 } from "./addParticleSystem2";
 import { addCircleWall } from "./addCircleWall";
 import { addWind } from "./addWind";
 type toolItemType = {
@@ -217,6 +218,11 @@ let toolList: Ref<toolItemType[]> = ref([
     title: "风场模拟",
     value: 30,
     active: false,
+  },
+  {
+    title: "云雾粒子",
+    value: 31,
+    active: false,
   }
 ])
 onMounted(async () => {
@@ -332,6 +338,9 @@ const toolChecked = (active: boolean, value: number) => {
       break;
     case 30:
       addWind(viewer, active);
+      break;
+    case 31:
+      addParticleSystem2(viewer, active);
       break;
     default: break;
   }
