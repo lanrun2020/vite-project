@@ -30,7 +30,7 @@ const createFirework = (viewer, color, position) => {
       particleLife: 2.0,
       speed: 100.0,
       imageSize: new Cesium.Cartesian2(100, 100),
-      emissionRate: 10,//每秒发射数量
+      emissionRate: 20,//每秒发射数量
       emitter: new Cesium.SphereEmitter(0.1),
       lifetime: 30.0,
       modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(position),
@@ -57,51 +57,107 @@ const init = () => {
         `;
   // 片元着色器
   const fragShaderSource = `
-    precision mediump float;
-    varying vec3 v_pos;
-    uniform vec3 uColor;
-    float Hash(vec3 p)
-    {
-      p  = fract(p * MOD3);
-        p += dot(p.xyz, p.yzx + 19.19);
-        return fract(p.x * p.y * p.z);
-    }
+  precision mediump float;
+  varying vec3 v_pos;
+  uniform vec3 uColor;
+  float cloudscale = 1.0;
+  mat2 m = mat2( 1.6,  1.2, -1.2,  1.6 );
 
-    float Noise3d(in vec3 p)
-    {
-        vec2 add = vec2(1.0, 0.0);
-      p *= 10.0;
-        float h = 0.0;
-        float a = .3;
-        for (int n = 0; n < 4; n++)
-        {
-            vec3 i = floor(p);
-            vec3 f = fract(p);
-            f *= f * (3.0-2.0*f);
+  vec2 hash( vec2 p ) {
+    p = vec2(dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)));
+    return -1.0 + 2.0*fract(sin(p)*43758.5453123);
+  }
+  
+  float noise( in vec2 p ) {
+      const float K1 = 0.366025404; // (sqrt(3)-1)/2;
+      const float K2 = 0.211324865; // (3-sqrt(3))/6;
+      vec2 i = floor(p + (p.x+p.y)*K1);	
+      vec2 a = p - i + (i.x+i.y)*K2;
+      vec2 o = (a.x>a.y) ? vec2(1.0,0.0) : vec2(0.0,1.0); //vec2 of = 0.5 + 0.5*vec2(sign(a.x-a.y), sign(a.y-a.x));
+      vec2 b = a - o + K2;
+      vec2 c = a - 1.0 + 2.0*K2;
+      vec3 h = max(0.5-vec3(dot(a,a), dot(b,b), dot(c,c) ), 0.0 );
+      vec3 n = h*h*h*h*vec3( dot(a,hash(i+0.0)), dot(b,hash(i+o)), dot(c,hash(i+1.0)));
+      return dot(n, vec3(70.0));	
+  }
+  
+  float fbm(vec2 n) {
+    float total = 0.0, amplitude = 0.1;
+    for (int i = 0; i < 7; i++) {
+      total += noise(n) * amplitude;
+      n = m * n;
+      amplitude *= 0.4;
+    }
+    return total;
+  }
+  void main() {
+      vec2 p = v_pos.xy;
+      vec2 uv = p;
+      float q = fbm(uv * cloudscale * 0.5);
+      
+      //ridged noise shape 脊状噪音形状
+      float r = 0.0;
+      uv *= cloudscale;
+      uv -= q;
+      float weight = 0.8;
+      for (int i=0; i<8; i++){
+        r += abs(weight*noise( uv ));
+        uv = m*uv;
+        weight *= 0.7;
+      }
+      
+      //noise shape 噪音外形
+      float f = 0.0;
+      uv = p*vec2(1.0,1.0);
+      uv *= cloudscale;
+      uv -= q;
+      weight = 0.7;
+      for (int i=0; i<8; i++){
+        f += weight*noise( uv );
+        uv = m*uv;
+        weight *= 0.6;
+      }
+      f *= r + f;
 
-            h += mix(
-                mix(mix(Hash(i), Hash(i + add.xyy),f.x),
-                    mix(Hash(i + add.yxy), Hash(i + add.xxy),f.x),
-                    f.y),
-                mix(mix(Hash(i + add.yyx), Hash(i + add.xyx),f.x),
-                    mix(Hash(i + add.yxx), Hash(i + add.xxx),f.x),
-                    f.y),
-                f.z)*a;
-            a*=.5;
-            p += p;
-        }
-        return h;
+      //noise colour 噪音颜色
+      float c = 0.0;
+      uv = p*vec2(1.0,1.0);
+      uv *= cloudscale*2.0;
+      uv -= q;
+      weight = 0.4;
+      for (int i=0; i<7; i++){
+        c += weight*noise( uv );
+        uv = m*uv;
+        weight *= 0.6;
+      }
+      
+      //noise ridge colour 噪音山脊颜色
+      float c1 = 0.0;
+      uv = p*vec2(1.0,1.0);
+      uv *= cloudscale*3.0;
+      uv -= q;
+      weight = 0.4;
+      for (int i=0; i<7; i++){
+        c1 += abs(weight*noise( uv ));
+        uv = m*uv;
+        weight *= 0.6;
+      }
+    
+      c += c1;
+
+    vec3 cloudcolour = vec3(1.0, 1.0, 1.0) * clamp((0.1 + 0.3*c), 0.0, 1.0);
+    if (cloudcolour.y > 0.2) {
+      float dis = distance(v_pos.xy,vec2(0.5,0.5));
+        if (dis < 1.0){
+          gl_FragColor = vec4(cloudcolour, (1.0-dis)*0.6);
+        } else {
+          discard;
+      }
+    } else {
+      discard;
     }
-    float fogmap(in vec3 p, in float d)
-    {
-        p.xz -= time*7.+sin(p.z*.3)*3.;
-        p.y -= time*.5;
-        return (max(Noise3d(p*.008+.1)-.1,0.0)*Noise3d(p*.1))*.3;
     }
-            void main() {
-                gl_FragColor = vec4(uColor, v_pos.x*v_pos.y);
-            }
-        `;
+    `;
   //声明初始化着色器函数
   function initShader(vertexShaderSource: any, fragmentShaderSource: any) {
     //创建顶点着色器对象
@@ -146,12 +202,12 @@ const init = () => {
   program = initShader(vertexShaderSource, fragShaderSource);
   // 三角形的顶点数据
   const vertexs: number[] = [
-    -0.5, 0.5, 0,
-    0.5, 0.5, 0,
-    -0.5, -0.5, 0,
-    -0.5, -0.5, 0,
-    0.5, -0.5, 0,
-    0.5, 0.5, 0,
+    -1, 1, 0,
+    1, 1, 0,
+    -1, -1, 0,
+    -1, -1, 0,
+    1, -1, 0,
+    1, 1, 0,
   ];
   // initBuffers(gl)
   const aPosAttLocation = gl.getAttribLocation(program, "aPos"); // 获得变量位置
