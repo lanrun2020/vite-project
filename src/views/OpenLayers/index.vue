@@ -13,13 +13,11 @@ import ZoomSlider from 'ol/control/ZoomSlider';
 import { defaults as defaultControls } from 'ol/control';
 
 import { Vector as VectorLayer } from "ol/layer";
-import { Extent } from 'ol/extent'
 import { Vector as VectorSource, XYZ } from "ol/source";
 import Point from "ol/geom/Point";
 import LineString from "ol/geom/LineString";
 import Feature from "ol/Feature";
-import { Stroke, Style, Circle, Fill } from "ol/style";
-import { feature } from '@turf/turf';
+import { Stroke, Style, Circle, Fill, Text } from "ol/style";
 const map = ref(null)
 const view = new View({
   projection: "EPSG:4326", // 坐标系，有EPSG:4326和EPSG:3857
@@ -48,6 +46,16 @@ const getPointStyle = (color) => {
       fill: new Fill({
         color: color,
       }),
+    }),
+    text: new Text({
+        textAlign: 'center',     //对齐方式
+        textBaseline: 'middle',    //文本基线
+        font: 'normal 12px 微软雅黑',     //字体样式
+        text: 'point',    //文本内容
+        offsetY: -25,    // Y轴偏置
+        fill: new Fill({        //填充样式
+        color: '#000000'
+      })
     })
   })
   return pointStyle
@@ -59,17 +67,13 @@ points.forEach((point, index) => {
   // 添加点标记
   pointFeature2 = new Feature({
     geometry: new Point(point),
+    name: 'My Polygon',
   })
-  if (index % 2) { //下标奇数点我们给它设置颜色，偶数点不设置样式采用默认样式
-    pointFeature2.setStyle(new Style({
-        image: new Circle({
-          radius: 10,
-          fill: new Fill({
-            color: '#0000ff',
-          }),
-        })
-      })) // 这种方式可以设置不同样式的点,不设置则采用默认样式
-  }
+  // if (index % 2) { //下标奇数点我们给它设置颜色，偶数点不设置样式采用默认样式
+    pointFeature2.setStyle(
+      getPointStyle('#0000ff')
+    ) // 这种方式可以设置不同样式的点,不设置则采用默认样式
+  // }
   pointFeature.push(pointFeature2)
 })
 const pointSource = new VectorSource({
@@ -166,9 +170,10 @@ const initMap = () => {
       const type = feature.getGeometry().getType()
       // const property = feature.getProperties()
       if (type === 'Point'){
-        // const style = feature.getStyle().clone()
-        // style.getImage().getFill().setColor('yellow')
-        feature.setStyle(getPointStyle('yellow'))
+        feature.getStyle().getText().getFill().setColor('yellow')
+        feature.getStyle().getImage().getFill().setColor('yellow')
+        feature.changed()
+        // feature.setStyle(getPointStyle('yellow'))
       }
       // const coordinate = Extent.getCenter(feature.getGeometry().getExtent())
     })

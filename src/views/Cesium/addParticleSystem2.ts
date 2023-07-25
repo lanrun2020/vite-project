@@ -28,10 +28,10 @@ const createFirework = (viewer, color, position) => {
       startScale: 4.0,
       endScale: 4.0,
       particleLife: 2.0,
-      speed: 100.0,
+      speed: 10.0,
       imageSize: new Cesium.Cartesian2(100, 100),
       emissionRate: 20,//每秒发射数量
-      emitter: new Cesium.SphereEmitter(0.1),
+      emitter: new Cesium.SphereEmitter(10.0),
       lifetime: 30.0,
       modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(position),
     })

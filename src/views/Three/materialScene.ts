@@ -91,6 +91,10 @@ export default class materialScene {
       name: 'points',
       label: '点集合',
       method: 'addPoints',
+    },{
+      name: 'battery',
+      label: '电池',
+      method: 'addBattery',
     }
     ]
 
@@ -571,6 +575,21 @@ export default class materialScene {
     const cylinder31 = new THREE.Mesh(geometry31, flowMaterial31);
     this.shaderMaterialList.push(flowMaterial31)
     cylinder31.position.set(-20, 8.1, 20)
+    this.scene.add(cylinder31);
+
+    return  {
+      entities: [cylinder31],
+      materials: [flowMaterial31],
+    }
+  }
+
+  addBattery() {
+    //圆柱2 立体旋转扫描
+    const geometry31 = new THREE.CylinderGeometry(5, 5, 16, 32, 1, false);//true上下底面不封闭
+    const flowMaterial31 = getRotateMaterialByY3({ edge: 5 }) //绕y轴的旋转材质
+    const cylinder31 = new THREE.Mesh(geometry31, flowMaterial31);
+    this.shaderMaterialList.push(flowMaterial31)
+    cylinder31.position.set(0, 8, 0)
     this.scene.add(cylinder31);
 
     return  {
