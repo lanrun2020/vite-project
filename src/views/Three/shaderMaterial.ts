@@ -646,7 +646,89 @@ export const getScanMaterial = (options?: { side?: object, transparent?: boolean
   })
   return material
 }
-
+// 太极图
+export const getTaiJiMaterial = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number }) => {
+  const tubeShader = {
+    vertexshader: `
+    varying vec3 v_pos;
+    varying vec2 vUv;
+    uniform float time;
+    uniform float speed;
+    void main() {
+      vUv = uv;
+      v_pos = position;
+      //绕Y轴旋转的旋转矩阵
+      float angle = -time * speed;
+      //绕X轴
+      // mat3 rotationMatrix = mat3(
+      //   1.0,0.0,0.0,
+      //   0.0,cos(angle), -sin(angle),
+      //   0.0,sin(angle), cos(angle)
+      // );
+      //绕Y轴
+      // mat3 rotationMatrix = mat3(
+      //   cos(angle), 0.0, -sin(angle),
+      //            0, 1.0, 0,
+      //   -sin(angle),0.0, cos(angle)
+      // );
+      //绕Z轴
+      mat3 rotationMatrix = mat3(
+        cos(angle), -sin(angle),0.0,
+        sin(angle), cos(angle), 0.0,
+        0.0,0.0, 1.0
+      );
+      vec3 rotatedPosition = rotationMatrix * position;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4( rotatedPosition, 1.0 );
+    }
+        `,
+    fragmentshader: `
+    varying vec3 v_pos;
+    varying vec2 vUv;
+    void main() {
+      float minR = 0.06;
+      if(vUv.y>0.5){
+        float dis1 = distance(vUv,vec2(0.5,0.75));
+        if((vUv.x>0.5 || dis1<0.25) && dis1 > minR){
+              gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
+        }else{
+              gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
+        }
+      }else{
+        float dis2 = distance(vUv,vec2(0.5,0.25));
+        if((vUv.x<0.5 || dis2<0.25) && dis2 > minR){
+              gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
+        }else{
+              gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
+        }
+      }
+    }`
+  }
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      color: {
+        value: options?.color || new THREE.Color(0x00ffff),
+        type: "v3"
+      },
+      time: {
+        value: 1,
+        type: "f"
+      },
+      speed: {
+        value: options?.speed || 3.0,
+        type: "f"
+      },
+      opacity: {
+        value: options?.opacity || 1.0,
+        type: "f"
+      },
+    },
+    side: options?.side || THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+    transparent: options?.transparent || true,// 是否透明
+    vertexShader: tubeShader.vertexshader, // 顶点着色器
+    fragmentShader: tubeShader.fragmentshader // 片元着色器
+  })
+  return material
+}
 // 流动材质 圆柱圆锥沿Y轴的流动材质
 export const getFlowMaterialByY = (options?: { side?: object, transparent?: boolean, height: number, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number }) => {
   const tubeShader = {

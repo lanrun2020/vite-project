@@ -24,6 +24,7 @@ import {
   getRotateMaterialByY3,
   getUpDownRotateMaterial,
   getBatteryMaterial,
+  getTaiJiMaterial,
  } from './shaderMaterial'
 const THREE = T
 let that: materialScene
@@ -112,6 +113,10 @@ export default class materialScene {
       name: 'battery',
       label: '电池',
       method: 'addBattery',
+    },{
+      name: 'taiji',
+      label: '太极图',
+      method: 'addTaiJi',
     }
     ]
 
@@ -613,6 +618,20 @@ export default class materialScene {
     return  {
       entities: [cylinder31],
       materials: [flowMaterial31],
+    }
+  }
+
+  addTaiJi() {
+    //太极图
+    const geometry = new THREE.CircleGeometry(20, 128, 0); //半径，分段
+    const scanMaterial = getTaiJiMaterial()
+    this.shaderMaterialList.push(scanMaterial)
+    const circle = new THREE.Mesh(geometry, scanMaterial);
+    circle.rotation.x = -Math.PI / 2
+    this.scene.add(circle);
+    return  {
+      entities: [circle],
+      materials: [scanMaterial],
     }
   }
 

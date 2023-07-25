@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as T from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { getTextMaterial } from './shaderMaterial'
 const THREE = T
 let that: chinaMap
 export default class chinaMap {
@@ -12,8 +13,8 @@ export default class chinaMap {
   private requestId: number
   private group = new THREE.Group()
   private lineGroup = new THREE.Group()
-  private offsetX = 104
-  private offsetY = 29
+  private offsetX = 110
+  private offsetY = 32
   private bgColor = 0x131A2C
   private raycaster: THREE.Raycaster
   private previousObj = null
@@ -120,7 +121,9 @@ export default class chinaMap {
     this.scene = new THREE.Scene();
     // this.scene.background = new THREE.Color(0xcccccc); //背景颜色
     // scene.fog = new THREE.FogExp2(0xcccccc, 0.002); //雾效果
-
+    // 辅助三维坐标系
+    const axesHelper = new THREE.AxesHelper(500);
+    this.scene.add(axesHelper)
     // Grid 添加网格辅助对象
     const helper = new THREE.GridHelper(100, 30, 0x303030, 0x303030); //长度1000 划分为50份
     helper.rotation.x = Math.PI / 2
@@ -185,7 +188,21 @@ export default class chinaMap {
       this.lineGroup.add(line2);
     }
   }
-
+  //文本标签
+  addTextPlane(textContent,position) {
+    if(!position || !position.length) return
+    const width = 3
+    const height = 1.0
+    const fontSize = 1
+    const tempCanvas = document.createElement("canvas")
+    const tempCtx = tempCanvas.getContext('2d')
+    tempCtx.font = "bold " + fontSize + "px 宋体"
+    const textWidth = tempCtx.measureText(textContent).width;
+    const material = getTextMaterial({ textContent,textWidth })
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height, 128, 128), material)
+    plane.position.set(position[0] - this.offsetX, position[1] - this.offsetY,2.0)
+    this.scene.add(plane)
+  }
   async drawMap() {
     await axios.get('/chinaMap/china.json').then((res) => {
       this.scene.remove(this.group)
@@ -194,19 +211,20 @@ export default class chinaMap {
       this.lineGroup = new THREE.Group()
       this.controls.target = new THREE.Vector3(0, 0, 0)
       const features = res.data.features
-      features.forEach((worldItem: { type: string, properties: { adcode: number }, geometry: { coordinates: Array<Array<Array<Array<number>>>> } }) => {
+      features.forEach((worldItem: { type: string, properties: { adcode: number, name:string,center }, geometry: { coordinates: Array<Array<Array<Array<number>>>> } }) => {
         worldItem.geometry.coordinates.forEach((worldChildItem: Array<Array<Array<number>>>) => {
           worldChildItem.forEach((countryItem: Array<Array<number>>) => { //每个版块的点数组
             this.drawExtrude(this.drawShape(countryItem), worldItem.properties.adcode) //传递数据画出地图的shape，返回结果再传到drawExtrude方法得到ExtrudeGeometry网格
             this.drawLine(countryItem); //传递数据画出地图边线
           });
         });
+        that.addTextPlane(worldItem.properties.name,worldItem.properties.center)
       });
       that.camera.position.x = 0
       that.camera.position.y = 0
-      this.group.scale.y = 1.2; //group里面包含所有版块网格
+      this.group.scale.y = 1; //group里面包含所有版块网格
       this.scene.add(this.group);
-      this.lineGroup.scale.y = 1.2; //lineGruop里面包含所有线的网格
+      this.lineGroup.scale.y = 1; //lineGruop里面包含所有线的网格
       this.scene.add(this.lineGroup);
     })
   }
@@ -244,9 +262,9 @@ export default class chinaMap {
       });
       that.camera.position.x = that.preCenter.x
       that.camera.position.y = that.preCenter.y
-      this.group.scale.y = 1.2; //group里面包含所有版块网格
+      this.group.scale.y = 1; //group里面包含所有版块网格
       this.scene.add(this.group);
-      this.lineGroup.scale.y = 1.2; //lineGruop里面包含所有线的网格
+      this.lineGroup.scale.y = 1; //lineGruop里面包含所有线的网格
       this.scene.add(this.lineGroup);
     }).catch((error) => {
       console.log(error);
@@ -301,8 +319,8 @@ export default class chinaMap {
     await this.drawMap();
     window.addEventListener('resize', this.onWindowResize);
     this.dom.addEventListener('mousemove', this.handleMousemove, false)
-    this.dom.addEventListener('click', this.handleClick, false)
-    this.dom.addEventListener('contextmenu', this.handleClick, false)
+    // this.dom.addEventListener('click', this.handleClick, false)
+    // this.dom.addEventListener('contextmenu', this.handleClick, false)
     this.animate();
   }
 }
