@@ -7,7 +7,24 @@ import cloud from '../../assets/cloud.png'
 import lavatile from '../../assets/lavatile.jpg'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
-import { getFlowMaterial, getTextMaterial, getTestMaterial, getShieldMaterial, getSunMaterial, getFlagMaterial, getSeaMaterial, getWaterMaterial, getScanMaterial, getFlowMaterialByY, getRotateScanMaterial, getRotateMaterialByY, getRotateMaterialByY2, getRotateMaterialByY3, getUpDownRotateMaterial } from './shaderMaterial'
+import {
+  getFlowMaterial,
+  getTextMaterial,
+  getTestMaterial,
+  getShieldMaterial,
+  getSunMaterial,
+  getFlagMaterial,
+  getSeaMaterial,
+  getWaterMaterial,
+  getScanMaterial,
+  getFlowMaterialByY,
+  getRotateScanMaterial,
+  getRotateMaterialByY,
+  getRotateMaterialByY2,
+  getRotateMaterialByY3,
+  getUpDownRotateMaterial,
+  getBatteryMaterial,
+ } from './shaderMaterial'
 const THREE = T
 let that: materialScene
 let tool = []
@@ -583,13 +600,14 @@ export default class materialScene {
     }
   }
 
+  //添加圆柱体电池
   addBattery() {
     //圆柱2 立体旋转扫描
-    const geometry31 = new THREE.CylinderGeometry(5, 5, 16, 32, 1, false);//true上下底面不封闭
-    const flowMaterial31 = getRotateMaterialByY3({ edge: 5 }) //绕y轴的旋转材质
+    const geometry31 = new THREE.CylinderGeometry(2, 5, 4, 32, 1, false);//true上下底面不封闭
+    const flowMaterial31 = getBatteryMaterial() //绕y轴的旋转材质
     const cylinder31 = new THREE.Mesh(geometry31, flowMaterial31);
     this.shaderMaterialList.push(flowMaterial31)
-    cylinder31.position.set(0, 8, 0)
+    cylinder31.position.set(0, 2, 0)
     this.scene.add(cylinder31);
 
     return  {

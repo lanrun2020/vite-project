@@ -1273,18 +1273,17 @@ export const getRotateMaterialByY3 = (options?: { side?: object, transparent?: b
       `+ angleFuc + `
       //degrees 弧度转角度
       float computeX(float angle){ //angle旋转角度
-        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * cos(radians(angle + degrees(angleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
+        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * cos(radians(angle + degrees(angleFuc(modelPos.x,modelPos.z))));
       }
       float computeY(float angle){
-        return sqrt((modelPos.x-0.5)*(modelPos.x-0.5) + (modelPos.z-0.5)*(modelPos.z-0.5)) * sin(radians(angle + degrees(angleFuc(modelPos.x-0.5,modelPos.z-0.5))  ));
+        return sqrt((modelPos.x)*(modelPos.x) + (modelPos.z)*(modelPos.z)) * sin(radians(angle + degrees(angleFuc(modelPos.x,modelPos.z))));
       }
       void main() {
         float angle = fract(-speed*time*0.5)*360.0;//旋转的角度
         modelPos = position;
         modelPos2 = position;//记录初始位置,然后计算出旋转后的位置,初始位置保持不变,通过旋转角度计算旋转后的位置
-        // modelPos.z += 5.0;
-        modelPos2.x = 0.5 + computeX(angle); //旋转后的位置x
-        modelPos2.z = 0.5 + computeY(angle); //旋转后的位置z
+        modelPos2.x = computeX(angle); //旋转后的位置x
+        modelPos2.z = computeY(angle); //旋转后的位置z
         vec4 mvPosition = modelViewMatrix * vec4(modelPos, 1.0);
         gl_Position = projectionMatrix * mvPosition;
       }
@@ -1297,7 +1296,7 @@ export const getRotateMaterialByY3 = (options?: { side?: object, transparent?: b
       uniform float PI;
       `+ angleFuc + `
       void main() {
-        float e = angleFuc(modelPos2.x-0.5,modelPos2.z-0.5)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
+        float e = angleFuc(modelPos2.x,modelPos2.z)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
         gl_FragColor = vec4(color, step(mod(e, 1.0/edge), 0.5/edge) * opacity);
       }`
   }
@@ -1336,6 +1335,60 @@ export const getRotateMaterialByY3 = (options?: { side?: object, transparent?: b
   return material
 }
 
+export const getBatteryMaterial = () => {
+  const tubeShader = {
+    vertexshader: `
+      varying vec2 vUv;
+      varying vec2 vUv2;
+      varying vec3 modelPos;
+      uniform float time;
+      uniform float speed;
+      uniform float PI;
+      void main() {
+        modelPos = position;
+        vec4 mvPosition = modelViewMatrix * vec4(modelPos, 1.0);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+      `,
+    fragmentshader: `
+      uniform float opacity;
+      uniform vec3 color;
+      uniform float PI;
+      varying vec3 modelPos;
+      void main() {
+          gl_FragColor = vec4(color, 1.0 * opacity * (1.0 - (modelPos.y + 2.0)/4.0));
+      }`
+  }
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      color: {
+        value: new THREE.Color(0xff0000),
+        type: "v3"
+      },
+      time: {
+        value: 1,
+        type: "f"
+      },
+      speed: {
+        value: 1.0,
+        type: "f"
+      },
+      opacity: {
+        value: 0.2,
+        type: "f"
+      },
+      PI: {
+        value: Math.PI,
+        type: "f"
+      },
+    },
+    side: THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+    transparent: true,// 是否透明
+    vertexShader: tubeShader.vertexshader, // 顶点着色器
+    fragmentShader: tubeShader.fragmentshader // 片元着色器
+  })
+  return material
+}
 
 // 材质
 export const getSunMaterial = (options?: { url1?:string,url2?:string, side?: object, transparent?: boolean, height?: number, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number }) => {
