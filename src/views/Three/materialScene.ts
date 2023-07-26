@@ -25,6 +25,7 @@ import {
   getUpDownRotateMaterial,
   getBatteryMaterial,
   getTaiJiMaterial,
+  getChessboardMaterial,
  } from './shaderMaterial'
 const THREE = T
 let that: materialScene
@@ -117,6 +118,10 @@ export default class materialScene {
       name: 'taiji',
       label: '太极图',
       method: 'addTaiJi',
+    },{
+      name: 'chessboard',
+      label: '棋盘格',
+      method: 'addChessboard',
     }
     ]
 
@@ -632,6 +637,19 @@ export default class materialScene {
     return  {
       entities: [circle],
       materials: [scanMaterial],
+    }
+  }
+  addChessboard() {
+    //棋盘格
+    const geometry = new THREE.CircleGeometry(20, 256, 0); //半径，分段
+    const material = getChessboardMaterial()
+    this.shaderMaterialList.push(material)
+    const circle = new THREE.Mesh(geometry, material);
+    circle.rotation.x = -Math.PI / 2
+    this.scene.add(circle);
+    return  {
+      entities: [circle],
+      materials: [material],
     }
   }
 

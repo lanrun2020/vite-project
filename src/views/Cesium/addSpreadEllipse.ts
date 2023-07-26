@@ -132,93 +132,122 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
     });
 
     // 根据中心点 起始偏移角度,终止角度，求扇形
-    // const calcPoints = (
-    //   x1: number,
-    //   y1: number,
-    //   radius: number,
-    //   angle1: number,
-    //   angle2: number,
-    // ) => {
-    //   const m = Cesium.Transforms.eastNorthUpToFixedFrame(
-    //     Cesium.Cartesian3.fromDegrees(x1, y1)
-    //   );
-    //   const positionArr: Array<number> = [];
-    //   positionArr.push(x1);
-    //   positionArr.push(y1);
-    //   for (let i = angle1; i <= angle2; i++) {
-    //     const ry = radius * Math.cos(Cesium.Math.toRadians(i));
-    //     const rx = radius * Math.sin(Cesium.Math.toRadians(i));
-    //     const translation = Cesium.Cartesian3.fromElements(rx, ry, 0);
-    //     const d = Cesium.Matrix4.multiplyByPoint(
-    //       m,
-    //       translation,
-    //       new Cesium.Cartesian3()
-    //     );
-    //     const c = Cesium.Cartographic.fromCartesian(d);
-    //     const x2 = Cesium.Math.toDegrees(c.longitude);
-    //     const y2 = Cesium.Math.toDegrees(c.latitude);
-    //     positionArr.push(x2);
-    //     positionArr.push(y2);
-    //   }
-    //   return positionArr
-    // };
-    // const sxArr = [[0, 45], [70, 120], [140, 200]]
-    // sxArr.forEach((g,index) => {
-    //    entities.push(viewer.entities.add({
-    //     id: "sx"+index,
-    //     polygon: {
-    //       hierarchy: new Cesium.PolygonHierarchy(Cesium.Cartesian3.fromDegreesArray(calcPoints(point.lng + 0.006, point.lat + 0.008, 500,g[0],g[1]))),
-    //       material: new Cesium.DiffuseMaterialProperty({
-    //         color: new Cesium.Color(1.0, 0.0, 0.0, 1.0),
-    //         speed: 1.0,
-    //         thickness: 0.8,
-    //         angle: Cesium.Cartesian3(point.lng + 0.006, point.lat + 0.008, 0),
-    //       }),
-    //     },
-    //   }));
-    // })
-    // console.log(entities);
-  //   primitives = viewer.scene.primitives.add(new Cesium.PrimitiveCollection())
-  //   sxArr.forEach((g, index) => {
-  //     const instance2 = new Cesium.GeometryInstance({
-  //       geometry: new Cesium.PolygonGeometry({
-  //         polygonHierarchy: new Cesium.PolygonHierarchy(
-  //           Cesium.Cartesian3.fromDegreesArray(calcPoints(point.lng + 0.006, point.lat + 0.008, 500, g[0], g[1]))
-  //         )
-  //       }),
-  //     });
-  //     const source = `
-  //     czm_material czm_getMaterial(czm_materialInput materialInput)\n\
-  //     {\n\
-  //         czm_material material = czm_getDefaultMaterial(materialInput);\n\
-  //         float x = materialInput.st.s;
-  //         float y = materialInput.st.t;
-  //         // float dis = distance(materialInput.st, vec2(0.0, 0.0));\n\
-  //         // float dis = distance(v_positionEC, vec3(center));\n\
-  //         material.alpha = color.a * x;\n\
-  //         material.diffuse = color.rgb;\n\
-  //         return material;\n\
-  //     }`
-  //     //这里采用GroundPrimitive可以在开启深度检测的情况下贴地,如果采用Primitive在开启深度检测时会与贴图交叉重合
-  //     const primitive2 = new Cesium.GroundPrimitive({
-  //       geometryInstances: instance2,
-  //       appearance: new Cesium.MaterialAppearance({
-  //         translucent: true,
-  //         material: new Cesium.Material({
-  //           fabric: {
-  //             uniforms: {
-  //               color: new Cesium.Color(0, 1, 0, 1),
-  //               center: Cesium.Cartesian3.fromDegrees(point.lng + 0.006, point.lat + 0.008,0)
-  //             },
-  //             source: source
-  //           },
-  //           translucent: true,
-  //         }),
-  //       })
-  // })
-  // console.log(primitive2);
-  // primitives.add(primitive2)
-// })
+    const calcPoints = (
+      x1: number,
+      y1: number,
+      radius: number,
+      angle1: number,
+      angle2: number,
+    ) => {
+      const m = Cesium.Transforms.eastNorthUpToFixedFrame(
+        Cesium.Cartesian3.fromDegrees(x1, y1)
+      );
+      const positionArr: Array<number> = [];
+      positionArr.push(x1);
+      positionArr.push(y1);
+      for (let i = angle1; i <= angle2; i++) {
+        const ry = radius * Math.cos(Cesium.Math.toRadians(i));
+        const rx = radius * Math.sin(Cesium.Math.toRadians(i));
+        const translation = Cesium.Cartesian3.fromElements(rx, ry, 0);
+        const d = Cesium.Matrix4.multiplyByPoint(
+          m,
+          translation,
+          new Cesium.Cartesian3()
+        );
+        const c = Cesium.Cartographic.fromCartesian(d);
+        const x2 = Cesium.Math.toDegrees(c.longitude);
+        const y2 = Cesium.Math.toDegrees(c.latitude);
+        positionArr.push(x2);
+        positionArr.push(y2);
+      }
+      return positionArr
+    };
+
+    //primitive加载构造的扇形多边形
+    const sxArr2 = [
+      {
+        angle:[0, 45],
+        color: new Cesium.Color(1.0,0.0,0.0,1.0),
+        lng: 121.4861830727844,
+        lat: 31.23723471021075,
+        radius: 500
+      },
+      {
+        angle:[70, 120],
+        color: new Cesium.Color(0.0,1.0,0.0,1.0),
+        lng: 121.4861830727844,
+        lat: 31.23723471021075,
+        radius: 500
+      },
+      {
+        angle:[140, 300],
+        color: new Cesium.Color(0.0,0.0,1.0,1.0),
+        lng: 121.4861830727844,
+        lat: 31.23723471021075,
+        radius: 500
+      },
+    ]
+    primitives = viewer.scene.primitives.add(new Cesium.PrimitiveCollection())
+    sxArr2.forEach((g, index) => {
+      const instance2 = new Cesium.GeometryInstance({
+        geometry: new Cesium.PolygonGeometry({
+          polygonHierarchy: new Cesium.PolygonHierarchy(
+            Cesium.Cartesian3.fromDegreesArray(calcPoints(g.lng, g.lat, g.radius, g.angle[0], g.angle[1]))
+          )
+        }),
+      });
+      const v = `
+      attribute vec3 position3DHigh;
+      attribute vec3 position3DLow;
+      attribute vec2 st;
+      attribute float batchId;
+      uniform vec3 v_center;
+      varying float dis;
+      varying vec2 v_st;
+      varying vec2 f_dis;
+      varying vec3 v_positionEC;
+      uniform float uTime;
+      void main()
+      {
+          vec4 p = czm_computePosition(); //使用czm_computePosition必须要使用---> position3DHigh,position3DLow,batchId;
+          v_positionEC = (czm_modelViewRelativeToEye * p).xyz;
+          gl_Position = czm_modelViewProjectionRelativeToEye * p;
+      }`
+      const f = `
+      uniform vec3 v_center;
+      varying vec3 v_positionEC;
+      uniform float v_radius;
+      uniform vec4 v_color;
+      void main()
+      {
+          float time = fract(czm_frameNumber*0.005);
+          vec4 color = v_color;
+          vec4 pos = czm_inverseModelView * vec4(v_positionEC, 1.0);
+          float dis = distance(vec4(v_center,1.0),pos);
+          float sp = 1.0/5.0;
+          float d = 1.0 - dis/v_radius;
+          float m = mod(d + time, sp);
+          float a = step(m, sp*0.5);
+          gl_FragColor = vec4(color.xyz, a * d);
+      }`
+      const appearance = new Cesium.MaterialAppearance({
+        translucent: true,
+        vertexShaderSource: v,
+        fragmentShaderSource: f,
+      })
+      appearance.uniforms = {
+        v_radius: g.radius,
+        v_color: g.color,
+        v_center: Cesium.Cartesian3.fromDegrees(g.lng, g.lat)
+      }
+      //这里采用GroundPrimitive可以在开启深度检测的情况下贴地,如果采用Primitive在开启深度检测时会与贴图交叉重合
+      //采用GroundPrimitive时自定义shader不生效
+      const primitive2 = new Cesium.Primitive({
+        geometryInstances: instance2,
+        appearance
+      })
+      primitives.add(primitive2)
+    })
 
     //以下代码是计算鼠标点击点与某点正北放向夹角的
     const getHeading = (fromPosition, toPosition) => {
@@ -245,13 +274,6 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
         if(pickEntity){ //先将之前选中的恢复默认
           pickEntity.ellipse.material._color.alpha = 0.6
         }
-        //将第一个entity取出来求圆心位置
-        // const car3 = pickedObjectArrays[0].id.position._value
-        // let angle = getHeading(car3, cartesian)
-        // if (angle < 0){
-        //   angle += 360
-        // }
-        // const distance = getDistance(Cesium.Cartographic.fromCartesian(car3,viewer.scene.globe.ellipsoid), Cesium.Cartographic.fromCartesian(cartesian,viewer.scene.globe.ellipsoid))
         pickedObjectArrays.forEach((item) => {
           if(item && item.id){
             if (!item.id._angle){

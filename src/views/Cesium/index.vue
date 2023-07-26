@@ -384,7 +384,7 @@ const initCesium = () => {
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
 
   //深度检测
-  viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
+  viewer.scene.globe.depthTestAgainstTerrain = false; //几何图形是否有高程遮挡效果
   var pos = Cesium.Cartesian3.fromDegrees(61.296382224724795,35.628536117000692);
   // console.log(pos);
   //Cartesian3转经纬度坐标

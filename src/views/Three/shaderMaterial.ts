@@ -729,6 +729,63 @@ export const getTaiJiMaterial = (options?: { side?: object, transparent?: boolea
   })
   return material
 }
+
+// 棋盘格
+export const getChessboardMaterial = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number }) => {
+  const tubeShader = {
+    vertexshader: `
+    varying vec3 v_pos;
+    varying vec2 vUv;
+    uniform float time;
+    uniform float speed;
+    void main() {
+      vUv = uv;
+      v_pos = position;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4( v_pos, 1.0 );
+    }
+  `,
+    fragmentshader: `
+    varying vec3 v_pos;
+    varying vec2 vUv;
+    uniform float time;
+    void main() {
+      float sp = 1.0/5.0;
+      float m = mod(vUv.x, sp); //返回余数
+      float a = step(m, sp*0.5); //用于分段,值为0或1
+      float a2 = step(mod(vUv.y, sp),sp*0.5);
+      if(a > 0.0 && a2 < 1.0 || a<1.0 && a2> 0.0){
+        gl_FragColor = vec4( 1.0, 1.0, 1.0 - sin(time), 1.0 );
+      } else {
+        gl_FragColor = vec4( 0.0, 0.0, cos(time), 1.0 );
+      }
+    }`
+  }
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      color: {
+        value: options?.color || new THREE.Color(0x00ffff),
+        type: "v3"
+      },
+      time: {
+        value: 1,
+        type: "f"
+      },
+      speed: {
+        value: options?.speed || 3.0,
+        type: "f"
+      },
+      opacity: {
+        value: options?.opacity || 1.0,
+        type: "f"
+      },
+    },
+    side: options?.side || THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+    transparent: options?.transparent || true,// 是否透明
+    vertexShader: tubeShader.vertexshader, // 顶点着色器
+    fragmentShader: tubeShader.fragmentshader // 片元着色器
+  })
+  return material
+}
 // 流动材质 圆柱圆锥沿Y轴的流动材质
 export const getFlowMaterialByY = (options?: { side?: object, transparent?: boolean, height: number, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number }) => {
   const tubeShader = {
