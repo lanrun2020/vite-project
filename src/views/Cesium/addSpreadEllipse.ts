@@ -319,5 +319,6 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
     })
     entities = []
   }
+  primitives.removeAll()
 }
 };

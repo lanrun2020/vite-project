@@ -26,23 +26,23 @@ export const addCity = (viewer: any, active: boolean) => {
     // },100)
     // const vew = new ViewShed(viewer)
     // 流动水面效果
-    viewer.scene.primitives.add(
-      new Cesium.Primitive({
-          geometryInstances: new Cesium.GeometryInstance({
-              geometry: new Cesium.RectangleGeometry({
-                  rectangle: Cesium.Rectangle.fromDegrees(
-                      121.5061830727844, 31.22923471021075,
-                      121.5461830727844, 31.25923471021075,
-                  ),
-                  height: 10,
-                  vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT,
-              }),
-          }),
-          appearance: new Cesium.MaterialAppearance({
-            material: waterMaterial.getMaterial(), faceForward: !1, closed: !0
-          }),
-      })
-    );
+    // viewer.scene.primitives.add(
+    //   new Cesium.Primitive({
+    //       geometryInstances: new Cesium.GeometryInstance({
+    //           geometry: new Cesium.RectangleGeometry({
+    //               rectangle: Cesium.Rectangle.fromDegrees(
+    //                   121.5061830727844, 31.22923471021075,
+    //                   121.5461830727844, 31.25923471021075,
+    //               ),
+    //               height: 10,
+    //               vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT,
+    //           }),
+    //       }),
+    //       appearance: new Cesium.MaterialAppearance({
+    //         material: waterMaterial.getMaterial(), faceForward: !1, closed: !0
+    //       }),
+    //   })
+    // );
     setTimeout(() => {
       viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(121.5061830727844, 31.22923471021075, 3000),

@@ -1,9 +1,9 @@
 // 迁徙线
 import Cesium from "@/utils/importCesium"
 let entities: Array<any> = []
-const startPoint = { longitude: 170, latitude: 32 }
+const startPoint = { longitude: 114, latitude: 31 }
 const endPoint = [
-  { longitude: -170, latitude: 32 },
+  { longitude: 117, latitude: 32 },
   { longitude: 112, latitude: 31 },
   { longitude: 110, latitude: 30 },
   { longitude: 108, latitude: 32 },
