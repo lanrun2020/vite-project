@@ -1,6 +1,6 @@
 import Cesium from "@/utils/importCesium"
 import river from '../../assets/arrow1.jpg'
-// import * as LeaderLine from 'leader-line'
+import * as LeaderLine from 'leader-line'
 const entities: object[] = []
 let arr:{x:number,y:number, position:typeof Cesium.Cartesian3}[] = []
 let boxArr:{box:HTMLElement,point:HTMLElement,leaderLine:typeof LeaderLine}[] = []

@@ -8,6 +8,10 @@ let primitives: any
 export const addLoad = async (viewer: any, active: boolean) => {
   if (active) {
     viewer.scene.globe.depthTestAgainstTerrain = false;
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(116.22, 39.9, 140000.0),
+      duration: 0
+    });
     if (!primitives) {
       primitives = viewer.scene.primitives.add(new Cesium.PrimitiveCollection())
       await axios.get('/lines-bus.json').then((res) => {
@@ -31,9 +35,6 @@ export const addLoad = async (viewer: any, active: boolean) => {
         })
       })
     }
-    viewer.camera.setView({
-      destination: Cesium.Cartesian3.fromDegrees(116.23, 39.8, 250000.0)
-    });
   } else {
     viewer.scene.globe.depthTestAgainstTerrain = true;
     if (primitives) {

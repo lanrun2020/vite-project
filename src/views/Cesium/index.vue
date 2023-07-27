@@ -84,18 +84,18 @@ let toolList: Ref<toolItemType[]> = ref([
     value: 3,
     active: false,
   },
+  // {
+  //   title: "动态河流",
+  //   value: 4,
+  //   active: false,
+  // },
   {
-    title: "动态河流",
-    value: 4,
-    active: false,
-  },
-  {
-    title: "静态雷达",
+    title: "静态雷达模型",
     value: 5,
     active: false,
   },
   {
-    title: "雷达扫描",
+    title: "雷达扫描动画",
     value: 6,
     active: false,
   },
@@ -110,7 +110,7 @@ let toolList: Ref<toolItemType[]> = ref([
     active: false,
   },
   {
-    title: "人口统计",
+    title: "大量柱体",
     value: 9,
     active: false,
   },
@@ -150,7 +150,7 @@ let toolList: Ref<toolItemType[]> = ref([
     active: false,
   },
   {
-    title: "echarts",
+    title: "结合echarts",
     value: 17,
     active: false,
   },
@@ -160,12 +160,12 @@ let toolList: Ref<toolItemType[]> = ref([
     active: false,
   },
   {
-    title: "城市道路",
+    title: "北京交通线路",
     value: 19,
     active: false,
   },
   {
-    title: "飞机航线2",
+    title: "飞机视角",
     value: 20,
     active: false,
   },
@@ -189,26 +189,26 @@ let toolList: Ref<toolItemType[]> = ref([
     value: 24,
     active: false,
   },
-  {
-    title: "billboard",
-    value: 25,
-    active: false,
-  },
+  // {
+  //   title: "billboard",
+  //   value: 25,
+  //   active: false,
+  // },
   {
     title: "视锥扫描",
     value: 26,
     active: false,
   },
   {
-    title: "加载geojson数据",
+    title: "中国地图geojson",
     value: 27,
     active: false,
   },
-  {
-    title: "粒子系统",
-    value: 28,
-    active: false,
-  },
+  // {
+  //   title: "粒子系统",
+  //   value: 28,
+  //   active: false,
+  // },
   {
     title: "圆形墙",
     value: 29,
@@ -249,12 +249,14 @@ const toolChecked = (active: boolean, value: number) => {
       addFlyLine(viewer, active);
       break;
     case 1:// 扩散扫描效果
+      viewer.scene.globe.depthTestAgainstTerrain = false;
       addSpreadEllipse(viewer, active);
       break;
     case 2://旋转扫描效果
       addScanEllipse(viewer, active);
       break;
     case 3://绘制多边形
+      viewer.scene.globe.depthTestAgainstTerrain = true;
       addPolygon2(viewer, active);
       break;
     case 4://动态河流淹没
@@ -289,9 +291,11 @@ const toolChecked = (active: boolean, value: number) => {
       addWall(viewer, active);
       break;
     case 14: //测量距离
+      viewer.scene.globe.depthTestAgainstTerrain = true;
       serveyDistance(viewer, active);
       break;
     case 15: //测量面积
+     viewer.scene.globe.depthTestAgainstTerrain = true;
       serveyArea(viewer, active);
       break;
     case 16: //环绕卫星
@@ -303,7 +307,7 @@ const toolChecked = (active: boolean, value: number) => {
     case 18: //白膜建筑
       addCity(viewer, active);
       break;
-    case 19: //城市道路
+    case 19: //北京交通线路
       addLoad(viewer, active);
       break;
     case 20: //飞机航线2
@@ -384,7 +388,7 @@ const initCesium = () => {
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
 
   //深度检测
-  viewer.scene.globe.depthTestAgainstTerrain = false; //几何图形是否有高程遮挡效果
+  viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
   var pos = Cesium.Cartesian3.fromDegrees(61.296382224724795,35.628536117000692);
   // console.log(pos);
   //Cartesian3转经纬度坐标

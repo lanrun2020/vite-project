@@ -1,9 +1,9 @@
 // 飞机航线
 import Cesium from "@/utils/importCesium"
-import { addPlaneLine } from "./addPlaneLine"
 let renderId: any
 let primitivesLine: any
 let primitivesModelList: any[] = []
+let entities = []
 let handler: any
 let timer:any
 const lineNum = 100 //一种轨迹的数量
@@ -13,6 +13,7 @@ let stop: any //终止时间 一个点一秒
 let clockCUR: any
 export const addPlaneLineByTime = (viewer: any, active: boolean) => {
   if (active) {
+    viewer.clock.currentTime = Cesium.JulianDate.addHours(Cesium.JulianDate.now(new Date()), 0, new Cesium.JulianDate());
     clockCUR = new Cesium.Clock({
       startTime : viewer.clock.currentTime.clone(),
       currentTime : viewer.clock.currentTime.clone(),
@@ -22,20 +23,11 @@ export const addPlaneLineByTime = (viewer: any, active: boolean) => {
       canAnimate: false
     });
     clockCUR.shouldAnimate = true
-
     start = viewer.clock.currentTime
     // stop = Cesium.JulianDate.addSeconds(start, alltime, new Cesium.JulianDate()) //终止时间 一个点一秒
     viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY)
     viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider({})
     viewer.scene.globe.depthTestAgainstTerrain = true;
-    //时间段循环
-    // viewer.clock.startTime = start.clone();
-    // viewer.clock.stopTime = stop.clone();
-    // viewer.clock.currentTime = start.clone();
-    // viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
-    // viewer.timeline.zoomTo(start, stop);
-    // viewer.clock.shouldAnimate = true
-    // viewer.clock.canAnimate = false
     const airList = new Array(lineNum).fill('').map((item, index) => {
       const lon = Math.random() * 180 - 90
       const lat = Math.random() * 90 - 45
@@ -73,12 +65,12 @@ export const addPlaneLineByTime = (viewer: any, active: boolean) => {
     primitivesModelList = []
     pathList.forEach((path, index) => {
       path.airList.forEach((item) => {
-        addPlane(item, primitivesLine, pathStartIndex, index, primitivesModelList, path) //item轨迹， num轨迹点数量，start轨迹起始时间，primitives用于存放轨迹primitive
+        addPlane(item, primitivesLine, pathStartIndex, index, path) //item轨迹， num轨迹点数量，start轨迹起始时间，primitives用于存放轨迹primitive
       })
       pathStartIndex += path.airList.length
     })
-    primitivesModelList.forEach((model) => {
-      viewer.entities.add(model)
+    entities = primitivesModelList.map((model) => {
+      return viewer.entities.add(model)
     })
     handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
     let pickedPath: any[] = []
@@ -137,7 +129,6 @@ export const addPlaneLineByTime = (viewer: any, active: boolean) => {
         timeTick()
       }
     },1000)
-    // addPlaneLine(viewer,active)
 
   } else {
     clearInterval(timer)
@@ -149,9 +140,11 @@ export const addPlaneLineByTime = (viewer: any, active: boolean) => {
     viewer.scene.primitives.remove(primitivesLine)
     handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)//移除事件
     handler.removeInputAction(Cesium.ScreenSpaceEventType.WHEEL)//移除事件
-    primitivesModelList.forEach((primitives) => {
-      viewer.scene.primitives.remove(primitives)
+    entities.forEach((entity) => {
+      viewer.entities.remove(entity)
     })
+    primitivesModelList = []
+    entities = []
   }
 }
 
@@ -165,7 +158,7 @@ const computeCirclularFlight2 = () => {
   };
 }
 
-const addPlane = (item: any, primitives: any, startIndex: number, pathTypeIndex: number, primitivesModelLsit2:any,path:any) => {
+const addPlane = (item: any, primitives: any, startIndex: number, pathTypeIndex: number,path:any) => {
   //轨迹起点，终点
   const lon = item.lon
   const lat = item.lat
@@ -222,5 +215,5 @@ const addPlane = (item: any, primitives: any, startIndex: number, pathTypeIndex:
     },
     orientation: orientation,
   }
-  primitivesModelLsit2.push(modelEntity)
+  primitivesModelList.push(modelEntity)
 }

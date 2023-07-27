@@ -1,4 +1,4 @@
-// 飞机航线2
+// 飞机视角
 import Cesium from "@/utils/importCesium"
 import { computeCirclularFlight, getHeading } from './util'
 import axios from "axios";

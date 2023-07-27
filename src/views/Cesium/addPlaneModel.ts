@@ -89,7 +89,7 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
       id: "modelPlane2",
       position: propertyLine,
       model: {
-        uri: `/model/ufo.glb`,
+        uri: `/model/Airplane.glb`,
         scale: 2,
         minimumPixelSize: 60,
       },
@@ -97,7 +97,7 @@ export const addPlaneModel = (viewer: any, active: boolean) => {
     })
     entities.push(plane)
     entities.push(plane2)
-
+    viewer.trackedEntity = plane2
     let current:any
     current = Cesium.clone(startPoint)
     const render = () => { // 更新相机位置
