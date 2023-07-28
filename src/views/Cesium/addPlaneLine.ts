@@ -5,7 +5,7 @@ let primitivesLine: any
 let primitivesModelList: any[] = []
 let handler: any
 const num = 200 //一条轨迹上的点个数
-const lineNum = 200 //一种轨迹的数量
+const lineNum = 300 //一种轨迹的数量
 const start = new Cesium.JulianDate(2459905, 21600, Cesium.TimeStandard.UTC); //起始时间
 const stop = Cesium.JulianDate.addSeconds(start, num, new Cesium.JulianDate()) //终止时间 一个点一秒
 
@@ -164,7 +164,9 @@ const addPlane = (item: any, num: number, start: any, primitives: any, startInde
         float m = mod(dis, sp);
         float a2 = 1.0 - step(sp*0.5,m);
         float a = color.a * a2;
-        material.alpha = b ? a : 0.0;\n\
+        //虚线
+        // material.alpha = b ? a : 0.0;\n\
+        material.alpha = b ? 1.0 : 0.0;\n\
         material.diffuse = color.rgb;\n\
         return material;\n\
     }`

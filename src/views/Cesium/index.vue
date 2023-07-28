@@ -84,11 +84,11 @@ let toolList: Ref<toolItemType[]> = ref([
     value: 3,
     active: false,
   },
-  // {
-  //   title: "动态河流",
-  //   value: 4,
-  //   active: false,
-  // },
+  {
+    title: "河流淹没",
+    value: 4,
+    active: false,
+  },
   {
     title: "静态雷达模型",
     value: 5,
@@ -180,7 +180,7 @@ let toolList: Ref<toolItemType[]> = ref([
   //   active: false,
   // },
   {
-    title: "航迹线",
+    title: "航迹回放",
     value: 23,
     active: false,
   },
@@ -362,7 +362,7 @@ const initCesium = () => {
   // })
   viewer = new Cesium.Viewer("cesiumContainer", {
     animation: true, // 是否显示时钟clock动画控件
-    baseLayerPicker: false, // 是否显示图层选择控件
+    baseLayerPicker: true, // 是否显示图层选择控件
     geocoder: false, // 是否显示地名查找控件
     timeline: true, // 是否显示时间线控件
     sceneModePicker: true, // 是否显示投影方式控件
