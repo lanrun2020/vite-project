@@ -1,7 +1,7 @@
 <template>
   <div class="app-wrapper">
     <el-container style="height: 100vh">
-      <el-menu class="el-menu-vertical-demo" :collapse="isCollapse" :collapse-transition="false" :style="{ width: isCollapse ? '68px' : '200px' }"
+      <el-menu class="el-menu-vertical-demo" :unique-opened="true" :collapse="isCollapse" :collapse-transition="false" :style="{ width: isCollapse ? '68px' : '200px' }"
         background-color="#565656" text-color="#fff" active-text-color="#ffd04b" @select="menuSelect">
         <el-menu-item index="/home">
           <el-icon>

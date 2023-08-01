@@ -597,11 +597,11 @@ export default class materialScene {
   //旋转圆柱
   addRotationCylinder() {
     //圆柱2 立体旋转扫描
-    const geometry31 = new THREE.CylinderGeometry(5, 5, 16, 32, 1, false);//true上下底面不封闭
-    const flowMaterial31 = getRotateMaterialByY3({ edge: 2 }) //绕y轴的旋转材质
+    const geometry31 = new THREE.CylinderGeometry(8, 8, 16, 32, 1, false);//true上下底面不封闭
+    const flowMaterial31 = getRotateMaterialByY3({ edge: 3 }) //绕y轴的旋转材质
     const cylinder31 = new THREE.Mesh(geometry31, flowMaterial31);
     this.shaderMaterialList.push(flowMaterial31)
-    cylinder31.position.set(-20, 8.1, 20)
+    cylinder31.position.set(0, 8.1, 0)
     this.scene.add(cylinder31);
 
     return  {
