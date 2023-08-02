@@ -57,6 +57,7 @@ import { addParticleSystem } from "./addParticleSystem";
 import { addParticleSystem2 } from "./addParticleSystem2";
 import { addCircleWall } from "./addCircleWall";
 import { addWind } from "./addWind";
+import test from "node:test";
 type toolItemType = {
   title: string;
   value: number;
@@ -370,6 +371,10 @@ const initCesium = () => {
     infoBox: false, // 是否显示点击要素之后显示的信息
     fullscreenButton: false, // 是否显示全屏按钮
     selectionIndicator: false, // 是否显示选中指示器
+    //Cesium默认使用 WebGL1
+    contextOptions: {
+      requestWebgl2: true, // 开启webgl2
+    },//Context和WebGL创建属性对应于Context#options
     // terrainProvider: Cesium.createWorldTerrain({
     //   requestVertexNormals: true,
     //   requestWaterMask: false
@@ -447,7 +452,16 @@ const initCesium = () => {
   // });
   // viewer.scene.screenSpaceCameraController.enableTit = false;
   // addCity(viewer, true);
+  testFuc()
 };
+const testFuc = () => {
+  // const VoxelProvider = 
+  // const primitive = new Cesium.VoxelPrimitive({
+  //   provider:	VoxelProvider,
+  //   modelMatrix: Matrix4,
+  //   customShader:
+  // })
+}
 function dataURLtoBlob(dataurl) {
             let arr = dataurl.split(','),
                 mime = arr[0].match(/:(.*?);/)[1],

@@ -4,7 +4,7 @@ import radarMaterialsProperty from "./RadarMaterial2"
 let entities: Array<object>  = []
 let primitives: any
 const radarMaterial = new radarMaterialsProperty({ color: new Cesium.Color(.1, 1, 0, 0.8), repeat: 1, thickness: 0.8, gradual: true, gradualValue: 0.6 })
-const radarMaterial2 = new radarMaterialsProperty({ color: new Cesium.Color(.1, 1, 0, 1), repeat: 10, thickness: 0.2 })
+const radarMaterial2 = new radarMaterialsProperty({ color: new Cesium.Color(.1, 1, 0, 1), repeat: 3, thickness: 0.2,gradual: true })
 
 export const addSatellite = (viewer: any, active: boolean) => {
   if (active) {
@@ -93,6 +93,17 @@ export const addSatellite = (viewer: any, active: boolean) => {
       }),
       modelMatrix: modelMatrix2, // 提供位置参数
     });
+    const center3 = Cesium.Cartesian3.fromDegrees(118, 29, 200000)
+    const modelMatrix3 = Cesium.Transforms.eastNorthUpToFixedFrame(center3);
+    const instance3 = new Cesium.GeometryInstance({
+      geometry: new Cesium.CylinderGeometry({
+        length: 400000,
+        topRadius: 0.0,
+        bottomRadius: 100000.0,
+        vertexFormat: Cesium.MaterialAppearance.MaterialSupport.TEXTURED.vertexFormat
+      }),
+      modelMatrix: modelMatrix3, // 提供位置参数
+    });
     const primitive1 = new Cesium.Primitive({
       geometryInstances: instance,
       appearance: new Cesium.MaterialAppearance({
@@ -105,9 +116,17 @@ export const addSatellite = (viewer: any, active: boolean) => {
         material: radarMaterial2.getMaterial(), faceForward: !1, closed: !0
       })
     });
+    const primitive3 = new Cesium.Primitive({
+      geometryInstances: instance3,
+      appearance: new Cesium.MaterialAppearance({
+        material: radarMaterial.getMaterial(), faceForward: !1, closed: !0
+      })
+    });
     primitives = viewer.scene.primitives.add(new Cesium.PrimitiveCollection())
-    primitives.add(primitive2)
     primitives.add(primitive1)
+    primitives.add(primitive3)
+    primitives.add(primitive2)
+    //primitive后面加载的可以透视看见前面，前面加载的不能透视看见后面加载的primitive
     viewer.flyTo(entities)
   } else {
     if (entities?.length) {

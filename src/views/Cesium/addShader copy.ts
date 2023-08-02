@@ -54,7 +54,6 @@ class CustomPrimitive {
 
     // Compute a model matrix that puts the surface at a specific point on
     // the globe.
-    // 计算一个模型矩阵，将表面放在地球上的一个特定点上
     this.cartographicPosition = cartographicPosition;
     const cartesianPosition = Cesium.Cartographic.toCartesian(
       cartographicPosition,
@@ -202,7 +201,6 @@ const initialize = (primitive: any, context: any) => {
     attribute vec3 a_position;
     varying vec3 v_position;
     uniform float u_time;
-    varying float v_h;
     void main()
     {
         vec2 k = vec2(0.0004, 0.0001);
@@ -211,7 +209,6 @@ const initialize = (primitive: any, context: any) => {
         z += 1000.0 * sin(czm_pi * dot(a_position.xy, k) * 0.5 - 0.002 * u_time);
         z += 1000.0 * sin(czm_pi * dot(a_position.xy, k2) * 0.5 - 0.002 * u_time);
         v_position = a_position;
-        v_h = z/4000.0 + 0.5;
         gl_Position = czm_modelViewProjection * vec4(a_position.xy, z, 1.0);
     }
     `;
@@ -220,7 +217,6 @@ const initialize = (primitive: any, context: any) => {
     varying vec3 v_position;
     uniform float u_time;
     uniform sampler2D u_texture;
-    varying float v_h;
     void main()
     {
         vec2 k = vec2(0.0004, 0.0001);
@@ -232,11 +228,7 @@ const initialize = (primitive: any, context: any) => {
         z *= 0.5;
         // signed -> unsigned
         z = 0.5 + 0.5 * z;
-        // gl_FragColor = texture2D(u_texture, vec2(z, 0.1));
-        vec3 color = vec3(0.0,1.0,0.0);
-        color = mix(vec3(0.0,1.0,0.0),vec3(1.0,0.0,0.0),v_h);
-        gl_FragColor = vec4(color, v_h);
-
+        gl_FragColor = texture2D(u_texture, vec2(z, 0.1));
     }
     `;
 
@@ -300,9 +292,8 @@ const initialize = (primitive: any, context: any) => {
   primitive.time = performance.now();
   const uniformMap = {
     u_time: function () {
-      // const now = performance.now();
-      // return now - primitive.time;
-      return 1.0;
+      const now = performance.now();
+      return now - primitive.time;
     },
     u_texture: function () {
       return texture;
@@ -310,17 +301,17 @@ const initialize = (primitive: any, context: any) => {
   };
 
   const drawCommand = new Cesium.DrawCommand({
-    boundingVolume: primitive.boundingSphere,//世界空间中几何体的边界体积。这用于剔除和视锥体选择
-    modelMatrix: primitive.modelMatrix, // 从模型空间中的几何图形到世界空间中的变换。如果未定义，则假定几何体在世界空间中定义。
-    pass: Cesium.Pass.TRANSLUCENT, //渲染通道 OPAQUE不透明, OVERLAY覆盖, TRANSLUCENT半透明
-    shaderProgram: shaderProgram, //着色器程序
-    renderState: renderState, //渲染状态
-    vertexArray: vertexArray, //顶点数组
-    count: indexCount, //顶点数组中要绘制的顶点数
-    primitiveType: Cesium.PrimitiveType.TRIANGLES,//顶点数组中的几何类型(TRIANGLES 将一系列点绘制成三角形)
-    uniformMap: uniformMap, //一个对象，其函数的名称与着色器程序中的制服相匹配，并返回值来设置这些制服
+    boundingVolume: primitive.boundingSphere,
+    modelMatrix: primitive.modelMatrix,
+    pass: Cesium.Pass.OPAQUE,
+    shaderProgram: shaderProgram,
+    renderState: renderState,
+    vertexArray: vertexArray,
+    count: indexCount,
+    primitiveType: Cesium.PrimitiveType.TRIANGLES,
+    uniformMap: uniformMap,
   });
-  primitive.drawCommand = drawCommand;//绘制命令
+  primitive.drawCommand = drawCommand;
 }
 
 
