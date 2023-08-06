@@ -199,16 +199,10 @@ const initialize = (primitive: any, context: any) => {
   // Inteference patterns made by two plane waves crossing each
   // other at an angle. The color is based on the height.
   const vertexShader = `
-    attribute vec3 position3DHigh;
-    attribute vec3 position3DLow;
-    attribute vec2 st;
-    attribute float batchId;
     attribute vec3 a_position;
     varying vec3 v_position;
     uniform float u_time;
     varying float v_h;
-    varying vec3 v_positionEC;
-    varying vec4 v_pos;
     void main()
     {
         vec2 k = vec2(0.0004, 0.0001);
@@ -218,9 +212,6 @@ const initialize = (primitive: any, context: any) => {
         z += 1000.0 * sin(czm_pi * dot(a_position.xy, k2) * 0.5 - 0.002 * u_time);
         v_position = a_position;
         v_h = z/4000.0 + 0.5;
-        vec4 p = czm_computePosition(); //使用czm_computePosition必须要使用---> position3DHigh,position3DLow,batchId;
-        v_pos = p; // 得到世界坐标
-        v_positionEC = (czm_modelViewRelativeToEye * p).xyz;
         gl_Position = czm_modelViewProjection * vec4(a_position.xy, z, 1.0);
     }
     `;
@@ -229,52 +220,22 @@ const initialize = (primitive: any, context: any) => {
     varying vec3 v_position;
     uniform float u_time;
     uniform sampler2D u_texture;
-    varying vec3 v_positionEC;
     varying float v_h;
-    varying vec3 v_pos;
-    // #define bottom 13.0;   // 云层底部
-    // #define top 20.0;      // 云层顶部
-    // #define width 5.0;     // 云层 xz 坐标范围
-    // 获取体积云颜色
-    vec4 getCloud(vec3 worldPos, vec3 cameraPos) {
-        vec3 direction = normalize(worldPos - cameraPos);   // 视线射线方向
-        vec3 step = direction * 0.25;   // 步长
-        vec4 colorSum = vec4(0);        // 积累的颜色
-        vec3 point = cameraPos;         // 从相机出发开始测试
-        // ray marching
-        float bottom = 13.0;
-        float top = 20.0;
-        float width = 5.0; 
-        for(int i=0; i<100; i++) {
-            point += step;
-            if(bottom>point.y || point.y>top || -width>point.x || point.x>width || -width>point.z || point.z>width){
-                continue;
-            }
-            float density = 0.1;
-            vec4 color = vec4(0.9, 0.8, 0.7, 1.0) * density;    // 当前点的颜色
-            colorSum = colorSum + color * (1.0 - colorSum.a);   // 与累积的颜色混合
-        }
-        return colorSum;
-    }
     void main()
     {
-        // vec2 k = vec2(0.0004, 0.0001);
-        // vec2 k2 = vec2(0.0001, 0.0004);
-        // float z = 0.0;
-        // z += sin(2.0 * czm_pi * dot(v_position.xy, k) - 0.002 * u_time);
-        // z += sin(2.0 * czm_pi * dot(v_position.xy, k2) - 0.002 * u_time);
+        vec2 k = vec2(0.0004, 0.0001);
+        vec2 k2 = vec2(0.0001, 0.0004);
+        float z = 0.0;
+        z += sin(2.0 * czm_pi * dot(v_position.xy, k) - 0.002 * u_time);
+        z += sin(2.0 * czm_pi * dot(v_position.xy, k2) - 0.002 * u_time);
         // divide by 2 to keep in the range [-1, 1]
-        // z *= 0.5;
+        z *= 0.5;
         // signed -> unsigned
-        // z = 0.5 + 0.5 * z;
+        z = 0.5 + 0.5 * z;
         // gl_FragColor = texture2D(u_texture, vec2(z, 0.1));
-        // vec3 color = vec3(0.0,1.0,0.0);
-        // color = mix(vec3(0.0,1.0,0.0),vec3(1.0,0.0,0.0),v_h);
-        // gl_FragColor = vec4(color, v_h);
-        vec3 cameraPos = v_pos.xyz;
-        vec3 worldPos = (czm_inverseModelView * vec4(v_positionEC, 1.0)).xyz;
-        vec4 cloud = getCloud(worldPos, cameraPos); // 云颜色
-        gl_FragColor.rgb = gl_FragColor.rgb*(1.0 - cloud.a) + cloud.rgb;    // 混色
+        vec3 color = vec3(0.0,1.0,0.0);
+        color = mix(vec3(0.0,1.0,0.0),vec3(1.0,0.0,0.0),v_h);
+        gl_FragColor = vec4(color, v_h);
 
     }
     `;

@@ -56,7 +56,7 @@ export default class cloudScene {
   setCamera() {
     // 第二参数就是 长度和宽度比 默认采用浏览器  返回以像素为单位的窗口的内部宽度和高度
     this.camera = new THREE.PerspectiveCamera(75, this.dom.offsetWidth / this.dom.offsetHeight, 0.01, 1000);
-    this.camera.position.set(0, 30, 50)
+    this.camera.position.set(0, 1, 1)
   }
 
   // 设置光源
@@ -139,7 +139,7 @@ export default class cloudScene {
         for (let x = 0; x < size; x++) {
 
           const d = 1.0 - vector.set(x, y, z).subScalar(size / 2).divideScalar(size).length();
-          data[i] = (128 + 128 * perlin.noise(x * scale / 1.5, y * scale, z * scale / 1.5)) * d * d;
+          data[i] = (size + size * perlin.noise(x * scale / 1.5, y * scale, z * scale / 1.5)) * d * d;
           i++;
 
         }
@@ -147,6 +147,7 @@ export default class cloudScene {
       }
 
     }
+    
 
     const texture = new THREE.Data3DTexture(data, size, size, size);
     texture.format = THREE.RedFormat;
@@ -224,21 +225,21 @@ export default class cloudScene {
         return float(wang_hash(seed)) / 4294967296.;
     }
 
-    vec2 hitBox( vec3 orig, vec3 dir ) {
-      const vec3 box_min = vec3( - 0.5 );
+    vec2 hitBox( vec3 orig, vec3 dir ) { //orig相机位置, dir观察方向单位向量(经过了归一化)
+      const vec3 box_min = vec3( -0.5 );
       const vec3 box_max = vec3( 0.5 );
-      vec3 inv_dir = 1.0 / dir;
+      vec3 inv_dir = 1.0 / dir; 
       vec3 tmin_tmp = ( box_min - orig ) * inv_dir;
       vec3 tmax_tmp = ( box_max - orig ) * inv_dir;
       vec3 tmin = min( tmin_tmp, tmax_tmp );
       vec3 tmax = max( tmin_tmp, tmax_tmp );
-      float t0 = max( tmin.x, max( tmin.y, tmin.z ) );
-      float t1 = min( tmax.x, min( tmax.y, tmax.z ) );
-      return vec2( t0, t1 );
+      float t0 = max( tmin.x, max( tmin.y, tmin.z ) ); //最小值中的最大值
+      float t1 = min( tmax.x, min( tmax.y, tmax.z ) ); //最大值中的最小值
+      return vec2( t0, t1 ); //大部分是t0<t1
     }
 
     float sample1( vec3 p ) {
-      return texture( map, p ).r;
+      return texture( map, p ).r; //传入vec3坐标点p,通过texture纹理函数获取map中对应位置的深度值
     }
 
     float shading( vec3 coord ) {
@@ -251,9 +252,9 @@ export default class cloudScene {
     }
 
     void main(){
-      vec3 rayDir = normalize( vDirection );
-      vec2 bounds = hitBox( vOrigin, rayDir );
-
+      vec3 rayDir = normalize( vDirection ); //各顶点到相机方向, 即观察方向
+      vec2 bounds = hitBox( vOrigin, rayDir );//vOrigin相机位置
+      //bounds : (min,max)
       if ( bounds.x > bounds.y ) discard;
 
       bounds.x = max( bounds.x, 0.0 );
@@ -263,16 +264,10 @@ export default class cloudScene {
       float delta = min( inc.x, min( inc.y, inc.z ) );
       delta /= steps;
 
-      // Jitter
-
-      // Nice little seed from
-      // https://blog.demofox.org/2020/05/25/casual-shadertoy-path-tracing-1-basic-camera-diffuse-emissive/
-      uint seed = uint( gl_FragCoord.x ) * uint( 1973 ) + uint( gl_FragCoord.y ) * uint( 9277 ) + uint( frame ) * uint( 26699 );
-      vec3 size = vec3( textureSize( map, 0 ) );
+      uint seed = uint( gl_FragCoord.x ) * uint( 1973 ) + uint( gl_FragCoord.y ) * uint( 19277 ) + uint( frame ) * uint( 26699 );
+      vec3 size = vec3( textureSize( map, 0 ) ); //textureSize纹理尺寸
       float randNum = randomFloat( seed ) * 2.0 - 1.0;
       p += rayDir * randNum * ( 1.0 / size );
-
-      //
 
       vec4 ac = vec4( base, 0.0 );
 
@@ -294,7 +289,8 @@ export default class cloudScene {
 
       }
 
-      color = linearToSRGB( ac );
+      // color = linearToSRGB( ac );//线性划分
+      color = ac;
 
       if ( color.a == 0.0 ) discard;
 

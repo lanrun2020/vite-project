@@ -206,13 +206,10 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
       varying vec2 v_st;
       varying vec2 f_dis;
       varying vec3 v_positionEC;
-      varying vec4 v_pos;
-
       uniform float uTime;
       void main()
       {
           vec4 p = czm_computePosition(); //使用czm_computePosition必须要使用---> position3DHigh,position3DLow,batchId;
-          v_pos = p;
           v_positionEC = (czm_modelViewRelativeToEye * p).xyz;
           gl_Position = czm_modelViewProjectionRelativeToEye * p;
       }`
@@ -221,28 +218,6 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
       varying vec3 v_positionEC;
       uniform float v_radius;
       uniform vec4 v_color;
-      varying vec4 v_pos;
-      // 获取体积云颜色
-      vec4 getCloud(vec3 worldPos, vec3 cameraPos) {
-          vec3 direction = normalize(worldPos - cameraPos);   // 视线射线方向
-          vec3 step = direction * 0.25;   // 步长
-          vec4 colorSum = vec4(0);        // 积累的颜色
-          vec3 point = cameraPos;         // 从相机出发开始测试
-          // ray marching
-          float bottom = 13.0;
-          float top = 20.0;
-          float width = 5.0; 
-          for(int i=0; i<100; i++) {
-              point += step;
-              if(bottom>point.y || point.y>top || -width>point.x || point.x>width || -width>point.z || point.z>width){
-                  continue;
-              }
-              float density = 0.1;
-              vec4 color = vec4(0.9, 0.8, 0.7, 1.0) * density;    // 当前点的颜色
-              colorSum = colorSum + color * (1.0 - colorSum.a);   // 与累积的颜色混合
-          }
-          return colorSum;
-      }
       void main()
       {
           float time = fract(czm_frameNumber*0.005);
@@ -253,11 +228,7 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
           float d = 1.0 - dis/v_radius;
           float m = mod(d + time, sp);
           float a = step(m, sp*0.5);
-          gl_FragColor = vec4(color.xyz, 1.0);
-          vec3 cameraPos = v_pos.xyz;
-          vec3 worldPos = (czm_inverseModelView * vec4(v_positionEC, 1.0)).xyz;
-          vec4 cloud = getCloud(worldPos, cameraPos); // 云颜色
-          gl_FragColor.rgb = cloud.rgb;    // 混色
+          gl_FragColor = vec4(color.xyz, a * d);
       }`
       const appearance = new Cesium.MaterialAppearance({
         translucent: true,
