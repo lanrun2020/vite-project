@@ -642,7 +642,9 @@ export const getScanMaterial = (options?: { side?: object, transparent?: boolean
     side: options?.side || THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
     transparent: options?.transparent || true,// 是否透明
     vertexShader: tubeShader.vertexshader, // 顶点着色器
-    fragmentShader: tubeShader.fragmentshader // 片元着色器
+    fragmentShader: tubeShader.fragmentshader, // 片元着色器
+    depthWrite: false, 
+    depthTes: false, 
   })
   return material
 }
@@ -954,7 +956,9 @@ export const getRotateScanMaterial = (options?: { side?: object, transparent?: b
     side: options?.side || THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
     transparent: options?.transparent || true,// 是否透明
     vertexShader: tubeShader.vertexshader, // 顶点着色器
-    fragmentShader: tubeShader.fragmentshader // 片元着色器
+    fragmentShader: tubeShader.fragmentshader, // 片元着色器
+    depthWrite: false, // 渲染此材质是否对深度缓冲区有任何影响。默认为true,为了不遮挡后面的模型，这里设置为false
+    depthTes: false, //是否在渲染此材质时启用深度测试。默认为 true
   })
   return material
 }

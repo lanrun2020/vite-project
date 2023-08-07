@@ -147,6 +147,28 @@ export default class cloudScene {
       }
 
     }
+    // const geometry2 = new THREE.BufferGeometry()
+    // const arr = []
+    // const colors = []
+    // const radius = 128
+    // let t = 0
+    // for (let i = 0; i < radius; i++) {
+    //   for (let j = 0; j < radius; j++) {
+    //     for (let k = 0;k < radius; k++) {
+    //       arr.push(i,j,k)
+    //       t++
+    //       colors.push(0.0,data[t]/20,0.0)
+    //     }
+    //   }
+    // }
+    // const vertices = new Float32Array(arr);
+
+    // // itemSize = 3 因为每个顶点都是一个三元组。
+    // geometry2.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    // geometry2.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+    // const material2 = new THREE.PointsMaterial({ size: 0.1, vertexColors:true }); //vertexColors采用顶点颜色
+    // const Points = new THREE.Points(geometry2, material2);
+    // this.scene.add(Points)
     
 
     const texture = new THREE.Data3DTexture(data, size, size, size);

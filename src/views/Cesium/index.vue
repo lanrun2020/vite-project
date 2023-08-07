@@ -57,6 +57,7 @@ import { addParticleSystem } from "./addParticleSystem";
 import { addParticleSystem2 } from "./addParticleSystem2";
 import { addCircleWall } from "./addCircleWall";
 import { addWind } from "./addWind";
+import { addBox } from "./addBox";
 import test from "node:test";
 type toolItemType = {
   title: string;
@@ -224,6 +225,11 @@ let toolList: Ref<toolItemType[]> = ref([
     title: "云雾粒子",
     value: 31,
     active: false,
+  },
+  {
+    title: "Box",
+    value: 32,
+    active: false,
   }
 ])
 onMounted(async () => {
@@ -346,6 +352,9 @@ const toolChecked = (active: boolean, value: number) => {
       break;
     case 31:
       addParticleSystem2(viewer, active);
+      break;
+    case 32:
+      addBox(viewer, active);
       break;
     default: break;
   }

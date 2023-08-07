@@ -149,8 +149,10 @@ export default class materialScene {
   setRenderer() {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
-      alpha: true
+      alpha: true,
+      logarithmicDepthBuffer: true
     });
+    this.renderer.sortObjects = true
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     this.renderer.setClearColor(0x041336);
@@ -533,6 +535,9 @@ export default class materialScene {
     this.shaderMaterialList.push(scanMaterial4)
     const circle = new THREE.Mesh(geometry, scanMaterial4);
     circle.rotation.x = -Math.PI / 2
+    circle.material.polygonOffset=true;//开启偏移
+    circle.material.polygonOffsetFactor=-1;//偏移因子
+    circle.material.polygonOffsetUnits=1;//偏移单位
     this.scene.add(circle);
 
     return  {
