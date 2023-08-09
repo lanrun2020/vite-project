@@ -59,6 +59,8 @@ import { addCircleWall } from "./addCircleWall";
 import { addWind } from "./addWind";
 import { addBox } from "./addBox";
 import test from "node:test";
+import "./texture3D"
+import { addPrimitive } from "./lxs_volumn"
 type toolItemType = {
   title: string;
   value: number;
@@ -412,6 +414,14 @@ const initCesium = () => {
   //经纬度
   var lon = Cesium.Math.toDegrees(carto.longitude);
   var lat = Cesium.Math.toDegrees(carto.latitude);
+  addPrimitive(viewer)
+  // viewer.camera.lookAt(new Cesium.Cartesian3.fromDegrees(124.21936679679918,
+  //   45.85136872098397, 80), new Cesium.Cartesian3(2, 2, 2));
+    viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(124.21936679679918,
+    45.85136872098397, 100),
+        duration: 1.6
+      })
   setTimeout(() => {
     viewer.render();
     let canvas = viewer.scene.canvas;
