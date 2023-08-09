@@ -419,7 +419,7 @@ const initCesium = () => {
   //   45.85136872098397, 80), new Cesium.Cartesian3(2, 2, 2));
     viewer.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(124.21936679679918,
-    45.85136872098397, 100),
+    45.85136872098397, 10),
         duration: 1.6
       })
   setTimeout(() => {

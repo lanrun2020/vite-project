@@ -15,12 +15,12 @@ const fragmentShaderSource = `precision mediump sampler3D;
     varying vec2 vst;
 
     float getData(vec3 pos_lxs){
-        vec3 pos=pos_lxs/(halfdim*2.);
-        return texture(volumnTexture_lxs,pos).a;
+        vec3 pos = pos_lxs/(halfdim*2.);
+        return texture(volumnTexture_lxs,pos).a;//传入位置获取当前位置的值
     }
-    vec2 hitBox( vec3 orig, vec3 dir ) {
-        vec3 box_min = vec3( -halfdim );
-        vec3 box_max = vec3( halfdim );
+    vec2 hitBox( vec3 orig, vec3 dir ) { //org相机位置,dir归一化的方向向量
+        vec3 box_min = vec3( -halfdim ); //包围盒最小值
+        vec3 box_max = vec3( halfdim ); //包围盒最大值
         vec3 inv_dir = 1.0 / dir;
         vec3 tmin_tmp = ( box_min - orig ) * inv_dir;
         vec3 tmax_tmp = ( box_max - orig ) * inv_dir;
@@ -48,8 +48,8 @@ const fragmentShaderSource = `precision mediump sampler3D;
 
     void main()
     {
-        vec3 rayDir=normalize(vDirection);
-        vec2 bounds=hitBox(vOrigin,rayDir);
+        vec3 rayDir = normalize(vDirection);//方向向量 归一化
+        vec2 bounds = hitBox(vOrigin, rayDir);
 
         if(bounds.x>bounds.y) discard;
         bounds.x=max(bounds.x,0.0);
@@ -83,8 +83,8 @@ const vertexShaderSource = `
 
   void main()
   {    
-      vOrigin=czm_encodedCameraPositionMCHigh+czm_encodedCameraPositionMCLow;
-      vDirection=position-vOrigin;
+      vOrigin=czm_encodedCameraPositionMCHigh+czm_encodedCameraPositionMCLow; //相机位置
+      vDirection=position-vOrigin;//各顶点方向向量
       vst=st;
 
       gl_Position = czm_modelViewProjection * vec4(position,1.0);
@@ -184,7 +184,7 @@ class lxs_primitive {
         frameState.commandList.push(this.drawCommand);
     }
 }
-const dim_lxs = new Cesium.Cartesian3(5, 5, 5);
+const dim_lxs = new Cesium.Cartesian3(2.0, 2.0, 2.0);
 var geometry = Cesium.BoxGeometry.fromDimensions({
     vertexFormat: Cesium.VertexFormat.POSITION_AND_ST, //顶点格式
     dimensions: dim_lxs, //尺寸
@@ -196,7 +196,7 @@ const primitive_modelMatrix = Cesium.Matrix4.multiplyByTranslation(
             45.85136872098397
         )
     ),
-    new Cesium.Cartesian3(0.0, 0.0, 80.0),
+    new Cesium.Cartesian3(0.0, 0.0, 0.5),//最后一个参数控制高度
     new Cesium.Matrix4()
 );
 /**
@@ -207,24 +207,23 @@ const size = 128;
 const data = new Uint8Array(size * size * size);
 let dx, dy, dz;
 let i = 0;
+let s = 6.5; //复杂度
 for (let z = 0; z < size; z++) {
     for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
             dx = x * 1.0 / size;
             dy = y * 1.0 / size;
             dz = z * 1.0 / size;
-            const d = noise(dx * 6.5, dy * 6.5, dz * 6.5);
+            const d = noise(dx * s, dy * s, dz * s);
             data[i++] = d * 128 + 128;
-            // data[i++]=0;
         }
     }
 }
-
 const options = {
     modelMatrix: primitive_modelMatrix,
     geometry_lxs: geometry,
     data: data,
-    dim: new Cesium.Cartesian3(1, 1, 1)
+    dim: dim_lxs
 };
 
 export const addPrimitive = (viewer) => {
