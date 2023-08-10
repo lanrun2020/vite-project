@@ -280,7 +280,10 @@ export const getTextMaterial = (options?: { textContent?:string, textWidth?:numb
       uniform vec3 color;
       void main() {
           vec2 vUv2 = vUv;
-          gl_FragColor = texture2D(u_map, vUv2) + vec4(color, u_opacity);;
+          gl_FragColor = texture2D(u_map, vUv2) + vec4(color, u_opacity);
+          if (gl_FragColor.a < 0.4) {
+            discard;
+          }
       }`
     }
     const material = new THREE.ShaderMaterial({

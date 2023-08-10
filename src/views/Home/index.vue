@@ -15,6 +15,8 @@
     <el-button @click="test3">测试3</el-button>
     <el-button @click="screenFull">全屏</el-button>
     <input type="file" @change="changeFile" />
+    <input ref="input1" type="number" @click="changeNumber" />
+
 
     <el-table :data="tableData" border :span-method="objectSpanMethod" style="width: 100%; margin-top: 20px">
       <el-table-column prop="id" label="ID" width="180">
@@ -43,6 +45,7 @@ const num1 = ref(0);
 const num2 = ref(0);
 const count = ref(0);
 const obj = { name: 'jack', age: 20 }
+const input1 = ref();
 const newObj = ref(obj.age)
 const newObj2 = toRef(obj, 'age')
 const newObj3 = toRefs(obj)
@@ -102,20 +105,50 @@ const changeFile = async (e: Event) => {
   const res = await hash(chunks)
   console.log(res);
 }
+const changeNumber = (e) => {
+  console.log(e);
+  console.log(input1.value);
+  
+  const i = getCursortPosition(input1.value)
+  console.log(i);
+  
+}
+const getCursortPosition = (element) => {
 
+var CaretPos = 0;
+
+if (document.selection) {//支持IE
+
+  element.focus();
+
+  var Sel = document.selection.createRange();
+
+  Sel.moveStart('character', -element.value.length);
+
+  CaretPos = Sel.text.length;
+
+}
+
+else if (element.selectionStart || element.selectionStart == '0')//支持firefox
+
+  CaretPos = element.selectionStart;
+
+return (CaretPos);
+
+}
 //文件切片
 const createChunks = (file: File, chunksSize: number) => {
-  const result:Blob[] = []
+  const result: Blob[] = []
   for (let i = 0; i < file.size; i += chunksSize) {
     result.push(file.slice(i, i + chunksSize))
   }
   return result
 }
 
-const hash = (chunks:Blob[]) => {
+const hash = (chunks: Blob[]) => {
   return new Promise((reslove) => {
     const spark = new SparkMD5()
-    function _read(i:number) {
+    function _read(i: number) {
       if (i >= chunks.length) {
         reslove(spark.end())
         return
@@ -131,7 +164,7 @@ const hash = (chunks:Blob[]) => {
     }
     _read(0)
   })
-  
+
 }
 const sum = computed(() => {
   return num1.value + num2.value;

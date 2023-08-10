@@ -366,12 +366,12 @@ const initCesium = () => {
     viewer.destroy();
   }
 
-  // const overlay = new Cesium.TileMapServiceImageryProvider({
-  //   url:'/map',
-  //   fileExtension: 'png',
-  //   // fileExtension:'png',
-  //   maximumLevel:19,
-  // })
+  const overlay = new Cesium.TileMapServiceImageryProvider({
+    url:'/map',
+    fileExtension: 'png',
+    // fileExtension:'png',
+    maximumLevel:19,
+  })
   viewer = new Cesium.Viewer("cesiumContainer", {
     animation: true, // 是否显示时钟clock动画控件
     baseLayerPicker: true, // 是否显示图层选择控件
@@ -463,7 +463,7 @@ const initCesium = () => {
   //   // fileExtension:'png',
   //   maximumLevel:9,
   // })
-  // viewer.imageryLayers.addImageryProvider(overlay);
+  viewer.imageryLayers.addImageryProvider(overlay);
 
   // viewer.camera.flyTo({
   //   destination: Cesium.Cartesian3.fromDegrees(110, 30, 10000000),

@@ -63,7 +63,6 @@ const fragmentShaderSource = `precision mediump sampler3D;
             float d=getData(p+halfdim);
             if(d>0.6){
                 color.rgb=normal(p+0.5)*0.5+(p*1.5+0.25);
-                // color=vec4(d);
                 color.a=1.;
                 break;
             }

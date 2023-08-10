@@ -1,6 +1,6 @@
 import * as T from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { ImprovedNoise } from 'three/examples/jsm//math/ImprovedNoise.js';
+import { ImprovedNoise } from 'three/examples/jsm/math/ImprovedNoise.js';
 import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js'
 const THREE = T
 let that: cloudScene
