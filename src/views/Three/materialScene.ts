@@ -122,6 +122,10 @@ export default class materialScene {
       name: 'chessboard',
       label: '棋盘格',
       method: 'addChessboard',
+    },{
+      name: 'transform',
+      label: '变换',
+      method: 'addTransform',
     }
     ]
 
@@ -658,6 +662,21 @@ export default class materialScene {
     }
   }
 
+  addTransform() {
+    //变换
+    const planeGeometry = new THREE.PlaneGeometry(200, 100, 1, 1);//长宽,长宽分段
+    planeGeometry.rotateX(- Math.PI / 2);
+    const material = getChessboardMaterial()
+    this.shaderMaterialList.push(material)
+    const mesh = new THREE.Mesh(planeGeometry, material);
+    mesh.position.set(0, -0.1, 0)
+    this.scene.add(mesh);
+
+    return  {
+      entities: [mesh],
+      materials: [material],
+    }
+  }
   //面对象
   addBufferGeometry() {
     const geometry = new THREE.BufferGeometry() //创建一个Buffer类型几何体对象
