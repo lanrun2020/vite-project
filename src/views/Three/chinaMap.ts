@@ -166,7 +166,8 @@ export default class chinaMap {
     //   shapeGeometryObj.children.push(line)
     // })
     shapeGeometryObj.children.push(group)
-    this.group.add(shapeGeometryObj);
+    return shapeGeometryObj
+    // this.group.add(shapeGeometryObj);
   }
   //绘制边界线
   drawLine(posArr: Array<Array<number>>) {
@@ -178,13 +179,13 @@ export default class chinaMap {
     posArr.forEach((item: Array<number>) => {
       points1.push(
         item[0] - this.offsetX,
-        item[1] - this.offsetY,
-        1.01
+        1.01,
+        -item[1] + this.offsetY,
       );
       points2.push(
         item[0] - this.offsetX,
-        item[1] - this.offsetY,
-        -0.01
+        -0.01,
+        -item[1] + this.offsetY,
       );
     });
     if (points1.length) {
@@ -195,7 +196,7 @@ export default class chinaMap {
       const line2 = new THREE.Line(geometry2, lineMaterial);
       const group = new THREE.Group()
       group.add(line1,line2)
-      group.scale.y = 1.2;
+      group.scale.z = 1.2;
       return group
     }
   }
@@ -211,8 +212,8 @@ export default class chinaMap {
     const textWidth = tempCtx.measureText(textContent).width;
     const material = getTextMaterial({ textContent,textWidth })
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height, 128, 128), material)
-    plane.position.set(position[0] - this.offsetX, position[1] - this.offsetY,2.0)
-    plane.position.y = 1.2 * plane.position.y
+    plane.position.set(position[0] - this.offsetX, 2.0, -position[1] + this.offsetY)
+    plane.position.z = 1.2 * plane.position.z
     this.scene.add(plane)
   }
   async drawMap() {
@@ -224,19 +225,25 @@ export default class chinaMap {
       this.controls.target = new THREE.Vector3(0, 0, 0)
       const features = res.data.features
       features.forEach((worldItem: { type: string, properties: { adcode: number, name:string,center }, geometry: { coordinates: Array<Array<Array<Array<number>>>> } }) => {
+        const group = new THREE.Group()
         worldItem.geometry.coordinates.forEach((worldChildItem: Array<Array<Array<number>>>) => {
           worldChildItem.forEach((countryItem: Array<Array<number>>) => { //每个版块的点数组
-            this.drawExtrude(countryItem, worldItem.properties.adcode) //传递数据画出地图的shape，返回结果再传到drawExtrude方法得到ExtrudeGeometry网格
+            const mesh = this.drawExtrude(countryItem, worldItem.properties.adcode) //传递数据画出地图的shape，返回结果再传到drawExtrude方法得到ExtrudeGeometry网格
+            group.add(mesh)
           });
         });
+        this.group.add(group)
         that.addTextPlane(worldItem.properties.name,worldItem.properties.center)
       });
+      console.log(this.group);
       that.camera.position.x = 0
       that.camera.position.y = 0
       this.group.scale.y = 1.2; //group里面包含所有版块网格
+      this.group.rotation.x = -Math.PI / 2
       this.scene.add(this.group);
-      this.lineGroup.scale.y = 1.2; //lineGruop里面包含所有线的网格
-      this.scene.add(this.lineGroup);
+      // this.lineGroup.scale.y = 1.2; //lineGruop里面包含所有线的网格
+      // this.lineGroup.rotation.x = -Math.PI / 2
+      // this.scene.add(this.lineGroup);
     })
   }
 
@@ -288,7 +295,8 @@ export default class chinaMap {
     mouse.x = ((event.clientX - that.dom.offsetLeft) / that.dom.offsetWidth) * 2 - 1;
     mouse.y = - ((event.clientY - that.dom.offsetTop) / that.dom.offsetHeight) * 2 + 1;
     that.raycaster.setFromCamera(mouse, that.camera);
-    const intersects = that.raycaster.intersectObjects(that.group.children,false);
+    const intersects = that.raycaster.intersectObjects(that.group.children, false);
+    
     if (intersects[0] && intersects[0].object ) {
       // console.log(intersects[0].object);
       if (that.previousObj !== intersects[0].object){ //获取到了与上次不同的对象
@@ -297,33 +305,33 @@ export default class chinaMap {
             const obj2 = that.previousObj
             that.previousObj = null
             obj2.material[0].color = new THREE.Color(that.bgColor);
-            that.animateMap(obj2, 1.0, 200)
-            that.animateMap(obj2.children[0], 1.0, 200)
+            that.animateMap(obj2, 1.0, 200, 'z')
+            that.animateMap(obj2.children[0], 1.0, 200, 'y')
           }
           intersects[0].object['material'][0].color = new THREE.Color(0xffaa00);
           that.previousObj = intersects[0].object; //previousObj保存悬浮的对象，鼠标移开后恢复颜色。
           const obj = intersects[0].object
-          that.animateMap(obj, 1.5, 200)
-          that.animateMap(obj.children[0], 1.5, 200)
+          that.animateMap(obj, 1.5, 200, 'z')
+          that.animateMap(obj.children[0], 1.5, 200, 'y')
       }
     } else if(that.previousObj) { //鼠标没有获取到对象,并且之前有获取的对象
       const obj = that.previousObj
       that.previousObj = null
       obj.material[0].color = new THREE.Color(that.bgColor);
-      that.animateMap(obj, 1.0, 200)
-      that.animateMap(obj.children[0], 1.0, 200)
+      that.animateMap(obj, 1.0, 200, 'z')
+      that.animateMap(obj.children[0], 1.0, 200, 'y')
     }
   }
 
-  animateMap(obj,scaleH,time) { //current1相机当前位置,target1相机目标位置，current2控制器当前位置，target2控制器目标位置
+  animateMap(obj,scaleH,time,axis) { //current1相机当前位置,target1相机目标位置，current2控制器当前位置，target2控制器目标位置
     const tween = new TWEEN.Tween({
-      scale: obj.scale.z, // 相机当前位置x
+      scale: obj.scale[axis], // 相机当前位置x
     });
     tween.to({
       scale: scaleH, // 新的相机位置x
     }, time);
     tween.onUpdate(function () {
-      obj.scale.z = this.scale;
+      obj.scale[axis] = this.scale;
     })
     // tween.easing(TWEEN.Easing.Bounce.In);
     tween.start();
