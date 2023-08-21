@@ -305,7 +305,7 @@ export const getTextMaterial = (options?: { textContent?:string, textWidth?:numb
           type: "f"
         },
       },
-      side: THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+      side: THREE.FrontSide,// side属性的默认值是前面THREE.FrontSide 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
       transparent: true,// 是否透明
       vertexShader: tubeShader.vertexshader, // 顶点着色器
       fragmentShader: tubeShader.fragmentshader // 片元着色器
@@ -588,7 +588,7 @@ float heightMapTracing(vec3 ori, vec3 dir, out vec3 p) {
 }
 
 // 扫描材质 圆的扩散扫描材质
-export const getScanMaterial = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number }) => {
+export const getScanMaterial = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number, depthWrite?: boolean, depthTest?: boolean }) => {
   const tubeShader = {
     vertexshader: `
         varying vec2 vUv;
@@ -646,8 +646,8 @@ export const getScanMaterial = (options?: { side?: object, transparent?: boolean
     transparent: options?.transparent || true,// 是否透明
     vertexShader: tubeShader.vertexshader, // 顶点着色器
     fragmentShader: tubeShader.fragmentshader, // 片元着色器
-    depthWrite: false, 
-    depthTes: false, 
+    depthWrite: options?.depthWrite || true,
+    depthTest: options?.depthTest || true,
   })
   return material
 }
@@ -961,7 +961,7 @@ export const getRotateScanMaterial = (options?: { side?: object, transparent?: b
     vertexShader: tubeShader.vertexshader, // 顶点着色器
     fragmentShader: tubeShader.fragmentshader, // 片元着色器
     depthWrite: false, // 渲染此材质是否对深度缓冲区有任何影响。默认为true,为了不遮挡后面的模型，这里设置为false
-    depthTes: false, //是否在渲染此材质时启用深度测试。默认为 true
+    depthTest: false, //是否在渲染此材质时启用深度测试。默认为 true
   })
   return material
 }

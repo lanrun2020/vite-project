@@ -10,6 +10,7 @@ onMounted(() => {
 });
 onUnmounted(() => {
   map.stop()
+  console.log('stop');
 })
 const init = () => {
   const dom = document.getElementById("china") as HTMLElement;
@@ -20,5 +21,6 @@ const init = () => {
 #china {
   width: 100%;
   height: 100%;
+  position: relative;
 }
 </style>

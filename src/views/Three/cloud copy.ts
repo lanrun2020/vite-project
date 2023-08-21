@@ -277,7 +277,7 @@ export default class cloudScene {
       side: THREE.DoubleSide,
       transparent: true,
       depthWrite: false,
-      depthTes: false,
+      depthTest: false,
     });
 
     mesh = new THREE.Mesh(geometry, material);

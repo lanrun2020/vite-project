@@ -118,8 +118,18 @@ export default class cloudScene {
 
   // 停止渲染
   stop() {
-    window.removeEventListener('resize', this.onWindowResize)
     cancelAnimationFrame(this.requestId)
+    window.removeEventListener('resize', this.onWindowResize)
+    this.renderer.forceContextLoss()
+    this.renderer.dispose()
+    this.scene.clear()
+    this.scene = null
+    this.requestId = null
+    this.camera = null
+    this.controls = null
+    this.renderer.domElement = null
+    this.renderer = null
+    this.dom = null
   }
 
   addCloud() {
