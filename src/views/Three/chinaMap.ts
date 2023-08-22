@@ -4,6 +4,7 @@ import TWEEN from "tween"
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { getFlowMaterialByY, getScanMaterial, getTextMaterial } from './shaderMaterial'
 import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js'
+import { colorGradient } from '@/utils/colorGradient'
 const THREE = T
 let that: chinaMap
 export default class chinaMap {
@@ -290,18 +291,18 @@ export default class chinaMap {
     if (active) {
       await axios.get('../src/json/gdp.json').then((res) => {
         const data = res.data.data[0].data
+        const arr = data.map((item) => {
+          return Number(item.value)
+        })
+        const max = Math.max(...arr)
         for(const index in children) {
           const group = children[index].children[0]
           const node = data.find((item)=>item.code === children[index].properties.adcode.toString())
           if(node && node.value){
-            this.addCyliner(group, children[index].properties.center, node.value)
+            this.addCyliner(group, children[index].properties.center, node.value, max)
           }
         }
       })
-      // for(const index in children) {
-      //   const group = children[index].children[0]
-      //   this.addCyliner(group, children[index].properties.center)
-      // }
     } else {
       for(const index in children) {
         const group = children[index].children[0]
@@ -310,11 +311,12 @@ export default class chinaMap {
     }
   }
 
-  addCyliner(group, position, value) {
+  addCyliner(group, position, value, max) {
     if(!position || !position.length) return
     const h = value/10000
+    const color = colorGradient(['#00ff00','#ffa200','#ff0000'], value/max)
     const geometry = new THREE.CylinderGeometry(0.1, 0.1, h, 12, 1, true);//true上下底面不封闭
-    const flowMaterial = getFlowMaterialByY({ height: h, thickness: 0.95, speed: 0.5, repeat: 3 }) //沿Y轴的流动材质
+    const flowMaterial = getFlowMaterialByY({ color:new THREE.Color(color), height: h, thickness: 0.95, speed: 0.5, repeat: 3 }) //沿Y轴的流动材质
     const cylinder = new THREE.Mesh(geometry, flowMaterial);
     this.shaderMaterialList.push(flowMaterial)
     cylinder.position.set(position[0] - this.offsetX, h/2+1, (-position[1] + this.offsetY)*1.2-0.2)

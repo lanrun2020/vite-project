@@ -13,7 +13,7 @@ import chinaMap from "./chinaMap"
 let map: chinaMap
 let toolList = ref([
   {
-    name: '柱状图',
+    name: '2022GDP',
     active: false,
     value: 'addCyliners'
   },{
