@@ -19,7 +19,7 @@ export default class chinaMap {
   private offsetY = 32 //坐标y偏移，使地图中心的位置为0,0
   private scaleMap = 1.2 //缩放倍数
   private bgColor = 0x131A2C
-  private pickColor = '#ffaa00'
+  private pickColor = '#202D4C'
   private raycaster: THREE.Raycaster
   private previousObj = null
   private previousObj2 = null
@@ -125,10 +125,10 @@ export default class chinaMap {
     gui.domElement.style.position = 'absolute'
     gui.domElement.style.right = '0px'
     const parameters = {
-      color: 0xffaa00
+      pickColor: this.pickColor
     }
-    gui.addColor(parameters, 'color')
-    .name('color')
+    gui.addColor(parameters, 'pickColor')
+    .name('pickColor')
     .onChange((value) => this.guiUpdate(value))
   }
   guiUpdate(value) {
@@ -193,7 +193,7 @@ export default class chinaMap {
     const group = new THREE.Group()
     const shapeArr = this.drawShape(geometrys)
     this.drawLine(group, geometrys); //传递数据画出地图边线
-    this.addCyliner(group, properties.center)
+    // this.addCyliner(group, properties.center)
     this.addTextPlane(group, properties.name, properties.center)
     const geometry = new THREE.ExtrudeGeometry(shapeArr, this.options); //挤压几何体
     const material1 = new THREE.MeshPhongMaterial({ // 镜面高光材质
@@ -205,6 +205,8 @@ export default class chinaMap {
     });
     const shapeGeometryObj = new THREE.Mesh(geometry, [material1, material2]);
     shapeGeometryObj.name = properties.adcode;
+    // console.log(properties.name,properties.adcode);
+    shapeGeometryObj.properties = properties
     shapeGeometryObj.children.push(group)
     return shapeGeometryObj
   }
@@ -232,7 +234,9 @@ export default class chinaMap {
         geometry2.setAttribute('position', new THREE.BufferAttribute(new Float32Array(points2)!, 3))
         const lineMaterial = new THREE.LineBasicMaterial({ color: 0x008bfb });
         const line1 = new THREE.Line(geometry1, lineMaterial);
+        line1.name = '上层边界线'
         const line2 = new THREE.Line(geometry2, lineMaterial);
+        line2.name = '底层边界线'
         group.add(line1,line2)
       }
     })
@@ -251,6 +255,7 @@ export default class chinaMap {
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height, 128, 128), material)
     plane.position.set(position[0] - this.offsetX, 1.4, -position[1] + this.offsetY)
     plane.position.z = this.scaleMap * plane.position.z
+    plane.name = '名称标签'
     group.add(plane)
   }
   async drawMap() {
@@ -273,20 +278,63 @@ export default class chinaMap {
         const mesh = this.drawExtrude(grometrys, worldItem.properties) //传递数据画出地图的shape，返回结果再传到drawExtrude方法得到ExtrudeGeometry网格
         this.group.add(mesh)
       });
+      console.log(this.group);
       this.group.scale.y = this.scaleMap; //group里面包含所有版块网格
       this.group.rotation.x = -Math.PI / 2
       this.scene.add(this.group);
     })
   }
-  addCyliner(group, position) {
+
+  async addCyliners(active) {
+    const children = this.group.children
+    if (active) {
+      await axios.get('../src/json/gdp.json').then((res) => {
+        const data = res.data.data[0].data
+        for(const index in children) {
+          const group = children[index].children[0]
+          const node = data.find((item)=>item.code === children[index].properties.adcode.toString())
+          if(node && node.value){
+            this.addCyliner(group, children[index].properties.center, node.value)
+          }
+        }
+      })
+      // for(const index in children) {
+      //   const group = children[index].children[0]
+      //   this.addCyliner(group, children[index].properties.center)
+      // }
+    } else {
+      for(const index in children) {
+        const group = children[index].children[0]
+        this.removeChild(group, 'cyliner')
+      }
+    }
+  }
+
+  addCyliner(group, position, value) {
     if(!position || !position.length) return
-    const h = Math.random()*4
+    const h = value/10000
     const geometry = new THREE.CylinderGeometry(0.1, 0.1, h, 12, 1, true);//true上下底面不封闭
-    const flowMaterial = getFlowMaterialByY({ height: h, thickness: 0.98, speed: 0.5, repeat: 2 }) //沿Y轴的流动材质
+    const flowMaterial = getFlowMaterialByY({ height: h, thickness: 0.95, speed: 0.5, repeat: 3 }) //沿Y轴的流动材质
     const cylinder = new THREE.Mesh(geometry, flowMaterial);
     this.shaderMaterialList.push(flowMaterial)
     cylinder.position.set(position[0] - this.offsetX, h/2+1, (-position[1] + this.offsetY)*1.2-0.2)
+    cylinder.name = 'cyliner'
     group.add(cylinder)
+  }
+
+  //根据名称移除节点
+  removeChild(group, name:string) {
+    if (!name) return
+    const obj = group.children.find((item) => item.name === name)
+    if (obj) {
+      //判断材质是否添加到了更新时间的材质列表中，如果存在则移除
+      this.shaderMaterialList = this.shaderMaterialList.filter((item) => item !== obj.material)
+      group.remove(obj)
+    }
+  }
+
+  printLog(active) {
+    console.log(active, this.shaderMaterialList.length)
   }
 
   async drawMap2(code: string, num: number) {
