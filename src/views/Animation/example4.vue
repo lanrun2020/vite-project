@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang='ts'>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import png1 from '../../assets/guoqi.png'
 import png2 from '../../assets/user.png'
 import png3 from '../../assets/floorMarble.jpg'
@@ -58,8 +58,8 @@ const handleMousemove = () => {
 onMounted(() => {
   mapBar.value.addEventListener('mousemove', handleMousemove, false)
 })
-onUnmounted(() => {
-  mapBar.value.removeEventListener('mousemove', handleMousemove)
+onBeforeUnmount(() => {
+  mapBar.value.removeEventListener('mousemove', handleMousemove, false)
 })
 </script>
 
