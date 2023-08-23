@@ -5,6 +5,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { getFlowMaterialByY, getScanMaterial, getTextMaterial } from './shaderMaterial'
 import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js'
 import { colorGradient } from '@/utils/colorGradient'
+import * as echarts from 'echarts'
+
 const THREE = T
 let that: chinaMap
 export default class chinaMap {
@@ -29,6 +31,7 @@ export default class chinaMap {
   private level = 0
   private shaderMaterialList = []
   private clock: THREE.Clock
+  private myChart = null
   private options = {
     depth: 1, // 定义图形拉伸的深度，默认100
     steps: 0, // 拉伸面方向分为多少级，默认为1
@@ -190,12 +193,11 @@ export default class chinaMap {
   }
 
   //绘制多边形
-  drawExtrude(geometrys: Array<Array<Array<number>>>, properties: {adcode:number,name:string,center}) {
+  drawExtrude(geometrys: Array<Array<Array<number>>>, properties: {adcode:number,name:string,center,centroid}) {
     const group = new THREE.Group()
     const shapeArr = this.drawShape(geometrys)
     this.drawLine(group, geometrys); //传递数据画出地图边线
-    // this.addCyliner(group, properties.center)
-    this.addTextPlane(group, properties.name, properties.center)
+    this.addTextPlane(group, properties.name, properties.centroid)
     const geometry = new THREE.ExtrudeGeometry(shapeArr, this.options); //挤压几何体
     const material1 = new THREE.MeshPhongMaterial({ // 镜面高光材质
       color: this.bgColor, // 多面体面颜色
@@ -267,7 +269,7 @@ export default class chinaMap {
       this.lineGroup = new THREE.Group()
       // this.controls.target = new THREE.Vector3(0, 0, 0)
       const features = res.data.features
-      features.forEach((worldItem: { type: string, properties: { adcode: number, name:string,center }, geometry: { coordinates: Array<Array<Array<Array<number>>>> } }) => {
+      features.forEach((worldItem: { type: string, properties: { adcode: number, name:string, center, centroid }, geometry: { coordinates: Array<Array<Array<Array<number>>>> } }) => {
         const grometrys = []
         worldItem.geometry.coordinates.forEach((worldChildItem: Array<Array<Array<number>>>) => {
           const points = []
@@ -289,21 +291,43 @@ export default class chinaMap {
   async addCyliners(active) {
     const children = this.group.children
     if (active) {
+      this.clock.start() //重新开始计时，刷新动画
       await axios.get('../src/json/gdp.json').then((res) => {
         const data = res.data.data[0].data
         const arr = data.map((item) => {
           return Number(item.value)
         })
         const max = Math.max(...arr)
+        const yData = []
+        const seriesData = []
+        const sortArr = data.sort((a,b)=>{
+          return a.value - b.value
+        })
+        sortArr.forEach((item) => {
+          const color = colorGradient(['#00ff00','#ffa200','#ff0000'], item.value/max)
+          item.color = color
+          if (item.value) {
+            yData.push(item.name)
+            seriesData.push({
+              value: item.value,
+              itemStyle: {
+                color
+              }
+            })
+          }
+        })
+        this.initCharts(yData, seriesData)
         for(const index in children) {
           const group = children[index].children[0]
-          const node = data.find((item)=>item.code === children[index].properties.adcode.toString())
+          const node = sortArr.find((item)=>item.code === children[index].properties.adcode.toString())
           if(node && node.value){
-            this.addCyliner(group, children[index].properties.center, node.value, max)
+            this.addCyliner(group, children[index].properties.centroid, node.value*10.0/max, node.color)
           }
         }
       })
     } else {
+      this.myChart.clear()
+      this.myChart.dispose()
       for(const index in children) {
         const group = children[index].children[0]
         this.removeChild(group, 'cyliner')
@@ -311,17 +335,106 @@ export default class chinaMap {
     }
   }
 
-  addCyliner(group, position, value, max) {
+  addCyliner(group, position, height, color) {
     if(!position || !position.length) return
-    const h = value/10000
-    const color = colorGradient(['#00ff00','#ffa200','#ff0000'], value/max)
-    const geometry = new THREE.CylinderGeometry(0.1, 0.1, h, 12, 1, true);//true上下底面不封闭
-    const flowMaterial = getFlowMaterialByY({ color:new THREE.Color(color), height: h, thickness: 0.95, speed: 0.5, repeat: 3 }) //沿Y轴的流动材质
+    const geometry = new THREE.CylinderGeometry(0.1, 0.1, height, 24, 1, true);//true上下底面不封闭
+    const flowMaterial = getFlowMaterialByY({ color:new THREE.Color(color), height, thickness: 0.98, speed: 0.5, repeat: 3, duration: 0.5 }) //沿Y轴的流动材质
     const cylinder = new THREE.Mesh(geometry, flowMaterial);
     this.shaderMaterialList.push(flowMaterial)
-    cylinder.position.set(position[0] - this.offsetX, h/2+1, (-position[1] + this.offsetY)*1.2-0.2)
+    cylinder.position.set(position[0] - this.offsetX, height/2+1, (-position[1] + this.offsetY)*1.2-0.25)
     cylinder.name = 'cyliner'
     group.add(cylinder)
+  }
+
+  initCharts(yData,seriesData) {
+    const chartDom = document.getElementById('echarts') as HTMLElement;
+    this.myChart = echarts.init(chartDom);
+    const option = {
+      title: {
+        show: true,
+        text: '2022年度GDP排行榜',
+        left: 'center',
+        top: 20,
+        textStyle: {
+          color: '#00ffaa',
+        }
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow',
+          label: {
+            show: true,
+            color: '#00ffff',
+            backgroundColor: '#000000',
+          }
+        }
+      },
+      toolbox: {
+        show: true,
+        top: 12,
+        right: 36,
+        feature: {
+          mark: { show: true },
+          // dataView: { show: true, readOnly: false, title: '数据视图' },
+          magicType: {
+            show: true,
+            type: ['line', 'bar'] ,
+            title:{
+              line: '切换为折线图',
+              bar: '切换为柱状图'
+            }
+          },
+          restore: { show: true, title: '还原' },
+          // saveAsImage: { show: true, title: '保存为图片' }
+        }
+      },
+      yAxis: {
+        type: 'category',
+        data: yData,
+        axisLabel: {
+          color: '#00ffaa',
+        }
+      },
+      xAxis: {
+        type: 'value',
+        axisLabel: {
+          color: '#cccccc',
+        }
+      },
+      dataZoom: [
+        // {
+        //   show: true,
+        //   yAxisIndex: [0],
+        //   start: 50,
+        //   end: 100
+        // },
+        {
+          type: 'inside',
+          yAxisIndex: [0],
+          start: 40,
+          end: 100
+        }
+      ],
+      series: [
+        {
+          data: seriesData,
+          type: 'bar',
+          // barWidth: 30,
+          showBackground: true,
+          backgroundStyle: {
+            color: 'rgba(180, 180, 180, 0.2)'
+          },
+          label: {
+            show: true,
+            position: 'right',
+            color: '#00ffaa',
+            // valueAnimation: true
+          }
+        }
+      ]
+    };
+    option && this.myChart.setOption(option);
   }
 
   //根据名称移除节点

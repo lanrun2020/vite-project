@@ -2068,6 +2068,10 @@
           114.502461,
           38.045474
         ],
+        "centroid": [
+          115.502461,
+          39.045474
+        ],
         "childrenNum": 11,
         "level": "province",
         "parent": {
@@ -8564,7 +8568,7 @@
         ],
         "centroid": [
           114.077429,
-          44.331087
+          43.331087
         ],
         "childrenNum": 12,
         "level": "province",
@@ -22875,7 +22879,7 @@
         ],
         "centroid": [
           127.693027,
-          48.040465
+          47.040465
         ],
         "childrenNum": 13,
         "level": "province",
@@ -80942,7 +80946,7 @@
         ],
         "centroid": [
           108.887114,
-          35.263661
+          34.563661
         ],
         "childrenNum": 10,
         "level": "province",
@@ -83988,6 +83992,10 @@
         "center": [
           103.823557,
           36.058039
+        ],
+        "centroid": [
+          104.823557,
+          35.058039
         ],
         "childrenNum": 14,
         "level": "province",

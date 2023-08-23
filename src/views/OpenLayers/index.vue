@@ -18,6 +18,7 @@ import Point from "ol/geom/Point";
 import LineString from "ol/geom/LineString";
 import Feature from "ol/Feature";
 import { Stroke, Style, Circle, Fill, Text } from "ol/style";
+import GeoJSON from 'ol/format/GeoJSON.js';
 const map = ref(null)
 const view = new View({
   projection: "EPSG:4326", // 坐标系，有EPSG:4326和EPSG:3857
@@ -39,7 +40,7 @@ const points = [
 ]
 
 // 点样式
-const getPointStyle = (color) => {
+const getPointStyle = (color,index) => {
   const pointStyle = new Style({
     image: new Circle({
       radius: 10,
@@ -51,10 +52,10 @@ const getPointStyle = (color) => {
         textAlign: 'center',     //对齐方式
         textBaseline: 'middle',    //文本基线
         font: 'normal 12px 微软雅黑',     //字体样式
-        text: 'point',    //文本内容
+        text: 'point'+(index+1),    //文本内容
         offsetY: -25,    // Y轴偏置
         fill: new Fill({        //填充样式
-        color: '#000000'
+        color: '#00ff00'
       })
     })
   })
@@ -71,7 +72,7 @@ points.forEach((point, index) => {
   })
   // if (index % 2) { //下标奇数点我们给它设置颜色，偶数点不设置样式采用默认样式
     pointFeature2.setStyle(
-      getPointStyle('#0000ff')
+      getPointStyle('#0000ff', index)
     ) // 这种方式可以设置不同样式的点,不设置则采用默认样式
   // }
   pointFeature.push(pointFeature2)
@@ -146,14 +147,37 @@ const lineLayer = new VectorLayer({
 
 // start地图以及图层显示
 const initMap = () => {
+  const style = new Style({
+    text: new Text({
+      font: 'bold 11px "Open Sans", "Arial Unicode MS", "sans-serif"',
+      placement: 'line',
+      overflow: true,
+      fill: new Fill({
+        color: 'white',
+      }),
+    }),
+  });
   // 地图实例
   map.value = new Map({
     layers: [  // 图层
       new TileLayer({ // 使用瓦片渲染方法
         source: new XYZ({ // 图层数据源
-          url: 'https://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}',
+          // url: 'https://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}',//高德街道地图
+          // url: 'https://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetWarm/MapServer/tile/{z}/{y}/{x}',//中国暖色版地图
+          url: 'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}',//中国蓝黑版地图
         })
-      })
+      }),
+      new VectorLayer({
+        declutter: true,
+        source: new VectorSource({
+          format: new GeoJSON(),
+          url: '../src/json/text.geojson',
+        }),
+        style: function (feature) {
+          style.getText().setText(feature.get('name'));
+          return style;
+        },
+      }),
     ],
     keyboardEventTarget: document,
     target: 'map', // 对应页面里 id 为 map 的元素

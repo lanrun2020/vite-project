@@ -792,7 +792,7 @@ export const getChessboardMaterial = (options?: { side?: object, transparent?: b
   return material
 }
 // 流动材质 圆柱圆锥沿Y轴的流动材质
-export const getFlowMaterialByY = (options?: { side?: object, transparent?: boolean, height: number, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number }) => {
+export const getFlowMaterialByY = (options?: { side?: object, transparent?: boolean, height: number, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number, duration?: number }) => {
   const tubeShader = {
     vertexshader: `
       varying vec2 vUv;
@@ -810,6 +810,7 @@ export const getFlowMaterialByY = (options?: { side?: object, transparent?: bool
       uniform float opacity;
       uniform vec3 color;
       uniform float time;
+      uniform float duration;
       uniform float speed;
       uniform float repeat;
       uniform float thickness;
@@ -820,6 +821,9 @@ export const getFlowMaterialByY = (options?: { side?: object, transparent?: bool
         float m = mod(dis, sp); //返回余数
         float a = step(m, sp*thickness); //用于分段,值为0或1
         gl_FragColor = vec4(color,opacity*(1.0 - (modelPos.y/height + 0.5))*a);
+        if(duration>0.0 && time/duration + (0.5*height-modelPos.y)/height<1.0){
+          discard;
+        }
       }`
   }
   const material = new THREE.ShaderMaterial({
@@ -851,6 +855,10 @@ export const getFlowMaterialByY = (options?: { side?: object, transparent?: bool
       height: { //物体高度
         value: options?.height || 8.0,
         type: "f"
+      },
+      duration: {//初始加载动画时长
+        value: options?.duration || 0.0,
+        type: 'f',
       }
     },
     side: options?.side || THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
