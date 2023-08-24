@@ -238,7 +238,7 @@ export const getTextMaterial2 = (options?: { textContent?:string, textWidth?:num
   return material
 }
 //朝向屏幕
-export const getTextMaterial = (options?: { textContent?:string, textWidth?:number, side?: object, transparent?: boolean, url?: string }) => {
+export const getTextMaterial = (options?: { textContent?:string, textWidth?:number, side?: object, transparent?: boolean, url?: string, color?: string, bgColor?: string  }) => {
   const fontSize = 512 //值越大越清晰，此值决定了canvas画布像素
   const textContent = options?.textContent ?? 'text'
   const textWidth = ((options?.textWidth + 1) * fontSize) ?? 128*5;
@@ -252,7 +252,7 @@ export const getTextMaterial = (options?: { textContent?:string, textWidth?:numb
     // 文字
     c.beginPath();
     c.translate(textWidth/2, textHeight/2);
-    c.fillStyle = "#00ffff"; //文本填充颜色
+    c.fillStyle = options?.color ?? '#00ffff'; //文本填充颜色
     c.font = "bold " + fontSize + "px 宋体"; //字体样式设置
     c.textBaseline = "middle"; //文本与fillText定义的纵坐标
     c.textAlign = "center"; //文本居中(以fillText定义的横坐标)
@@ -277,20 +277,31 @@ export const getTextMaterial = (options?: { textContent?:string, textWidth?:numb
       varying vec2 vUv;
       uniform sampler2D u_map;
       uniform float u_opacity;
+      uniform float bgOpacity;
       uniform vec3 color;
+      uniform vec3 bgColor;
       void main() {
           vec2 vUv2 = vUv;
-          gl_FragColor = texture2D(u_map, vUv2) + vec4(color, u_opacity);
+          gl_FragColor = texture2D(u_map, vUv2) + vec4(color, u_opacity); //color设置为00后叠加的颜色就是传入的文本颜色
           if (gl_FragColor.a < 0.4) {
-            discard;
+            // discard;
+            gl_FragColor = vec4(bgColor, bgOpacity);
           }
       }`
     }
     const material = new THREE.ShaderMaterial({
       uniforms: {
         color: {
-          value: new THREE.Color(0x000000),
+          value: new THREE.Color('#000000'),
           type: "v3"
+        },
+        bgColor: {
+          value: new THREE.Color(options.bgColor ?? '#000000'),
+          type: "v3"
+        },
+        bgOpacity: {
+          value: 0.2,
+          type: "f"
         },
         u_opacity: {
           value: 0.2,
@@ -792,11 +803,12 @@ export const getChessboardMaterial = (options?: { side?: object, transparent?: b
   return material
 }
 // 流动材质 圆柱圆锥沿Y轴的流动材质
-export const getFlowMaterialByY = (options?: { side?: object, transparent?: boolean, height: number, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number, duration?: number }) => {
+export const getFlowMaterialByY = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number, duration?: number }) => {
   const tubeShader = {
     vertexshader: `
       varying vec2 vUv;
       varying vec3 modelPos;
+      varying vec3 mpos;
       void main() {
         modelPos = position;
         vUv = uv;
@@ -814,14 +826,13 @@ export const getFlowMaterialByY = (options?: { side?: object, transparent?: bool
       uniform float speed;
       uniform float repeat;
       uniform float thickness;
-      uniform float height; //传入物体高度
       void main() {
         float sp = 1.0/repeat;
-        float dis = fract((modelPos.y/ height + 0.5) - 0.5*time*speed); // modelPos.y 从 -0.5height 到 0.5height
+        float dis = fract((vUv.y) - 0.5*time*speed); // modelPos.y 从 -0.5height 到 0.5height
         float m = mod(dis, sp); //返回余数
         float a = step(m, sp*thickness); //用于分段,值为0或1
-        gl_FragColor = vec4(color,opacity*(1.0 - (modelPos.y/height + 0.5))*a);
-        if(duration>0.0 && time/duration + (0.5*height-modelPos.y)/height<1.0){
+        gl_FragColor = vec4(color, opacity*((1.0-vUv.y))*a);
+        if(duration>0.0 && time/duration + (1.0-vUv.y)<1.0){
           discard;
         }
       }`
@@ -852,8 +863,77 @@ export const getFlowMaterialByY = (options?: { side?: object, transparent?: bool
         value: options?.opacity || 1.0,
         type: "f"
       },
-      height: { //物体高度
-        value: options?.height || 8.0,
+      duration: {//初始加载动画时长
+        value: options?.duration || 0.0,
+        type: 'f',
+      }
+    },
+    side: options?.side || THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
+    transparent: options?.transparent || true,// 是否透明
+    vertexShader: tubeShader.vertexshader, // 顶点着色器
+    fragmentShader: tubeShader.fragmentshader // 片元着色器
+  })
+  return material
+}
+// 挤出多边形垂直扫描
+export const getFlowMaterialByY2 = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, repeat?: number, thickness?: number, speed?: number, opacity?: number, duration?: number }) => {
+  const tubeShader = {
+    vertexshader: `
+      varying vec2 vUv;
+      varying vec3 modelPos;
+      varying vec3 mpos;
+      void main() {
+        modelPos = position;
+        vUv = uv;
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+      `,
+    fragmentshader: `
+      varying vec2 vUv;
+      varying vec3 modelPos;
+      uniform float opacity;
+      uniform vec3 color;
+      uniform float time;
+      uniform float duration;
+      uniform float speed;
+      uniform float repeat;
+      uniform float thickness;
+      void main() {
+        float sp = 1.0/repeat;
+        float dis = fract((vUv.y) + 0.5*time*speed); // modelPos.y 从 -0.5height 到 0.5height
+        float m = mod(dis, sp); //返回余数
+        float a = step(m, sp*thickness); //用于分段,值为0或1
+        gl_FragColor = vec4(color, opacity*fract(-vUv.y-time*speed*1.5)*a*0.6);
+        if(duration>0.0 && time/duration + (1.0-vUv.y)<1.0){
+          discard;
+        }
+      }`
+  }
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      color: {
+        value: options?.color || new THREE.Color(0x00ffff),
+        type: "v3"
+      },
+      time: {
+        value: 1,
+        type: "f"
+      },
+      repeat: {
+        value: options?.repeat || 6,
+        type: "f"
+      },
+      thickness: {
+        value: options?.thickness || 0.5,
+        type: "f"
+      },
+      speed: {
+        value: options?.speed || 1.0,
+        type: "f"
+      },
+      opacity: {
+        value: options?.opacity || 1.0,
         type: "f"
       },
       duration: {//初始加载动画时长
@@ -868,7 +948,6 @@ export const getFlowMaterialByY = (options?: { side?: object, transparent?: bool
   })
   return material
 }
-
 // 扫描材质 圆的旋转扫描材质
 export const getRotateScanMaterial = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number }) => {
   //常用矩阵

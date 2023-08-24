@@ -154,7 +154,7 @@ export default class materialScene {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
-      logarithmicDepthBuffer: true
+      // logarithmicDepthBuffer: true //最好不开启（设置对数深度缓冲区，优化深度冲突问题）
     });
     this.renderer.sortObjects = true
     // 设置画布的大小
@@ -564,7 +564,7 @@ export default class materialScene {
   addCylinder() {
     //圆柱
     const geometry = new THREE.CylinderGeometry(2, 2, 10, 32, 1, true);//true上下底面不封闭
-    const flowMaterial = getFlowMaterialByY({ height: 10, thickness: 0.1, speed: 0.3, repeat: 16 }) //沿Y轴的流动材质
+    const flowMaterial = getFlowMaterialByY({ thickness: 0.1, speed: 0.3, repeat: 16 }) //沿Y轴的流动材质
     const cylinder = new THREE.Mesh(geometry, flowMaterial);
     this.shaderMaterialList.push(flowMaterial)
     cylinder.position.set(0, 8.1, -20)
@@ -572,7 +572,7 @@ export default class materialScene {
 
     //圆锥
     const geometry2 = new THREE.CylinderGeometry(4, 0, 8, 32, 1, true);
-    const flowMaterial2 = getFlowMaterialByY({ height: 8 }) //沿Y轴的流动材质
+    const flowMaterial2 = getFlowMaterialByY() //沿Y轴的流动材质
     const cylinder2 = new THREE.Mesh(geometry2, flowMaterial2);
     this.shaderMaterialList.push(flowMaterial2)
     cylinder2.position.set(8, 4.2, -20)

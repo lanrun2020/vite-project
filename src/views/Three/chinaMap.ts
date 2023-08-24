@@ -2,13 +2,14 @@ import axios from "axios";
 import * as T from "three";
 import TWEEN from "tween"
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { getFlowMaterialByY, getScanMaterial, getTextMaterial } from './shaderMaterial'
+import { getFlowMaterialByY,getFlowMaterialByY2, getScanMaterial, getTextMaterial } from './shaderMaterial'
 import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js'
 import { colorGradient } from '@/utils/colorGradient'
 import * as echarts from 'echarts'
 
 const THREE = T
 let that: chinaMap
+const sideMaterial = getFlowMaterialByY2({ color:new THREE.Color('#008bfb'), thickness: 0.98, speed: 0.5, repeat: 1, duration: 0.5 }) //沿Y轴的流动材质
 export default class chinaMap {
   private dom!: HTMLElement
   private scene!: THREE.Scene
@@ -45,6 +46,7 @@ export default class chinaMap {
     that = this
     this.dom = dom
     this.clock = new THREE.Clock()
+    this.shaderMaterialList.push(sideMaterial)
     this.init()
     this.raycaster = new THREE.Raycaster()
   }
@@ -197,18 +199,24 @@ export default class chinaMap {
     const group = new THREE.Group()
     const shapeArr = this.drawShape(geometrys)
     this.drawLine(group, geometrys); //传递数据画出地图边线
-    this.addTextPlane(group, properties.name, properties.centroid)
+    this.addTextPlane({
+      group,
+      textContent:properties.name,
+      position:properties.centroid,
+      name: '名称标签',
+      positionY: 1.4,
+      scale: 2.4,
+      offsetZ: 0,
+      color: '#00ffff',
+      bgColor: '#000000',
+    })
     const geometry = new THREE.ExtrudeGeometry(shapeArr, this.options); //挤压几何体
     const material1 = new THREE.MeshPhongMaterial({ // 镜面高光材质
       color: this.bgColor, // 多面体面颜色
       specular: this.bgColor //材质高光颜色
     });
-    const material2 = new THREE.MeshBasicMaterial({
-      color: 0x008bfb // 侧面颜色
-    });
-    const shapeGeometryObj = new THREE.Mesh(geometry, [material1, material2]);
+    const shapeGeometryObj = new THREE.Mesh(geometry, [material1, sideMaterial]);
     shapeGeometryObj.name = properties.adcode;
-    // console.log(properties.name,properties.adcode);
     shapeGeometryObj.properties = properties
     shapeGeometryObj.children.push(group)
     return shapeGeometryObj
@@ -245,21 +253,21 @@ export default class chinaMap {
     })
   }
   //文本标签
-  addTextPlane(group, textContent,position) {
-    if(!position || !position.length) return
-    const width = textContent.length/1.5
-    const height = 0.8
+  addTextPlane(opt:{ group, textContent, position, name, positionY, scale, offsetZ, color, bgColor}) {
+    if(!opt.position || !opt.position.length) return
+    const width = opt.textContent.length/(opt.scale || 2.4)
+    const height = 0.6
     const fontSize = 1
     const tempCanvas = document.createElement("canvas")
     const tempCtx = tempCanvas.getContext('2d')
     tempCtx.font = "bold " + fontSize + "px 宋体"
-    const textWidth = tempCtx.measureText(textContent).width;
-    const material = getTextMaterial({ textContent,textWidth })
+    const textWidth = tempCtx.measureText(opt.textContent).width;
+    const material = getTextMaterial({ textContent: opt.textContent,textWidth,bgColor:opt.bgColor || '000000', color: opt.color || '#00ffff' })
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height, 128, 128), material)
-    plane.position.set(position[0] - this.offsetX, 1.4, -position[1] + this.offsetY)
-    plane.position.z = this.scaleMap * plane.position.z
-    plane.name = '名称标签'
-    group.add(plane)
+    plane.position.set(opt.position[0] - this.offsetX, opt.positionY, - opt.position[1] + this.offsetY)
+    plane.position.z = this.scaleMap * plane.position.z + opt.offsetZ
+    plane.name = opt.name || '标签'
+    opt.group.add(plane)
   }
   async drawMap() {
     await axios.get('/chinaMap/china.json').then((res) => {
@@ -267,7 +275,6 @@ export default class chinaMap {
       this.scene.remove(this.lineGroup)
       this.group = new THREE.Group()
       this.lineGroup = new THREE.Group()
-      // this.controls.target = new THREE.Vector3(0, 0, 0)
       const features = res.data.features
       features.forEach((worldItem: { type: string, properties: { adcode: number, name:string, center, centroid }, geometry: { coordinates: Array<Array<Array<Array<number>>>> } }) => {
         const grometrys = []
@@ -281,7 +288,6 @@ export default class chinaMap {
         const mesh = this.drawExtrude(grometrys, worldItem.properties) //传递数据画出地图的shape，返回结果再传到drawExtrude方法得到ExtrudeGeometry网格
         this.group.add(mesh)
       });
-      console.log(this.group);
       this.group.scale.y = this.scaleMap; //group里面包含所有版块网格
       this.group.rotation.x = -Math.PI / 2
       this.scene.add(this.group);
@@ -320,8 +326,19 @@ export default class chinaMap {
         for(const index in children) {
           const group = children[index].children[0]
           const node = sortArr.find((item)=>item.code === children[index].properties.adcode.toString())
-          if(node && node.value){
+          if(node && node.value) {
             this.addCyliner(group, children[index].properties.centroid, node.value*10.0/max, node.color)
+            this.addTextPlane({
+              group,
+              textContent:node.value,
+              position: children[index].properties.centroid,
+              name:'GPDTEXT',
+              positionY:node.value*10.0/max+1.4,
+              scale:5.0,
+              offsetZ:-0.25,
+              color:'#00ffaa',
+              bgColor: '#ffffff',
+            })
           }
         }
       })
@@ -331,6 +348,7 @@ export default class chinaMap {
       for(const index in children) {
         const group = children[index].children[0]
         this.removeChild(group, 'cyliner')
+        this.removeChild(group, 'GPDTEXT')
       }
     }
   }
@@ -338,7 +356,7 @@ export default class chinaMap {
   addCyliner(group, position, height, color) {
     if(!position || !position.length) return
     const geometry = new THREE.CylinderGeometry(0.1, 0.1, height, 24, 1, true);//true上下底面不封闭
-    const flowMaterial = getFlowMaterialByY({ color:new THREE.Color(color), height, thickness: 0.98, speed: 0.5, repeat: 3, duration: 0.5 }) //沿Y轴的流动材质
+    const flowMaterial = getFlowMaterialByY({ color:new THREE.Color(color), thickness: 0.98, speed: 0.5, repeat: 3, duration: 0.5 }) //沿Y轴的流动材质
     const cylinder = new THREE.Mesh(geometry, flowMaterial);
     this.shaderMaterialList.push(flowMaterial)
     cylinder.position.set(position[0] - this.offsetX, height/2+1, (-position[1] + this.offsetY)*1.2-0.25)
