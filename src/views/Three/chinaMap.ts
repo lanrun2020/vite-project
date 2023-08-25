@@ -1,6 +1,10 @@
 import axios from "axios";
 import * as T from "three";
 import TWEEN from "tween"
+import {
+  CSS2DRenderer,
+  CSS2DObject
+} from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { getFlowMaterialByY,getFlowMaterialByY2, getScanMaterial, getTextMaterial } from './shaderMaterial'
 import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js'
@@ -15,6 +19,7 @@ export default class chinaMap {
   private scene!: THREE.Scene
   private camera!: THREE.PerspectiveCamera
   private renderer!: THREE.WebGLRenderer
+  private labelRenderer!: CSS2DRenderer
   private controls: OrbitControls
   private requestId: number
   private group = new THREE.Group()
@@ -68,6 +73,12 @@ export default class chinaMap {
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     this.renderer.setClearColor(0x041336);
+    this.labelRenderer = new CSS2DRenderer(); //新建CSS2DRenderer
+    this.labelRenderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
+    this.labelRenderer.domElement.style.position = 'absolute';
+    this.labelRenderer.domElement.style.top = '0';
+    this.labelRenderer.domElement.style.pointerEvents = 'none';
+    this.dom.appendChild(this.labelRenderer.domElement);
     this.dom.appendChild(this.renderer.domElement);
   }
 
@@ -81,13 +92,14 @@ export default class chinaMap {
     // controls.minDistance = 50; //移动最小距离
     this.controls.maxDistance = 1500; //移动最大距离
     // this.controls.maxPolarAngle = Math.PI; //垂直轨道多远，上限。范围为 0 到 Math.PI 弧度，默认为 Math.PI
-    this.controls.maxPolarAngle = Math.PI * 0.325;
+    this.controls.maxPolarAngle = Math.PI * 0.365; //1->180 0.5->90
   }
 
   // 渲染
   render() {
     if (this.renderer && this.scene && this.camera) {
       this.renderer.render(this.scene, this.camera);
+      this.labelRenderer.render(this.scene, this.camera);
     }
   }
 
@@ -122,6 +134,7 @@ export default class chinaMap {
       that.camera.aspect = that.dom.offsetWidth / that.dom.offsetHeight;
       that.camera.updateProjectionMatrix();
       that.renderer.setSize(that.dom.offsetWidth, that.dom.offsetHeight);
+      that.labelRenderer.setSize(that.dom.offsetWidth, that.dom.offsetHeight);
     }
   }
 
@@ -199,17 +212,18 @@ export default class chinaMap {
     const group = new THREE.Group()
     const shapeArr = this.drawShape(geometrys)
     this.drawLine(group, geometrys); //传递数据画出地图边线
-    this.addTextPlane({
-      group,
-      textContent:properties.name,
-      position:properties.centroid,
-      name: '名称标签',
-      positionY: 1.4,
-      scale: 2.4,
-      offsetZ: 0,
-      color: '#00ffff',
-      bgColor: '#000000',
-    })
+    // this.addTextPlane({
+    //   group,
+    //   textContent:properties.name,
+    //   position:properties.centroid,
+    //   name: '名称标签',
+    //   positionY: 1.4,
+    //   scale: 2.4,
+    //   offsetZ: 0,
+    //   color: '#00ffff',
+    //   bgColor: '#000000',
+    // })
+    this.addLabel(group, properties.name, properties.centroid, 0.0, 'rgba(0,255,255,0.6)','rgba(0,0,0,0.0)','名称')
     const geometry = new THREE.ExtrudeGeometry(shapeArr, this.options); //挤压几何体
     const material1 = new THREE.MeshPhongMaterial({ // 镜面高光材质
       color: this.bgColor, // 多面体面颜色
@@ -269,6 +283,25 @@ export default class chinaMap {
     plane.name = opt.name || '标签'
     opt.group.add(plane)
   }
+  addLabel(object: THREE.Group, text: string, position: Array<number>, height, color, bgcolor, name) {
+    if(!position || !position.length) return
+    const div = document.createElement("div");
+    div.className = "computer-box-label";
+    div.style.color = color;
+    div.style.backgroundColor = bgcolor;
+    // div.style.cursor = "pointer";
+    // div.style.pointerEvents = 'none';
+    // div.addEventListener('click', (event: MouseEvent) => {
+    //   console.log('点击了标签', text);
+    //   event.stopPropagation() // 阻止事件冒泡
+    // })
+    div.textContent = text;
+    const earthLabel = new CSS2DObject(div);
+    earthLabel.position.set(position[0] - this.offsetX, height + 1, -position[1] + this.offsetY);
+    earthLabel.position.z = this.scaleMap * earthLabel.position.z + 0.1
+    earthLabel.name = name
+    object.add(earthLabel);
+  }
   async drawMap() {
     await axios.get('/chinaMap/china.json').then((res) => {
       this.scene.remove(this.group)
@@ -294,8 +327,23 @@ export default class chinaMap {
     })
   }
 
-  async addCyliners(active) {
+  addFlyLine(active) {
+    const geometry = new THREE.BufferGeometry();
+    const vertices = []
+    const colors = []
+    for(let i = 0 ; i < 10; i++){
+      vertices.push(Math.random()*4,4,Math.random()*4)
+      colors.push(0,1/(i+1),0)
+    }
+    geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+		geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+    const line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff, vertexColors: true } ) );
+    this.scene.add(line)
+  }
+
+  async addGDP(active) {
     const children = this.group.children
+    const name = "GDP"
     if (active) {
       this.clock.start() //重新开始计时，刷新动画
       await axios.get('../src/json/gdp.json').then((res) => {
@@ -322,23 +370,24 @@ export default class chinaMap {
             })
           }
         })
-        this.initCharts(yData, seriesData)
+        this.initCharts(yData, seriesData, '2022年度GDP排行榜','亿')
         for(const index in children) {
           const group = children[index].children[0]
           const node = sortArr.find((item)=>item.code === children[index].properties.adcode.toString())
           if(node && node.value) {
-            this.addCyliner(group, children[index].properties.centroid, node.value*10.0/max, node.color)
-            this.addTextPlane({
-              group,
-              textContent:node.value,
-              position: children[index].properties.centroid,
-              name:'GPDTEXT',
-              positionY:node.value*10.0/max+1.4,
-              scale:5.0,
-              offsetZ:-0.25,
-              color:'#00ffaa',
-              bgColor: '#ffffff',
-            })
+            this.addCyliner(group, children[index].properties.centroid, node.value*10.0/max, node.color, name)
+            // this.addTextPlane({
+            //   group,
+            //   textContent:node.value,
+            //   position: children[index].properties.centroid,
+            //   name:'GDP',
+            //   positionY:node.value*10.0/max+1.4,
+            //   scale:5.0,
+            //   offsetZ:-0.25,
+            //   color:'#00ffaa',
+            //   bgColor: '#ffffff',
+            // })
+            // this.addLabel(group, node.value, children[index].properties.centroid, node.value*10.0/max, node.color, 'GDP')
           }
         }
       })
@@ -347,35 +396,97 @@ export default class chinaMap {
       this.myChart.dispose()
       for(const index in children) {
         const group = children[index].children[0]
-        this.removeChild(group, 'cyliner')
-        this.removeChild(group, 'GPDTEXT')
+        this.removeChild(group, name)
+      }
+    }
+  }
+  async addPopulation(active) {
+    const children = this.group.children
+    const name = "Population"
+    if (active) {
+      this.clock.start() //重新开始计时，刷新动画
+      await axios.get('../src/json/population.json').then((res) => {
+        const data = res.data.data[0].data
+        const arr = data.map((item) => {
+          return Number(item.value)
+        })
+        const max = Math.max(...arr)
+        const yData = []
+        const seriesData = []
+        const sortArr = data.sort((a,b)=>{
+          return a.value - b.value
+        })
+        sortArr.forEach((item) => {
+          const color = colorGradient(['#00ff00','#ffa200','#ff0000'], item.value/max)
+          item.color = color
+          if (item.value) {
+            yData.push(item.name)
+            seriesData.push({
+              value: item.value,
+              itemStyle: {
+                color
+              }
+            })
+          }
+        })
+        this.initCharts(yData, seriesData,'2022年度人口排行榜', '万')
+        for(const index in children) {
+          const group = children[index].children[0]
+          const node = sortArr.find((item)=>item.code === children[index].properties.adcode.toString())
+          if(node && node.value) {
+            this.addCyliner(group, children[index].properties.centroid, node.value*10.0/max, node.color, name)
+            // this.addTextPlane({
+            //   group,
+            //   textContent:node.value,
+            //   position: children[index].properties.centroid,
+            //   name:'GDP',
+            //   positionY:node.value*10.0/max+1.4,
+            //   scale:5.0,
+            //   offsetZ:-0.25,
+            //   color:'#00ffaa',
+            //   bgColor: '#ffffff',
+            // })
+            // this.addLabel(group, node.value, children[index].properties.centroid, node.value*10.0/max, node.color, 'GDP')
+          }
+        }
+      })
+    } else {
+      this.myChart.clear()
+      this.myChart.dispose()
+      for(const index in children) {
+        const group = children[index].children[0]
+        this.removeChild(group, name)
+        // this.removeChild(group, 'GDP')
       }
     }
   }
 
-  addCyliner(group, position, height, color) {
+  addCyliner(group, position, height, color, name) {
     if(!position || !position.length) return
-    const geometry = new THREE.CylinderGeometry(0.1, 0.1, height, 24, 1, true);//true上下底面不封闭
-    const flowMaterial = getFlowMaterialByY({ color:new THREE.Color(color), thickness: 0.98, speed: 0.5, repeat: 3, duration: 0.5 }) //沿Y轴的流动材质
+    const geometry = new THREE.CylinderGeometry(0.1, 0.1, height, 3, 1, true);//true上下底面不封闭
+    const flowMaterial = getFlowMaterialByY({ color:new THREE.Color(color), thickness: 0.98, speed: 0.5, repeat: 3, duration: 0.8 }) //沿Y轴的流动材质
     const cylinder = new THREE.Mesh(geometry, flowMaterial);
     this.shaderMaterialList.push(flowMaterial)
     cylinder.position.set(position[0] - this.offsetX, height/2+1, (-position[1] + this.offsetY)*1.2-0.25)
-    cylinder.name = 'cyliner'
+    cylinder.name = name
     group.add(cylinder)
   }
 
-  initCharts(yData,seriesData) {
+  initCharts(yData,seriesData,title,xName) {
     const chartDom = document.getElementById('echarts') as HTMLElement;
     this.myChart = echarts.init(chartDom);
     const option = {
       title: {
         show: true,
-        text: '2022年度GDP排行榜',
+        text: title,
         left: 'center',
         top: 20,
         textStyle: {
           color: '#00ffaa',
         }
+      },
+      grid: {
+        right: '20%',
       },
       tooltip: {
         trigger: 'axis',
@@ -386,7 +497,8 @@ export default class chinaMap {
             color: '#00ffff',
             backgroundColor: '#000000',
           }
-        }
+        },
+        // formatter: '{b0}: {c0}'
       },
       toolbox: {
         show: true,
@@ -415,9 +527,15 @@ export default class chinaMap {
         }
       },
       xAxis: {
+        // name: xName || '',
         type: 'value',
         axisLabel: {
           color: '#cccccc',
+          formatter:'{value}'+xName,
+
+        },
+        axisLine: {
+          show: true
         }
       },
       dataZoom: [
@@ -467,7 +585,7 @@ export default class chinaMap {
   }
 
   printLog(active) {
-    console.log(active, this.shaderMaterialList.length)
+    console.log('shaderMaterialList长度', this.shaderMaterialList.length)
   }
 
   async drawMap2(code: string, num: number) {

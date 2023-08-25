@@ -1,5 +1,13 @@
 <template>
  <div style="width: 100%;height: 100%;">
+    <div class="scoll-bar">
+      <ScrollBar>
+        <div v-for="(item,index) in mapList" :key="index" class="item-bar" :style="{backgroundImage:`url(${item.url})`}"></div>
+      </ScrollBar>
+    </div>
+    <div class="test">
+      <div class="img"></div>
+    </div>
     <div ref="mapBar" class="map-bar" :class="{ 'map-move': mapFlag }">
         <div v-for="(item,index) in mapList" :key="index" @click="changeMap(item)" class="map-item" :style="{backgroundImage:`url(${item.url})`,opacity:(index+1)/mapList.length,right:`${(mapList.length-1-index)*10}px`}">
           <div class="map-label" :class="{'map-active':item.active}">{{ item.name }}</div>
@@ -14,6 +22,7 @@ import png1 from '../../assets/guoqi.png'
 import png2 from '../../assets/user.png'
 import png3 from '../../assets/floorMarble.jpg'
 import png4 from '../../assets/floorMarble3.jpeg'
+import ScrollBar from '../../components/scrollBar.vue'
 let mapFlag = ref(true)
 const mapBar = ref()
 const mapList = ref([
@@ -65,6 +74,32 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 $dataLength : 4;//mapList长度
+.scoll-bar {
+  width: 800px;
+  height: 300px;
+  // border: 1px solid #f00;
+  .item-bar {
+    width: 400px;
+    height: 100%;
+    // border: 1px solid #0fc;
+    background-image: url('../../assets/dalishi.jpg');
+    background-size: cover;
+  }
+}
+.test {
+  width: 300px;
+  height: 300px;
+  border: 1px solid #0f0;
+  box-shadow: inset 0 0 20px #333333;
+  background-color: #ccc;
+  .img {
+    width: 80%;
+    height: 80%;
+    background-image: url('../../assets/dalishi.jpg');
+    background-size: cover;
+    box-shadow: inset 0 0 20px #00e5ff,inset -2px -2px 20px #00e5ff;
+  }
+}
 .map-bar {
   position: absolute;
   right: 0;

@@ -1,31 +1,42 @@
 <template>
   <div id="china">
     <div class="tool-box">
-      <div v-for="(item, index) in toolList" class="tool-item" :class="{ 'tool-active': item.active }" :key="index"
-        @click="changeToolItem(item)">
-        {{ item.name }}
-      </div>
+      <ScrollBar>
+        <div v-for="(item, index) in toolList" class="tool-item" :class="{ 'tool-active': item.active }" :key="index"
+          @click="changeToolItem(item, index)">
+          {{ item.name }}
+        </div>
+      </ScrollBar>
     </div>
-    <div class="echarts-plane" :class="{'show-plane': toolList[0].active && toolList[0].show}">
+    <div class="echarts-plane" :class="{'show-plane': toolList[chartIndex].active && toolList[chartIndex].show}">
         <div id="echarts"></div>
-        <el-icon v-if="toolList[0].show && toolList[0].active" class="close-icon" @click="toolList[0].show = false"><Close /></el-icon>
-        <el-icon v-if="!toolList[0].show && toolList[0].active" class="open-icon" @click="toolList[0].show = true"><DArrowRight /></el-icon>
+        <el-icon v-if="toolList[chartIndex].show && toolList[chartIndex].active" class="close-icon" @click="toolList[chartIndex].show = false"><Close /></el-icon>
+        <el-icon v-if="!toolList[chartIndex].show && toolList[chartIndex].active" class="open-icon" @click="toolList[chartIndex].show = true"><DArrowRight /></el-icon>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from "vue";
 import chinaMap from "./chinaMap"
+import ScrollBar from '../../components/scrollBar.vue'
 import {
   Close,DArrowRight
 } from "@element-plus/icons-vue";
 let map: chinaMap
+let chartIndex = ref(0)
 let toolList = ref([
   {
     name: '2022GDP',
     active: false,
     show: true,
-    value: 'addCyliners'
+    value: 'addGDP',
+    chart: true,
+  }, {
+    name: '2022人口',
+    active: false,
+    show: true,
+    value: 'addPopulation',
+    chart: true,
   }, {
     name: '飞线',
     active: false,
@@ -43,9 +54,20 @@ onMounted(() => {
 onUnmounted(() => {
   map.stop()
 })
-const changeToolItem = (item) => {
+const changeToolItem = (item, index) => {
   item.active = !item.active
-  if(item.active) item.show = true
+  if(item.active) {
+    item.show = true
+    toolList.value.forEach((tool) => {
+      if(tool.active && tool.value!=item.value) {
+        map[tool.value](false)
+        tool.active = false
+      }
+    })
+  }
+  if(item.chart) {
+    chartIndex.value = index
+  }
   map[item.value](item.active)
 }
 const init = () => {
@@ -60,11 +82,12 @@ const init = () => {
   position: relative;
 
   .tool-box {
-    max-width: 300px;
+    width: 300px;
     height: 60px;
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
+    overflow-y: hidden;
     color: rgb(151, 151, 151);
     border: 1px solid #00ffff47;
     border-bottom: none;
@@ -79,6 +102,8 @@ const init = () => {
     .tool-item {
       padding: 20px;
       cursor: pointer;
+      // flex-grow: 1;
+      flex-shrink: 0;
     }
 
     .tool-active {
@@ -95,6 +120,7 @@ const init = () => {
     height: 800px;
     background: rgba($color: #000000, $alpha: 0.5);
     transition: all 0.3s;
+    z-index: 999;
     #echarts {
       width: 100%;
       height: 100%;
@@ -118,5 +144,15 @@ const init = () => {
       font-size: 24px;
     }
   }
-
-}</style>
+}
+.computer-box-label {
+  color: #00ffaa;
+  /* width: 80px; */
+  font-size: 14px;
+  padding: 10px;
+  padding-bottom: 6px;
+  background: rgba(0,0,0,0.6);
+  // background: url('@/assets/msg-bg.png') no-repeat;
+  // background-size: cover;
+}
+</style>
