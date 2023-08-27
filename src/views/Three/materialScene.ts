@@ -6,7 +6,10 @@ import terrain from '../../assets/floor5.jpeg'
 import cloud from '../../assets/cloud.png'
 import lavatile from '../../assets/lavatile.jpg'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-
+import {
+  CSS3DRenderer,
+  CSS3DObject
+} from "three/examples/jsm/renderers/CSS3DRenderer.js";
 import {
   getFlowMaterial,
   getTextMaterial,
@@ -35,6 +38,7 @@ export default class materialScene {
   private scene!: THREE.Scene
   private camera!: THREE.PerspectiveCamera
   private renderer!: THREE.WebGLRenderer
+  private labelRenderer!: CSS3DRenderer
   private controls: OrbitControls
   private requestId: number
   private clock!: THREE.Clock
@@ -126,6 +130,10 @@ export default class materialScene {
       name: 'transform',
       label: '变换',
       method: 'addTransform',
+    },{
+      name: 'css3DObject',
+      label: 'CSS3DObject',
+      method: 'addCSS3DObject',
     }
     ]
 
@@ -160,13 +168,19 @@ export default class materialScene {
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
     this.renderer.setClearColor(0x041336);
+    this.labelRenderer = new CSS3DRenderer(); //新建CSS2DRenderer
+    this.labelRenderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
+    this.labelRenderer.domElement.style.position = 'absolute';
+    this.labelRenderer.domElement.style.top = '0';
+    this.labelRenderer.domElement.style.pointerEvents = 'none';
+    this.dom.appendChild(this.labelRenderer.domElement);
     this.dom.appendChild(this.renderer.domElement);
   }
 
   // 设置透视相机
   setCamera() {
     // 第二参数就是 长度和宽度比 默认采用浏览器  返回以像素为单位的窗口的内部宽度和高度
-    this.camera = new THREE.PerspectiveCamera(75, this.dom.offsetWidth / this.dom.offsetHeight, 1, 100000);
+    this.camera = new THREE.PerspectiveCamera(75, this.dom.offsetWidth / this.dom.offsetHeight, 0.1, 100000);
     this.camera.position.set(0, 30, 50)
   }
 
@@ -232,6 +246,7 @@ export default class materialScene {
     this.controls.update()
     // 设置画布的大小
     this.renderer.setSize(this.dom.offsetWidth, this.dom.offsetHeight);
+    this.labelRenderer.render(this.scene, this.camera);
     this.render();
   }
 
@@ -241,6 +256,7 @@ export default class materialScene {
       that.camera.aspect = that.dom.offsetWidth / that.dom.offsetHeight;
       that.camera.updateProjectionMatrix();
       that.renderer.setSize(that.dom.offsetWidth, that.dom.offsetHeight);
+      that.labelRenderer.setSize(that.dom.offsetWidth, that.dom.offsetHeight);
     }
   }
 
@@ -687,6 +703,29 @@ export default class materialScene {
       materials: [material],
     }
   }
+
+  addCSS3DObject() {
+    //CSS3DObject
+    const element = document.createElement('div')
+    element.style.backgroundColor = 'rgba(0,255,255,0.5)'
+    element.style.width = "20px"
+    element.style.height = "20px"
+    element.style.overflow = "hidden"
+    element.style.pointerEvents = 'none !important'
+    element.textContent = "css"
+    // const span = document.createElement('span')
+    // span.textContent = "css"
+
+    // element.appendChild(span)
+    const object3d = new CSS3DObject(element)
+    this.scene.add(object3d);
+
+    return  {
+      entities: [object3d],
+      materials: [],
+    }
+  }
+
   //面对象
   addBufferGeometry() {
     const geometry = new THREE.BufferGeometry() //创建一个Buffer类型几何体对象

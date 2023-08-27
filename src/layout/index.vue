@@ -184,9 +184,14 @@ const collapseChange = () => {
 
 .el-menu-vertical-demo {
   width: 200px;
-  min-height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   border: none;
   flex-shrink: 0;
+  &::-webkit-scrollbar {
+    width: 0;
+  }
 }
 
 .el-header {

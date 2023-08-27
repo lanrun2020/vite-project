@@ -414,7 +414,7 @@ const initCesium = () => {
   //经纬度
   var lon = Cesium.Math.toDegrees(carto.longitude);
   var lat = Cesium.Math.toDegrees(carto.latitude);
-  addPrimitive(viewer)
+  // addPrimitive(viewer)
   // viewer.camera.lookAt(new Cesium.Cartesian3.fromDegrees(124.21936679679918,
   //   45.85136872098397, 80), new Cesium.Cartesian3(2, 2, 2));
     viewer.camera.flyTo({

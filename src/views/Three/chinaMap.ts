@@ -6,7 +6,7 @@ import {
   CSS2DObject
 } from "three/examples/jsm/renderers/CSS2DRenderer.js";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { getFlowMaterialByY,getFlowMaterialByY2, getScanMaterial, getTextMaterial } from './shaderMaterial'
+import { getFlowMaterialByY,getFlowMaterialByY2, getScanMaterial, getTextMaterial, getTubeMaterial } from './shaderMaterial'
 import GUI from 'three/examples/jsm/libs/lil-gui.module.min.js'
 import { colorGradient } from '@/utils/colorGradient'
 import * as echarts from 'echarts'
@@ -160,7 +160,7 @@ export default class chinaMap {
     // scene.fog = new THREE.FogExp2(0xcccccc, 0.002); //雾效果
     // 辅助三维坐标系
     const axesHelper = new THREE.AxesHelper(500);
-    // this.scene.add(axesHelper)
+    this.scene.add(axesHelper)
     // Grid 添加网格辅助对象
     const helper = new THREE.GridHelper(100, 30, 0x303030, 0x303030); //长度1000 划分为50份
     // helper.rotation.x = Math.PI / 2
@@ -328,16 +328,54 @@ export default class chinaMap {
   }
 
   addFlyLine(active) {
+    //平滑曲线
+    const data = [
+      {
+        start:'北京',
+        end:'四川',
+      },
+      {
+        start:'北京',
+        end:'湖北',
+      }
+    ]
+    const children = this.group.children
+    // console.log(children);
+    data.forEach((line) => {
+      const start = children
+    })
+    // const node = data.find((item)=>item.name === children[index].properties.name.toString())
+    // if(node && node.value) {
+    //   this.addline(group, children[index].properties.centroid, node.value*10.0/max, node.color, name)
+    // }
+    const x1 = 0
+    const y1 = 0
+    const x2 = 10
+    const y2 = 0
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(x1, 1.5, y1),
+      // new THREE.Vector3((x1 + x2) / 2, Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 10, (y1 + y2) / 2),
+      new THREE.Vector3(x2, 1.5, y2),
+    ]);
+    // const tubeGeometry = new THREE.TubeGeometry(curve, 50, 0.05, 10, false); //path路径 tubularSegments分段 radius半径 radialSegments管道横截面分段 close是否闭合
+    // const linematerial = getTubeMaterial()
+    // const mesh = new THREE.Mesh(tubeGeometry, linematerial);
+    // this.shaderMaterialList.push(linematerial)
+    // this.scene.add(mesh);
+    
     const geometry = new THREE.BufferGeometry();
-    const vertices = []
+    const vertices = [0,4,0,2,4,2,4,4,4,6,4,6]
     const colors = []
-    for(let i = 0 ; i < 10; i++){
-      vertices.push(Math.random()*4,4,Math.random()*4)
-      colors.push(0,1/(i+1),0)
-    }
+    // for(let i = 0 ; i < 10; i++){
+    //   vertices.push(Math.random()*4,4,Math.random()*4)
+    //   colors.push(0,1/(i+1),0)
+    // }
     geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
-		geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
-    const line = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xffffff, vertexColors: true } ) );
+		// geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+    // const material = new THREE.LineBasicMaterial( { color: 0xffffff, vertexColors: false } ) 
+    const material = getTubeMaterial()
+    // this.shaderMaterialList.push(material)
+    const line = new THREE.Line( geometry, material);
     this.scene.add(line)
   }
 
@@ -467,7 +505,7 @@ export default class chinaMap {
     const flowMaterial = getFlowMaterialByY({ color:new THREE.Color(color), thickness: 0.98, speed: 0.5, repeat: 3, duration: 0.8 }) //沿Y轴的流动材质
     const cylinder = new THREE.Mesh(geometry, flowMaterial);
     this.shaderMaterialList.push(flowMaterial)
-    cylinder.position.set(position[0] - this.offsetX, height/2+1, (-position[1] + this.offsetY)*1.2-0.25)
+    cylinder.position.set(position[0] - this.offsetX, height/2+1, (-position[1] + this.offsetY)*1.2)
     cylinder.name = name
     group.add(cylinder)
   }
@@ -486,7 +524,7 @@ export default class chinaMap {
         }
       },
       grid: {
-        right: '20%',
+        // right: '20%',
       },
       tooltip: {
         trigger: 'axis',

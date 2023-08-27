@@ -558,13 +558,6 @@ export default class computerAttack {
     const links = []
     const newlinks = []
     const nodes = []
-    // const loader2 = new GLTFLoader();
-    // loader2.load(`/model/class6.glb`, function (gltf: any) {
-    //   const model = gltf.scene;
-    //   // model.rotation.y = Math.PI / 2
-    //   // that.addLabel(model, 'computer', 1)
-    //   that.group.add(model)
-    // })
     res.forEach((item: any) => {
       const copy_id = item.id
       item.id = item.name

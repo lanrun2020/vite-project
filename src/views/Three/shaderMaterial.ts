@@ -1849,3 +1849,67 @@ export const getShieldMaterial = () => {
   })
   return material
 }
+export const getTubeMaterial = () => {
+  const tubeShader = {
+    vertexshader: `
+        uniform float size;
+        uniform float time;
+        uniform float u_len;
+        attribute float u_index;
+        varying vec2 vUv;
+        uniform vec3 color;
+        uniform float u_opacity;
+        void main() {
+          vUv = uv;
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+        `,
+    fragmentshader: `
+      varying vec2 vUv;
+          uniform float u_opacity;
+          uniform vec3 color;
+          uniform float isTexture;
+          uniform float time;
+          uniform float speed;
+          uniform float repeatX;
+          void main() {
+              vec4 u_color = vec4(color,u_opacity);
+              // gl_FragColor =  vec4(color,fract(vUv.x * repeatX - time*speed) * u_opacity * step(0.5,fract(vUv.x * repeatX - time*speed)));
+              gl_FragColor = vec4(color,vUv.y+0.2);
+          }`
+  }
+  const tubeMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      color: {
+        value: new THREE.Color(0x00ffff),
+        type: "v3"
+      },
+      time: {
+        value: 0,
+        type: "f"
+      },
+      u_len: {
+        value: 10,
+        type: "f"
+      },
+      repeatX: {
+        value: 1,
+        type: "f"
+      },
+      speed: {
+        value: 1.0,
+        type: "f"
+      },
+      u_opacity: {
+        value: 0.8,
+        type: "f"
+      },
+    },
+    transparent: true,
+    // depthTest: false,
+    vertexShader: tubeShader.vertexshader,
+    fragmentShader: tubeShader.fragmentshader
+  })
+  return tubeMaterial
+}

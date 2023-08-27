@@ -113,11 +113,11 @@ const init = () => {
 
   .echarts-plane {
     position: absolute;
-    left: -500px;
+    left: -23vw;
     top: 0;
     // transform: translateY(-50%);
-    width: 500px;
-    height: 800px;
+    width: 23vw;
+    height: 70vh;
     background: rgba($color: #000000, $alpha: 0.5);
     transition: all 0.3s;
     z-index: 999;

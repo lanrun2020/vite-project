@@ -90,7 +90,7 @@ export const addPlaneLine = (viewer: any, active: boolean) => {
 
     const instances2:any = getInstances(airList2.length) // ufo轨迹数量
     primitivesModel2 = new Cesium.ModelInstanceCollection({
-      url: `/model/ufo.glb`,
+      url: `/model/CesiumAir.glb`,
       size: 5,
       minimumPixelSize: 20,
       instances: instances2
