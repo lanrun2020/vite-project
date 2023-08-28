@@ -1875,8 +1875,8 @@ export const getTubeMaterial = () => {
           uniform float repeatX;
           void main() {
               vec4 u_color = vec4(color,u_opacity);
-              // gl_FragColor =  vec4(color,fract(vUv.x * repeatX - time*speed) * u_opacity * step(0.5,fract(vUv.x * repeatX - time*speed)));
-              gl_FragColor = vec4(color,vUv.y+0.2);
+              gl_FragColor =  vec4(color,fract(vUv.x * repeatX - time*speed) * u_opacity * step(0.5,fract(vUv.x * repeatX - time*speed)));
+              // gl_FragColor = vec4(color,1.0);
           }`
   }
   const tubeMaterial = new THREE.ShaderMaterial({

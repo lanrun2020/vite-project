@@ -160,7 +160,7 @@ export default class chinaMap {
     // scene.fog = new THREE.FogExp2(0xcccccc, 0.002); //雾效果
     // 辅助三维坐标系
     const axesHelper = new THREE.AxesHelper(500);
-    this.scene.add(axesHelper)
+    // this.scene.add(axesHelper)
     // Grid 添加网格辅助对象
     const helper = new THREE.GridHelper(100, 30, 0x303030, 0x303030); //长度1000 划分为50份
     // helper.rotation.x = Math.PI / 2
@@ -328,55 +328,60 @@ export default class chinaMap {
   }
 
   addFlyLine(active) {
-    //平滑曲线
-    const data = [
-      {
-        start:'北京',
-        end:'四川',
-      },
-      {
-        start:'北京',
-        end:'湖北',
-      }
-    ]
-    const children = this.group.children
-    // console.log(children);
-    data.forEach((line) => {
-      const start = children
-    })
-    // const node = data.find((item)=>item.name === children[index].properties.name.toString())
-    // if(node && node.value) {
-    //   this.addline(group, children[index].properties.centroid, node.value*10.0/max, node.color, name)
-    // }
-    const x1 = 0
-    const y1 = 0
-    const x2 = 10
-    const y2 = 0
+    if(active) {
+      //平滑曲线
+      const data = [
+        {
+          start:'北京',
+          end:'四川',
+        },
+        {
+          start:'北京',
+          end:'浙江',
+        },
+        {
+          start:'北京',
+          end:'湖南',
+        },
+        {
+          start:'北京',
+          end:'广东',
+        },
+        {
+          start:'北京',
+          end:'黑龙江',
+        },
+        {
+          start:'北京',
+          end:'青海',
+        }
+      ]
+      const linematerial = getTubeMaterial()
+      this.shaderMaterialList.push(linematerial)
+      data.forEach((item) => {
+        const start = this.group.children.find((node) => node.properties.name.includes(item.start))
+        item['startPosition'] = start.properties.centroid
+        const end = this.group.children.find((node) => node.properties.name.includes(item.end))
+        item['endPosition'] = end.properties.centroid
+        const curve = this.getLinePoints(item['startPosition'][0]- this.offsetX,(-item['startPosition'][1] + this.offsetY)*this.scaleMap,item['endPosition'][0]- this.offsetX,(-item['endPosition'][1]+ this.offsetY)*this.scaleMap)
+        const tubeGeometry = new THREE.TubeGeometry(curve, 50, 0.02, 10, false); //path路径 tubularSegments分段 radius半径 radialSegments管道横截面分段 close是否闭合
+        const mesh = new THREE.Mesh(tubeGeometry, linematerial);
+        mesh.name = 'flyline'
+        this.scene.add(mesh);
+      })
+    } else {
+      this.removeChild(this.scene, 'flyline')
+    }
+  }
+
+  getLinePoints(x1,y1,x2,y2) {
+    // 平滑曲线
     const curve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(x1, 1.5, y1),
-      // new THREE.Vector3((x1 + x2) / 2, Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 10, (y1 + y2) / 2),
-      new THREE.Vector3(x2, 1.5, y2),
+      new THREE.Vector3(x1, 1, y1),
+      new THREE.Vector3((x1 + x2) / 2, 3, (y1 + y2) / 2),
+      new THREE.Vector3(x2, 1, y2),
     ]);
-    // const tubeGeometry = new THREE.TubeGeometry(curve, 50, 0.05, 10, false); //path路径 tubularSegments分段 radius半径 radialSegments管道横截面分段 close是否闭合
-    // const linematerial = getTubeMaterial()
-    // const mesh = new THREE.Mesh(tubeGeometry, linematerial);
-    // this.shaderMaterialList.push(linematerial)
-    // this.scene.add(mesh);
-    
-    const geometry = new THREE.BufferGeometry();
-    const vertices = [0,4,0,2,4,2,4,4,4,6,4,6]
-    const colors = []
-    // for(let i = 0 ; i < 10; i++){
-    //   vertices.push(Math.random()*4,4,Math.random()*4)
-    //   colors.push(0,1/(i+1),0)
-    // }
-    geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
-		// geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
-    // const material = new THREE.LineBasicMaterial( { color: 0xffffff, vertexColors: false } ) 
-    const material = getTubeMaterial()
-    // this.shaderMaterialList.push(material)
-    const line = new THREE.Line( geometry, material);
-    this.scene.add(line)
+    return curve
   }
 
   async addGDP(active) {
@@ -614,11 +619,13 @@ export default class chinaMap {
   //根据名称移除节点
   removeChild(group, name:string) {
     if (!name) return
-    const obj = group.children.find((item) => item.name === name)
-    if (obj) {
-      //判断材质是否添加到了更新时间的材质列表中，如果存在则移除
-      this.shaderMaterialList = this.shaderMaterialList.filter((item) => item !== obj.material)
-      group.remove(obj)
+    const objs = group.children.filter((item) => item.name === name)
+    if (objs.length) {
+      objs.forEach((obj) => {
+        //判断材质是否添加到了更新时间的材质列表中，如果存在则移除
+        this.shaderMaterialList = this.shaderMaterialList.filter((item) => item !== obj.material)
+        group.remove(obj)
+      })
     }
   }
 
