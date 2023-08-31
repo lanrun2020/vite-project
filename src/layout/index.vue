@@ -104,6 +104,9 @@
             <el-menu-item index="/animation/example4">
               example4
             </el-menu-item>
+            <el-menu-item index="/animation/example5">
+              example5
+            </el-menu-item>
           </el-menu-item-group>
         </el-sub-menu>
 
