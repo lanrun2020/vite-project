@@ -366,12 +366,12 @@ const initCesium = () => {
     viewer.destroy();
   }
 
-  const overlay = new Cesium.TileMapServiceImageryProvider({
-    url:'/map',
-    fileExtension: 'png',
-    // fileExtension:'png',
-    maximumLevel:19,
-  })
+  // const overlay = new Cesium.TileMapServiceImageryProvider({
+  //   url:'/map',
+  //   fileExtension: 'png',
+  //   // fileExtension:'png',
+  //   maximumLevel:19,
+  // })
   viewer = new Cesium.Viewer("cesiumContainer", {
     animation: true, // 是否显示时钟clock动画控件
     baseLayerPicker: true, // 是否显示图层选择控件
@@ -386,10 +386,10 @@ const initCesium = () => {
     contextOptions: {
       requestWebgl2: true, // 开启webgl2
     },//Context和WebGL创建属性对应于Context#options
-    terrainProvider: Cesium.createWorldTerrain({
-      requestVertexNormals: true,
-      requestWaterMask: false
-    }),
+    // terrainProvider: Cesium.createWorldTerrain({
+    //   requestVertexNormals: true,
+    //   requestWaterMask: false
+    // }),
     // imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
     //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
     // })
@@ -422,10 +422,10 @@ const initCesium = () => {
     // 45.85136872098397, 10),
     //     duration: 1.6
     //   })
-  setTimeout(() => {
-    viewer.render();
-    let canvas = viewer.scene.canvas;
-            let image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+  // setTimeout(() => {
+  //   viewer.render();
+  //   let canvas = viewer.scene.canvas;
+  //           let image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
             // console.log(image);
             // let link = document.createElement("a");
             // let blob = dataURLtoBlob(image);
@@ -434,54 +434,54 @@ const initCesium = () => {
             // link.download = "scene.png";
             // link.href = objurl;
             // link.click();
-  }, 4000)
-  const globe = viewer.scene.globe
-  const position = Cesium.Cartesian3.fromRadians(
-    -2.0862979473351286,
-    0.6586620013036164,
-    1400.0
-  );
-  const entity = viewer.entities.add({
-    position: position,
-    box: {
-      dimensions: new Cesium.Cartesian3(1400.0, 1400.0, 2800.0),
-      material: Cesium.Color.WHITE.withAlpha(0.3),
-      outline: false,
-      outlineColor: Cesium.Color.WHITE,
-    },
-  });
+  // }, 4000)
+  // const globe = viewer.scene.globe
+  // const position = Cesium.Cartesian3.fromRadians(
+  //   -2.0862979473351286,
+  //   0.6586620013036164,
+  //   1400.0
+  // );
+  // const entity = viewer.entities.add({
+  //   position: position,
+  //   box: {
+  //     dimensions: new Cesium.Cartesian3(1400.0, 1400.0, 2800.0),
+  //     material: Cesium.Color.WHITE.withAlpha(0.3),
+  //     outline: false,
+  //     outlineColor: Cesium.Color.WHITE,
+  //   },
+  // });
 
-  globe.depthTestAgainstTerrain = true;
-  globe.clippingPlanes = new Cesium.ClippingPlaneCollection({
-    modelMatrix: entity.computeModelMatrix(Cesium.JulianDate.now()),//指定相对于裁剪平面原始坐标系的额外变换
-    planes: [ //一个ClippingPlane对象数组，用于选择性地禁用每个平面外部的渲染。
-      new Cesium.ClippingPlane(
-        new Cesium.Cartesian3(1.0, 0.0, 0.0),
-        -700.0
-      ),
-      new Cesium.ClippingPlane(
-        new Cesium.Cartesian3(-1.0, 0.0, 0.0),
-        -700.0
-      ),
-      new Cesium.ClippingPlane(
-        new Cesium.Cartesian3(0.0, 1.0, 0.0),
-        -700.0
-      ),
-      new Cesium.ClippingPlane(
-        new Cesium.Cartesian3(0.0, -1.0, 0.0),
-        -700.0
-      ),
-    ],
-    edgeWidth: 1.0,//用于突出显示剪切对象沿其剪切的边缘的宽度
-    edgeColor: Cesium.Color.WHITE,//用于突出显示剪切对象沿其剪切的边缘的颜色
-    enabled: true,//确定裁剪平面是否处于活动状态
-  });
-  globe.backFaceCulling = true;
-  globe.showSkirts = true;
+  // globe.depthTestAgainstTerrain = true;
+  // globe.clippingPlanes = new Cesium.ClippingPlaneCollection({
+  //   modelMatrix: entity.computeModelMatrix(Cesium.JulianDate.now()),//指定相对于裁剪平面原始坐标系的额外变换
+  //   planes: [ //一个ClippingPlane对象数组，用于选择性地禁用每个平面外部的渲染。
+  //     new Cesium.ClippingPlane(
+  //       new Cesium.Cartesian3(1.0, 0.0, 0.0),
+  //       -700.0
+  //     ),
+  //     new Cesium.ClippingPlane(
+  //       new Cesium.Cartesian3(-1.0, 0.0, 0.0),
+  //       -700.0
+  //     ),
+  //     new Cesium.ClippingPlane(
+  //       new Cesium.Cartesian3(0.0, 1.0, 0.0),
+  //       -700.0
+  //     ),
+  //     new Cesium.ClippingPlane(
+  //       new Cesium.Cartesian3(0.0, -1.0, 0.0),
+  //       -700.0
+  //     ),
+  //   ],
+  //   edgeWidth: 1.0,//用于突出显示剪切对象沿其剪切的边缘的宽度
+  //   edgeColor: Cesium.Color.WHITE,//用于突出显示剪切对象沿其剪切的边缘的颜色
+  //   enabled: true,//确定裁剪平面是否处于活动状态
+  // });
+  // globe.backFaceCulling = true;
+  // globe.showSkirts = true;
 
-  viewer.trackedEntity = entity;
-  viewer.camera.lookAt(new Cesium.Cartesian3(1,
-    0, 0), new Cesium.Cartesian3(2, 2, 2));
+  // viewer.trackedEntity = entity;
+  // viewer.camera.lookAt(new Cesium.Cartesian3(1,
+  //   0, 0), new Cesium.Cartesian3(2, 2, 2));
 
   // console.log(lon,lat);
   // console.log(Cesium.JulianDate.fromDate(new Date('2023-06-05 13:39:56')));
@@ -510,7 +510,7 @@ const initCesium = () => {
   //   // fileExtension:'png',
   //   maximumLevel:9,
   // })
-  viewer.imageryLayers.addImageryProvider(overlay);
+  // viewer.imageryLayers.addImageryProvider(overlay);
 
   // viewer.camera.flyTo({
   //   destination: Cesium.Cartesian3.fromDegrees(110, 30, 10000000),

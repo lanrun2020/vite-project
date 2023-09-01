@@ -3,7 +3,7 @@
     <canvas id="canvas"></canvas>
   </div>
 </template>
-
+<!-- 模拟下雨 -->
 <script setup lang='ts'>
 import { onMounted, onBeforeUnmount } from 'vue';
 let canvas
@@ -42,8 +42,8 @@ class Point {
     this.r = 4;
     this.x = getRandom(0, canvas.width - this.r/2)
     this.y = getRandom(0, canvas.height - this.r/2)
-    this.xSpeed = getRandom(-100,100);
-    this.ySpeed = getRandom(-100,100);
+    this.xSpeed = 0;
+    this.ySpeed = 500;
     this.lastDrawTime = null;
   }
   draw() {
@@ -55,32 +55,20 @@ class Point {
       const yDis = this.ySpeed * duration
       let x = this.x + xDis
       let y = this.y + yDis
-      if (x>canvas.width - this.r/2) {
-        x = canvas.width - this.r / 2
-        this.xSpeed = -this.xSpeed
-      } else if (x<0){
-        x = 0
-        this.xSpeed = -this.xSpeed
-      }
       if (y>canvas.height-this.r/2) {
-        y = canvas.height - this.r/2
-        this.ySpeed = -this.ySpeed
-      } else if (y<0){
-        y = 0;
-        this.ySpeed = -this.ySpeed
+        y = -100
       }
-      this.x = x
       this.y = y
     }
-    ctx.beginPath()
-    ctx.arc(this.x, this.y, this.r, 0, 2*Math.PI)
-    ctx.fillStyle = 'rgba(0,255,255,0.5)';
-    ctx.fill()
+    // ctx.beginPath()
+    // ctx.arc(this.x, this.y, this.r, 0, 2*Math.PI)
+    // ctx.fillStyle = 'rgba(0,255,255,0.5)';
+    // ctx.fill()
     this.lastDrawTime = Date.now()
   }
 }
 class Graph {
-  constructor(ponitNumber = 50,maxDis = 300) {
+  constructor(ponitNumber = 150,maxDis = 300) {
     this.points = new Array(ponitNumber).fill(0).map(() => new Point())
     this.maxDis = maxDis
   }
@@ -93,26 +81,12 @@ class Graph {
       for(let i=0;i<this.points.length;i++){
         const p1 = this.points[i]
         p1.draw()
-        const d2 = Math.sqrt((p1.x-mouseX)**2+(p1.y-mouseY)**2)
-        if(d2<this.maxDis) {
-          ctx.beginPath()
-          ctx.moveTo(p1.x,p1.y)
-          ctx.lineTo(mouseX,mouseY)
-          ctx.closePath()
-          ctx.strokeStyle = `rgba(0,200,200,${1-d2/this.maxDis})`
-          ctx.stroke()
-        }
-        for(let j = i+1;j<this.points.length;j++){
-          const p2 = this.points[j]
-          const d = Math.sqrt((p1.x-p2.x)**2+(p1.y-p2.y)**2)
-          if(d>this.maxDis) continue
-          ctx.beginPath()
-          ctx.moveTo(p1.x,p1.y)
-          ctx.lineTo(p2.x,p2.y)
-          ctx.closePath()
-          ctx.strokeStyle = `rgba(0,200,200,${1-d/this.maxDis})`
-          ctx.stroke()
-        }
+        ctx.beginPath()
+        ctx.moveTo(p1.x,p1.y)
+        ctx.lineTo(p1.x,p1.y+100)
+        ctx.closePath()
+        ctx.strokeStyle = `rgba(0,200,200,0.5)`
+        ctx.stroke()
       }
     }
 }
