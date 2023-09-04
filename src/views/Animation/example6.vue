@@ -41,7 +41,8 @@ class Point {
   constructor() {
     this.r = 4;
     this.x = getRandom(0, canvas.width - this.r/2)
-    this.y = getRandom(0, canvas.height - this.r/2)
+    this.y = getRandom(0, 1200)
+    this.dis = getRandom(50, 100)
     this.xSpeed = 0;
     this.ySpeed = 500;
     this.lastDrawTime = null;
@@ -55,8 +56,9 @@ class Point {
       const yDis = this.ySpeed * duration
       let x = this.x + xDis
       let y = this.y + yDis
-      if (y>canvas.height-this.r/2) {
+      if (y>1200) {
         y = -100
+        this.dis = getRandom(50,100)
       }
       this.y = y
     }
@@ -83,9 +85,9 @@ class Graph {
         p1.draw()
         ctx.beginPath()
         ctx.moveTo(p1.x,p1.y)
-        ctx.lineTo(p1.x,p1.y+100)
+        ctx.lineTo(p1.x,p1.y+p1.dis)
         ctx.closePath()
-        ctx.strokeStyle = `rgba(0,200,200,0.5)`
+        ctx.strokeStyle = `rgba(0,200,200,${p1.dis/150})`
         ctx.stroke()
       }
     }
