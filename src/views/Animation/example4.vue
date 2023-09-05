@@ -1,19 +1,31 @@
 <template>
- <div style="width: 100%;height: 100%;">
+  <div style="width: 100%;height: 100%;">
     <div class="scoll-bar">
       <ScrollBar>
-        <div v-for="(item,index) in mapList" :key="index" class="item-bar" :style="{backgroundImage:`url(${item.url})`}"></div>
+        <div v-for="(item, index) in mapList" :key="index" class="item-bar"
+          :style="{ backgroundImage: `url(${item.url})` }">
+        </div>
       </ScrollBar>
     </div>
     <div class="test">
       <div class="img"></div>
     </div>
-    <div ref="mapBar" class="map-bar" :class="{ 'map-move': mapFlag }">
-        <div v-for="(item,index) in mapList" :key="index" @click="changeMap(item)" class="map-item" :style="{backgroundImage:`url(${item.url})`,opacity:(index+1)/mapList.length,right:`${(mapList.length-1-index)*10}px`}">
-          <div class="map-label" :class="{'map-active':item.active}">{{ item.name }}</div>
-        </div>
+    <div class="piano-plane">
+      <div class="piano-btn">A</div>
+      <div class="piano-btn">B</div>
+      <div class="piano-btn">C</div>
+      <div class="piano-btn">D</div>
+      <div class="piano-btn">E</div>
+      <div class="piano-btn">F</div>
+      <div class="piano-btn">G</div>
     </div>
- </div>
+    <div ref="mapBar" class="map-bar" :class="{ 'map-move': mapFlag }">
+      <div v-for="(item, index) in mapList" :key="index" @click="changeMap(item)" class="map-item"
+        :style="{ backgroundImage: `url(${item.url})`, opacity: (index + 1) / mapList.length, right: `${(mapList.length - 1 - index) * 10}px` }">
+        <div class="map-label" :class="{ 'map-active': item.active }">{{ item.name }}</div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang='ts'>
@@ -56,7 +68,7 @@ const changeMap = (item) => {
   mapList.value.forEach((map) => {
     map.active = false
   })
-  mapList.value.sort((a,b) => a.order - b.order)
+  mapList.value.sort((a, b) => a.order - b.order)
   mapList.value.push(item)
   item.active = true
   mapFlag.value = false
@@ -73,10 +85,12 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
-$dataLength : 4;//mapList长度
+$dataLength : 4; //mapList长度
+
 .scoll-bar {
   width: 800px;
   height: 300px;
+
   // border: 1px solid #f00;
   .item-bar {
     width: 400px;
@@ -86,20 +100,23 @@ $dataLength : 4;//mapList长度
     background-size: cover;
   }
 }
+
 .test {
   width: 300px;
   height: 300px;
   border: 1px solid #0f0;
   box-shadow: inset 0 0 20px #333333;
   background-color: #ccc;
+
   .img {
     width: 80%;
     height: 80%;
     background-image: url('../../assets/dalishi.jpg');
     background-size: cover;
-    box-shadow: inset 0 0 20px #00e5ff,inset -2px -2px 20px #00e5ff;
+    box-shadow: inset 0 0 20px #00e5ff, inset -2px -2px 20px #00e5ff;
   }
 }
+
 .map-bar {
   position: absolute;
   right: 0;
@@ -110,6 +127,7 @@ $dataLength : 4;//mapList长度
   width: 180px;
   height: 100px;
   transition: all 0.4s;
+
   .map-item {
     position: absolute;
     bottom: 0px;
@@ -120,28 +138,65 @@ $dataLength : 4;//mapList长度
     margin: 10px;
     border: 2px solid #ffffff;
     transition: all 0.4s;
+
     &:hover {
-      border:2px solid #333333;
+      border: 2px solid #333333;
     }
+
     .map-label {
       position: absolute;
       bottom: 0px;
-      right:0px;
-      padding:6px 10px;
-      background:rgba(4, 178, 236,0.1)
+      right: 0px;
+      padding: 6px 10px;
+      background: rgba(4, 178, 236, 0.1)
     }
+
     .map-active {
-      background:rgb(4, 178, 236)
+      background: rgb(4, 178, 236)
     }
   }
+
   &.map-move:hover {
     width: $dataLength*140px;
     background: rgba($color: #666666, $alpha: 0.3);
+
     @for $i from 1 through $dataLength {
       .map-item:nth-child(#{$i}) {
         right: #{($dataLength - $i) * 140}px !important;
         opacity: 1 !important;
       }
+    }
+  }
+}
+
+.piano-plane {
+  padding: 40px;
+  display: flex;
+  background-color: #333333;
+  .piano-btn {
+    box-sizing: border-box;
+    width: 60px;
+    height: 220px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    border-radius:4px 4px 6px 6px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    padding-bottom: 20px;
+    user-select: none;
+    transition: all 0.1s;
+    box-shadow:
+      0px 6px 0px 1px rgba(255, 255, 255, .4);
+
+    &:active {
+      padding-bottom: 19px;
+      box-shadow:
+        0px 5px 0px 1px rgba(255, 255, 255, .5),
+        inset 0px 4px 12px rgba(0, 0, 0, .4);
     }
   }
 }

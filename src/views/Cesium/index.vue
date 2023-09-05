@@ -61,6 +61,7 @@ import { addBox } from "./addBox";
 import test from "node:test";
 import "./texture3D"
 import { addPrimitive } from "./lxs_volumn"
+import { addChangePosition } from "./addChangePosition";
 type toolItemType = {
   title: string;
   value: number;
@@ -232,6 +233,11 @@ let toolList: Ref<toolItemType[]> = ref([
     title: "Box",
     value: 32,
     active: false,
+  },
+  {
+    title: "addChangePosition",
+    value: 33,
+    active: false
   }
 ])
 onMounted(async () => {
@@ -358,6 +364,9 @@ const toolChecked = (active: boolean, value: number) => {
     case 32:
       addBox(viewer, active);
       break;
+    case 33:
+      addChangePosition(viewer, active);
+      break;
     default: break;
   }
 };
@@ -414,6 +423,7 @@ const initCesium = () => {
   //经纬度
   var lon = Cesium.Math.toDegrees(carto.longitude);
   var lat = Cesium.Math.toDegrees(carto.latitude);
+  addChangePosition(viewer, true)
   // addPrimitive(viewer)
   // viewer.camera.lookAt(new Cesium.Cartesian3.fromDegrees(124.21936679679918,
   //   45.85136872098397, 80), new Cesium.Cartesian3(2, 2, 2));
