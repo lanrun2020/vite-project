@@ -1,6 +1,7 @@
 import Cesium from "@/utils/importCesium"
 import river from '../../assets/arrow1.jpg'
-import * as LeaderLine from 'leader-line'
+import LeaderLine from 'leader-line'
+//LeaderLine报错解决:在leader-line.min.js的最后一行添加export default LeaderLine
 const entities: object[] = []
 let arr:{x:number,y:number, position:typeof Cesium.Cartesian3}[] = []
 let boxArr:{box:HTMLElement,point:HTMLElement,leaderLine:typeof LeaderLine}[] = []

@@ -82,14 +82,16 @@ const pointSource = new VectorSource({
 });
 const pointLayer = new VectorLayer({
   source: pointSource,
-  style: new Style({
-    image: new Circle({
-      radius: 10,
-      fill: new Fill({
-        color: '#00FF00',
-      }),
-    })
-  }),//点图层默认样式
+  style: null,
+  visible: true,
+  // style: new Style({
+  //   image: new Circle({
+  //     radius: 10,
+  //     fill: new Fill({
+  //       color: '#00FF00',
+  //     }),
+  //   })
+  // }),//点图层默认样式
 });
 // end点
 
@@ -194,9 +196,10 @@ const initMap = () => {
       const type = feature.getGeometry().getType()
       // const property = feature.getProperties()
       if (type === 'Point'){
-        feature.getStyle().getText().getFill().setColor('yellow')
-        feature.getStyle().getImage().getFill().setColor('yellow')
-        feature.changed()
+        // feature.getStyle().getText().getFill().setColor('yellow')
+        // feature.getStyle().getImage().getFill().setColor('yellow')
+        // feature.changed()
+        feature.setStyle(null) //设置隐藏元素(图层vector样式设置为null才行,否则是设置为默认样式)
         // feature.setStyle(getPointStyle('yellow'))
       }
       // const coordinate = Extent.getCenter(feature.getGeometry().getExtent())

@@ -1,8 +1,5 @@
 <template>
   <div id="cesiumContainer">
-    <!-- <video id="myVideo" style="width: 400px;height: 400px;" autoplay loop controls >
-     <source src="./video.mp4" type="video/mp4">
-    </video> -->
     <toolbox :toolList="toolList" @toolChecked="toolChecked"></toolbox>
   </div>
 </template>
@@ -58,7 +55,6 @@ import { addParticleSystem2 } from "./addParticleSystem2";
 import { addCircleWall } from "./addCircleWall";
 import { addWind } from "./addWind";
 import { addBox } from "./addBox";
-import test from "node:test";
 import "./texture3D"
 import { addPrimitive } from "./lxs_volumn"
 import { addChangePosition } from "./addChangePosition";
@@ -194,11 +190,11 @@ let toolList: Ref<toolItemType[]> = ref([
     value: 24,
     active: false,
   },
-  // {
-  //   title: "billboard",
-  //   value: 25,
-  //   active: false,
-  // },
+  {
+    title: "billboard",
+    value: 25,
+    active: false,
+  },
   {
     title: "视锥扫描",
     value: 26,
@@ -238,7 +234,12 @@ let toolList: Ref<toolItemType[]> = ref([
     title: "addChangePosition",
     value: 33,
     active: false
-  }
+  },
+  // {
+  //   title: '体渲染',
+  //   value: 34,
+  //   active: false,
+  // }
 ])
 onMounted(async () => {
   console.log('cesium page')
@@ -367,6 +368,9 @@ const toolChecked = (active: boolean, value: number) => {
     case 33:
       addChangePosition(viewer, active);
       break;
+    case 34:
+      addPrimitive(viewer);
+      break;
     default: break;
   }
 };
@@ -411,276 +415,10 @@ const initCesium = () => {
   // viewer.scene.globe.enableLighting = true;
   viewer.clock.shouldAnimate = true
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
-
   //深度检测
   viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
-  var pos = Cesium.Cartesian3.fromDegrees(61.296382224724795,35.628536117000692);
-  // console.log(pos);
-  //Cartesian3转经纬度坐标
-  //Cartographic坐标
-  var carto = viewer.scene.globe.ellipsoid.cartesianToCartographic(pos);
-  // console.log(carto);
-  //经纬度
-  var lon = Cesium.Math.toDegrees(carto.longitude);
-  var lat = Cesium.Math.toDegrees(carto.latitude);
-  addChangePosition(viewer, true)
-  // addPrimitive(viewer)
-  // viewer.camera.lookAt(new Cesium.Cartesian3.fromDegrees(124.21936679679918,
-  //   45.85136872098397, 80), new Cesium.Cartesian3(2, 2, 2));
-    // viewer.camera.flyTo({
-    //     destination: Cesium.Cartesian3.fromDegrees(124.21936679679918,
-    // 45.85136872098397, 10),
-    //     duration: 1.6
-    //   })
-  // setTimeout(() => {
-  //   viewer.render();
-  //   let canvas = viewer.scene.canvas;
-  //           let image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-            // console.log(image);
-            // let link = document.createElement("a");
-            // let blob = dataURLtoBlob(image);
-            // console.log(blob);
-            // let objurl = URL.createObjectURL(blob);
-            // link.download = "scene.png";
-            // link.href = objurl;
-            // link.click();
-  // }, 4000)
-  // const globe = viewer.scene.globe
-  // const position = Cesium.Cartesian3.fromRadians(
-  //   -2.0862979473351286,
-  //   0.6586620013036164,
-  //   1400.0
-  // );
-  // const entity = viewer.entities.add({
-  //   position: position,
-  //   box: {
-  //     dimensions: new Cesium.Cartesian3(1400.0, 1400.0, 2800.0),
-  //     material: Cesium.Color.WHITE.withAlpha(0.3),
-  //     outline: false,
-  //     outlineColor: Cesium.Color.WHITE,
-  //   },
-  // });
-
-  // globe.depthTestAgainstTerrain = true;
-  // globe.clippingPlanes = new Cesium.ClippingPlaneCollection({
-  //   modelMatrix: entity.computeModelMatrix(Cesium.JulianDate.now()),//指定相对于裁剪平面原始坐标系的额外变换
-  //   planes: [ //一个ClippingPlane对象数组，用于选择性地禁用每个平面外部的渲染。
-  //     new Cesium.ClippingPlane(
-  //       new Cesium.Cartesian3(1.0, 0.0, 0.0),
-  //       -700.0
-  //     ),
-  //     new Cesium.ClippingPlane(
-  //       new Cesium.Cartesian3(-1.0, 0.0, 0.0),
-  //       -700.0
-  //     ),
-  //     new Cesium.ClippingPlane(
-  //       new Cesium.Cartesian3(0.0, 1.0, 0.0),
-  //       -700.0
-  //     ),
-  //     new Cesium.ClippingPlane(
-  //       new Cesium.Cartesian3(0.0, -1.0, 0.0),
-  //       -700.0
-  //     ),
-  //   ],
-  //   edgeWidth: 1.0,//用于突出显示剪切对象沿其剪切的边缘的宽度
-  //   edgeColor: Cesium.Color.WHITE,//用于突出显示剪切对象沿其剪切的边缘的颜色
-  //   enabled: true,//确定裁剪平面是否处于活动状态
-  // });
-  // globe.backFaceCulling = true;
-  // globe.showSkirts = true;
-
-  // viewer.trackedEntity = entity;
-  // viewer.camera.lookAt(new Cesium.Cartesian3(1,
-  //   0, 0), new Cesium.Cartesian3(2, 2, 2));
-
-  // console.log(lon,lat);
-  // console.log(Cesium.JulianDate.fromDate(new Date('2023-06-05 13:39:56')));
-  // var layer = new Cesium.UrlTemplateImageryProvider({
-  //   url: "http://webrd02.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
-  //   minimumLevel: 4,
-  //   maximumLevel: 18
-  // })
-  // viewer.imageryLayers.addImageryProvider(layer);
-
-  // const tiflayer = new Cesium.WebMapServiceImageryProvider({
-  //   url: '/cesiumtif',
-  //   layers: 'cesium:map9',
-  //   parameters: {
-  //     service: 'WMS',
-  //     format: 'image/png',
-  //     srs: 'EPSG:4326',
-  //     crs: 'EPSG:4326',
-  //     transparent: true,
-  //   }
-  // })
-  // viewer.imageryLayers.addImageryProvider(tiflayer);
-  // const overlay = new Cesium.UrlTemplateImageryProvider({
-  //   url:'/map/{z}/{x}/{y}.png',
-  //   fileExtension: 'png',
-  //   // fileExtension:'png',
-  //   maximumLevel:9,
-  // })
-  // viewer.imageryLayers.addImageryProvider(overlay);
-
-  // viewer.camera.flyTo({
-  //   destination: Cesium.Cartesian3.fromDegrees(110, 30, 10000000),
-  //   duration: 1.6,
-  // });
-  // viewer.scene.screenSpaceCameraController.enableTit = false;
-  // addCity(viewer, true);
-  testFuc()
 };
-const testFuc = () => {
-  // const VoxelProvider = 
-  // const primitive = new Cesium.VoxelPrimitive({
-  //   provider:	VoxelProvider,
-  //   modelMatrix: Matrix4,
-  //   customShader:
-  // })
-}
-function dataURLtoBlob(dataurl) {
-            let arr = dataurl.split(','),
-                mime = arr[0].match(/:(.*?);/)[1],
-                bstr = atob(arr[1]),
-                n = bstr.length,
-                u8arr = new Uint8Array(n);
-            while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
-            }
-            return new Blob([u8arr], {
-                type: mime
-            });
-        }
-// 创建相机
-// const createLightCamera = () => {
-//     this.lightCamera = new Cesium.Camera(this.viewer.scene)
-//     this.lightCamera.position = this.viewPosition
-//     this.lightCamera.frustum.near = this.viewDistance * 0.001
-//     this.lightCamera.frustum.far = this.viewDistance
-//     const hr = Cesium.Math.toRadians(this.horizontalViewAngle)
-//     const vr = Cesium.Math.toRadians(this.verticalViewAngle)
-//     const aspectRatio =
-//         (this.viewDistance * Math.tan(hr / 2) * 2) /
-//         (this.viewDistance * Math.tan(vr / 2) * 2)
-//     this.lightCamera.frustum.aspectRatio = aspectRatio
-//     if (hr > vr) {
-//       this.lightCamera.frustum.fov = hr
-//     } else {
-//       this.lightCamera.frustum.fov = vr
-//     }
-//     this.lightCamera.setView({
-//       destination: this.viewPosition,
-//       orientation: {
-//         heading: Cesium.Math.toRadians(this.viewHeading || 0),
-//         pitch: Cesium.Math.toRadians(this.viewPitch || 0),
-//         roll: 0
-//       }
-//     })
-//   }
-//投射视频到模型
-const addVideo = () => {
-  const dom = document.getElementById('myVideo')
-//   const greenCylinder = viewer.entities.add({
-//   name: "Green cylinder with black outline",
-//   position: Cesium.Cartesian3.fromDegrees(111.0, 40.0, 200000.0),
-//   cylinder: {
-//     length: 400000.0,
-//     topRadius: 200000.0,
-//     bottomRadius: 200000.0,
-//     material: Cesium.Color.GREEN.withAlpha(0.9),
-//   },
-// });
-//   const redCone = viewer.entities.add({
-//     name: "Red cone",
-//     position: Cesium.Cartesian3.fromDegrees(110.0, 30.0, 200000.0),
-//     cylinder: {
-//       length: 400000.0,
-//       topRadius: 0.0,
-//       bottomRadius: 200000.0,
-//       material: dom,
-//     },
-//   });
-  // const primitive = new Cesium.Primitive({
-  //     geometryInstances: new Cesium.GeometryInstance({
-  //       geometry: new Cesium.PolygonGeometry({
-  //         polygonHierarchy: new Cesium.PolygonHierarchy(
-  //           Cesium.Cartesian3.fromDegreesArray([
-  //             121.4591830727844, 31.20923471021075,
-  //             121.4591830727844, 31.27923471021075,
-  //             121.5599830727844, 31.27923471021075,
-  //             121.5599830727844, 31.20923471021075])
-  //         ),
-  //         height: 0,
-  //         extrudedHeight: 100,
-  //       }),
-  //     }),
-  //     classificationType : Cesium.ClassificationType.BOTH,
-  //     appearance: new Cesium.EllipsoidSurfaceAppearance({
-  //       material: Cesium.Material.fromType("Stripe"),
-  //     }),
-  //   })
-    // viewer.scene.primitives.add(
-    //   primitive
-    // );
-  // 121.4991830727844, 31.236923471021075
-  // viewer.zoomTo(viewer.entities);
-  // const dom2 = document.getElementById('myImage')
-  // 参数
-  // let viewModel = { verticalAngle: 90, horizontalAngle: 120, distance: 10 };
-  // let videoShed3DArr = [];
-  //   // 创建
-  //   let create = () => {
-  //       let videoShed3D = new Cesium.VideoShed3D(viewer, {
-  //         type: 'Video',
-  //         url: "src/cs.mp4",
-  //         alpha: 1,
-  //         debugFrustum: true,
-  //         horizontalAngle: Number(viewModel.horizontalAngle),
-  //         verticalAngle: Number(viewModel.verticalAngle),
-  //         distance: Number(viewModel.distance),
-  //       });
-  //       videoShed3DArr.push(videoShed3D)
-  //   }
-  //   create()
-    // 销毁
-    // let destroy = () => {
-    //     videoShed3DArr.forEach(video => video.destroy())
-    // }
-  const e = viewer.entities.add({
-    polygon:{
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        // heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
-        // height:0,
-        hierarchy: Cesium.Cartesian3.fromDegreesArrayHeights([
-          121.5091830727844, 31.23923471021075,1215,
-          121.5091830727844, 31.24123471021075,1215,
-          121.5109830727844, 31.24123471021075,1215,
-          121.5109830727844, 31.23923471021075,1215,
-        ]),
-        // extrudedHeight: 10,
-        // material: Cesium.Color.GREEN,
-        material: dom,
-        clampToGround: true,
-        classificationType: Cesium.ClassificationType.BOTH,
-      },
-    });
-    setTimeout(() => {
-      viewer.zoomTo(e);
-    },100)
 
-  // var videoElement = document.getElementById('myVideo');
-  // var projectionImage = new Cesium.ProjectionImage(videoElement);
-  // projectionImage.setImage({
-  //                   video: videoElement
-  //               });
-  //   projectionImage.viewPosition = [110.0, 30.0, 210000.0];
-
-  //   projectionImage.horizontalFov = 20000;
-  //   projectionImage.verticalFov = 10000;
-
-  //   projectionImage.setDistDirByPoint([110.0, 30.0, 200000.0]);
-  //   projectionImage.distance = 10000;
-}
 const TimeFormatter = (time: any, viewModel: any) => {
   return DateTimeFormatter(time, viewModel, true)
 }

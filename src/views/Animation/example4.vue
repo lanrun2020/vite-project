@@ -11,13 +11,47 @@
       <div class="img"></div>
     </div>
     <div class="piano-plane">
-      <div class="piano-btn">A</div>
-      <div class="piano-btn">B</div>
-      <div class="piano-btn">C</div>
-      <div class="piano-btn">D</div>
-      <div class="piano-btn">E</div>
-      <div class="piano-btn">F</div>
-      <div class="piano-btn">G</div>
+      <div class="white-plane" @click="whiteClick">
+        <div class="piano-btn">C3</div>
+        <div class="piano-btn">D3</div>
+        <div class="piano-btn">F3</div>
+        <div class="piano-btn">G3</div>
+        <div class="piano-btn">A3</div>
+        <div class="piano-btn">B3</div>
+        <div class="piano-btn">C4</div>
+        <div class="piano-btn">D4</div>
+        <div class="piano-btn">E4</div>
+        <div class="piano-btn">F4</div>
+        <div class="piano-btn">G4</div>
+        <div class="piano-btn">A4</div>
+        <div class="piano-btn">B4</div>
+        <div class="piano-btn">C5</div>
+        <div class="piano-btn">D5</div>
+        <div class="piano-btn">E5</div>
+        <div class="piano-btn">F5</div>
+        <div class="piano-btn">G5</div>
+        <div class="piano-btn">A5</div>
+      </div>
+      <div class="black-plane" @click="whiteClick">
+        <div class="piano-btn">CD4</div>
+        <div class="piano-btn">DE4</div>
+        <div class="piano-btn blank-btn"></div>
+        <div class="piano-btn">FG4</div>
+        <div class="piano-btn">GA4</div>
+        <div class="piano-btn">AB4</div>
+        <div class="piano-btn blank-btn"></div>
+        <div class="piano-btn">CD5</div>
+        <div class="piano-btn">DE5</div>
+        <div class="piano-btn blank-btn"></div>
+        <div class="piano-btn">FG5</div>
+        <div class="piano-btn">GA5</div>
+        <div class="piano-btn">AB5</div>
+        <div class="piano-btn blank-btn"></div>
+        <div class="piano-btn">CD6</div>
+        <div class="piano-btn">DE6</div>
+        <div class="piano-btn blank-btn"></div>
+        <div class="piano-btn">FG6</div>
+      </div>
     </div>
     <div ref="mapBar" class="map-bar" :class="{ 'map-move': mapFlag }">
       <div v-for="(item, index) in mapList" :key="index" @click="changeMap(item)" class="map-item"
@@ -75,6 +109,13 @@ const changeMap = (item) => {
 }
 const handleMousemove = () => {
   mapFlag.value = true
+}
+const whiteClick = (event) => {
+  var src = "/music/"+event.target.innerText.toLowerCase()+'.wav.mp3';
+  //创建媒体对象
+  var audio = new Audio(src);
+  //调用play方法
+	audio.play();
 }
 onMounted(() => {
   mapBar.value.addEventListener('mousemove', handleMousemove, false)
@@ -173,30 +214,77 @@ $dataLength : 4; //mapList长度
   padding: 40px;
   display: flex;
   background-color: #333333;
-  .piano-btn {
-    box-sizing: border-box;
-    width: 60px;
-    height: 220px;
-    font-weight: bold;
-    cursor: pointer;
+  justify-content: center;
+  position: relative;
+  .white-plane {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    border-radius:4px 4px 6px 6px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    padding-bottom: 20px;
-    user-select: none;
-    transition: all 0.1s;
-    box-shadow:
-      0px 6px 0px 1px rgba(255, 255, 255, .4);
-
-    &:active {
-      padding-bottom: 19px;
+    .piano-btn {
+      box-sizing: border-box;
+      width: 60px;
+      height: 260px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      border-radius:4px 4px 6px 6px;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      padding-bottom: 20px;
+      user-select: none;
+      transition: all 0.1s;
       box-shadow:
-        0px 5px 0px 1px rgba(255, 255, 255, .5),
-        inset 0px 4px 12px rgba(0, 0, 0, .4);
+        0px 6px 0px 1px rgba(255, 255, 255, .4);
+
+      &:active {
+        padding-bottom: 19px;
+        background-color: #72fffffe;
+        box-shadow:
+          0px 5px 0px 1px rgba(255, 255, 255, .5),
+          inset 0px 4px 12px rgba(0, 0, 0, .4);
+      }
+    }
+  }
+  .black-plane {
+    position: absolute;
+    height: 0;
+    top: 40px;
+    left: calc(50%);
+    transform: translateX(-50%);
+    display: flex;
+    color: #ccc;
+    .piano-btn {
+      margin: 0 4px;
+      box-sizing: border-box;
+      width: 52px;
+      height: 200px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      border-radius:0px 0px 6px 6px;
+      border: 1px solid rgb(0, 0, 0);
+      background-color: #000;
+      padding-bottom: 20px;
+      user-select: none;
+      transition: all 0.1s;
+      box-shadow:
+        0px 5px 0px 0px rgba(0, 0, 0, 1.0);
+      &:active {
+        padding-bottom: 19px;
+        box-shadow:
+          0px 4px 0px 0px rgba(40, 40, 40, 0.8),
+      }
+    }
+    .blank-btn {
+      background-color: transparent;
+      pointer-events: none;
+      border: none;
+      box-shadow: none;
+      height: 0;
     }
   }
 }

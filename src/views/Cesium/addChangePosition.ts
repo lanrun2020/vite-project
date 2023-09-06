@@ -3,8 +3,9 @@ import river from '../../assets/arrow1.jpg'
 let handler
 export const addChangePosition = async (viewer: any, active: boolean) => {
   if (active) {
+    const height = 100
     const entity = viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(115.59777, 34.03883,200),
+      position: Cesium.Cartesian3.fromDegrees(115.59777, 34.03883, height),
       billboard: {
         image: river, // default: undefined
         show: true, // default
@@ -18,62 +19,65 @@ export const addChangePosition = async (viewer: any, active: boolean) => {
       name: "Blue dashed line",
       polyline: {
         positions: Cesium.Cartesian3.fromDegreesArrayHeights([
-          115.59777, 34.03883,0,
-          115.59777, 34.03883,200
+          115.59777, 34.03883, 0,
+          115.59777, 34.03883, height
         ]),
         width: 4,
+        arcType: Cesium.ArcType.NONE,
         material: new Cesium.PolylineDashMaterialProperty({
           color: Cesium.Color.CYAN,
         }),
       },
-    });    
+    });
     handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
     handler.setInputAction((clickEvent: any) => {
-      const mouseY = clickEvent.position.y
-      const mouseX = clickEvent.position.x
       const pick = viewer.scene.pick(clickEvent.position);
-      console.log(clickEvent.position);
-      
       if (pick && pick.id) {
-        //1.获取此实体的高度，将线两端的位置转屏幕坐标计算差值
-        const cartographic = Cesium.Cartographic.fromCartesian(pick.id.position._value);
-        const height = cartographic.height //获取实体高度，后续好添加上去
-        const latitude = cartographic.latitude
-        const longitude = cartographic.longitude
-        //将高度置0后转连线底部的笛卡尔坐标
-        const cartesian3Bottom = Cesium.Cartesian3.fromRadians(longitude,latitude,0)
-        //转屏幕坐标
-        const cartesianBottom = Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, cartesian3Bottom);
-        //2.通过差值换算后通过屏幕坐标推出连线线底部经纬度坐标
-        //计算此时点击的位置转屏幕坐标与上面的屏幕坐标的高度差值
-        const disY = cartesianBottom.y - mouseY
-        const disX = cartesianBottom.x - mouseX
-        //3.再添加高度设置实体位置
         handler.setInputAction(function (event) {
           //获取到的鼠标高度减去差值再转经纬度，设置给实体
           const movePosition = event.endPosition
-          movePosition.y += disY
-          movePosition.x += disX //这一步换算的坐标会有一定偏差
-          const d = ((movePosition.x - mouseX)/mouseX)*85
-          // console.log(d);
-          
-          movePosition.x = movePosition.x-d
+          //1.获取此实体的高度，将线两端的位置转屏幕坐标计算差值
+          const cartesianBottom2 = Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, dashedLine.polyline.positions._value[1]);
+          const cartesianTop2 = Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, dashedLine.polyline.positions._value[0]);
+          const disX2 = cartesianTop2.x - cartesianBottom2.x
+          const disY2 = cartesianTop2.y - cartesianBottom2.y
+          movePosition.x += disX2 //这一步换算的坐标会有一定偏差
+          movePosition.y += disY2 //这一步换算的坐标会有一定偏差
           const cartesian2 = viewer.camera.pickEllipsoid(movePosition, viewer.scene.globe.ellipsoid);
           //cartesian此点为连线底部点,接着将这个点高度提升200，再换算出坐标
           const cartographic2 = Cesium.Cartographic.fromCartesian(cartesian2);
           const height2 = cartographic2.height
           const latitude2 = cartographic2.latitude
           const longitude2 = cartographic2.longitude
-          const cartesian3Top = Cesium.Cartesian3.fromRadians(longitude2,latitude2,height2+height)
+          const cartesian3Top = Cesium.Cartesian3.fromRadians(longitude2, latitude2, height2 + height)
           pick.id.position = cartesian3Top
           dashedLine.polyline.positions.setValue([cartesian2, cartesian3Top])
-        },Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+        }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
         handler.setInputAction(function () {
           handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE)//移除事件
           handler.removeInputAction(Cesium.ScreenSpaceEventType.RIGHT_CLICK)//移除事件
-        },Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+        }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
       }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    const circleMaterial2 = new Cesium.CircleMaterialProperty({
+      color: new Cesium.Color(1.0, 0.0, 0.0, 1.0),
+      speed: 1.0,
+      repeat: 1,
+      thickness: .8,
+      flash: true
+    });
+    viewer.entities.add({
+      position: Cesium.Cartesian3.fromDegrees(115.63777, 34.06883),
+      ellipse: {
+        // 椭圆短半轴长度
+        semiMinorAxis: 1000,
+        // 椭圆长半轴长度
+        semiMajorAxis: 1000,
+        // height: 1,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        material:circleMaterial2,
+      },
+    })
     viewer.flyTo(viewer.entities)
   } else {
     handler && handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)//移除事件

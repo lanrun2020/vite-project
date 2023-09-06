@@ -229,4 +229,9 @@ export const addPrimitive = (viewer) => {
     const lxs = viewer.scene.primitives.add(
         new lxs_primitive(options)
     )
+    viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(124.21936679679918,
+    45.85136872098397, 30),
+        duration: 1.6
+      })
 }
