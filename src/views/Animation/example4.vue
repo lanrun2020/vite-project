@@ -53,24 +53,18 @@
         <div class="piano-btn">FG6</div>
       </div>
     </div>
-    <div ref="mapBar" class="map-bar" :class="{ 'map-move': mapFlag }">
-      <div v-for="(item, index) in mapList" :key="index" @click="changeMap(item)" class="map-item"
-        :style="{ backgroundImage: `url(${item.url})`, opacity: (index + 1) / mapList.length, right: `${(mapList.length - 1 - index) * 10}px` }">
-        <div class="map-label" :class="{ 'map-active': item.active }">{{ item.name }}</div>
-      </div>
-    </div>
+    <MapBox></MapBox>
   </div>
 </template>
 
 <script setup lang='ts'>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref } from 'vue';
 import png1 from '../../assets/guoqi.png'
 import png2 from '../../assets/user.png'
 import png3 from '../../assets/floorMarble.jpg'
 import png4 from '../../assets/floorMarble3.jpeg'
 import ScrollBar from '../../components/scrollBar.vue'
-let mapFlag = ref(true)
-const mapBar = ref()
+import MapBox from '../../components/mapBox.vue'
 const mapList = ref([
   {
     order: 1,
@@ -98,17 +92,8 @@ const mapList = ref([
   }
 ])
 const changeMap = (item) => {
-  mapList.value = mapList.value.filter((map) => map.name !== item.name)
-  mapList.value.forEach((map) => {
-    map.active = false
-  })
-  mapList.value.sort((a, b) => a.order - b.order)
-  mapList.value.push(item)
-  item.active = true
-  mapFlag.value = false
-}
-const handleMousemove = () => {
-  mapFlag.value = true
+  console.log(item);
+  
 }
 const whiteClick = (event) => {
   var src = "/music/"+event.target.innerText.toLowerCase()+'.wav.mp3';
@@ -117,16 +102,9 @@ const whiteClick = (event) => {
   //调用play方法
 	audio.play();
 }
-onMounted(() => {
-  mapBar.value.addEventListener('mousemove', handleMousemove, false)
-})
-onBeforeUnmount(() => {
-  mapBar.value.removeEventListener('mousemove', handleMousemove, false)
-})
 </script>
 
 <style scoped lang="scss">
-$dataLength : 4; //mapList长度
 
 .scoll-bar {
   width: 800px;
@@ -155,58 +133,6 @@ $dataLength : 4; //mapList长度
     background-image: url('../../assets/dalishi.jpg');
     background-size: cover;
     box-shadow: inset 0 0 20px #00e5ff, inset -2px -2px 20px #00e5ff;
-  }
-}
-
-.map-bar {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  flex-wrap: nowrap;
-  background: rgba($color: #666666, $alpha: 0.0);
-  width: 180px;
-  height: 100px;
-  transition: all 0.4s;
-
-  .map-item {
-    position: absolute;
-    bottom: 0px;
-    width: 120px;
-    height: 80px;
-    background-size: cover;
-    cursor: pointer;
-    margin: 10px;
-    border: 2px solid #ffffff;
-    transition: all 0.4s;
-
-    &:hover {
-      border: 2px solid #333333;
-    }
-
-    .map-label {
-      position: absolute;
-      bottom: 0px;
-      right: 0px;
-      padding: 6px 10px;
-      background: rgba(4, 178, 236, 0.1)
-    }
-
-    .map-active {
-      background: rgb(4, 178, 236)
-    }
-  }
-
-  &.map-move:hover {
-    width: $dataLength*140px;
-    background: rgba($color: #666666, $alpha: 0.3);
-
-    @for $i from 1 through $dataLength {
-      .map-item:nth-child(#{$i}) {
-        right: #{($dataLength - $i) * 140}px !important;
-        opacity: 1 !important;
-      }
-    }
   }
 }
 

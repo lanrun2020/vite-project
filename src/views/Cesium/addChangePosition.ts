@@ -1,6 +1,7 @@
 import Cesium from "@/utils/importCesium"
 import river from '../../assets/arrow1.jpg'
 let handler
+let entities = []
 export const addChangePosition = async (viewer: any, active: boolean) => {
   if (active) {
     const height = 100
@@ -29,6 +30,7 @@ export const addChangePosition = async (viewer: any, active: boolean) => {
         }),
       },
     });
+    entities.push(entity,dashedLine)
     handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
     handler.setInputAction((clickEvent: any) => {
       const pick = viewer.scene.pick(clickEvent.position);
@@ -59,27 +61,13 @@ export const addChangePosition = async (viewer: any, active: boolean) => {
         }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
       }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-    const circleMaterial2 = new Cesium.CircleMaterialProperty({
-      color: new Cesium.Color(1.0, 0.0, 0.0, 1.0),
-      speed: 1.0,
-      repeat: 1,
-      thickness: .8,
-      flash: true
-    });
-    viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(115.63777, 34.06883),
-      ellipse: {
-        // 椭圆短半轴长度
-        semiMinorAxis: 1000,
-        // 椭圆长半轴长度
-        semiMajorAxis: 1000,
-        // height: 1,
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        material:circleMaterial2,
-      },
-    })
     viewer.flyTo(viewer.entities)
   } else {
     handler && handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)//移除事件
+    handler = null
+    if(entities.length){
+      entities.forEach((entity) => viewer.entities.remove(entity))
+      entities = []
+    }
   }
 }

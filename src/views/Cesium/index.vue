@@ -23,6 +23,7 @@ import "./rotationMaterial";
 import "./diffuseMaterial";
 import "./diffuseMaterial2";
 import "./cylinderMaterial";
+import "./CustomLineMaterial"
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
@@ -58,6 +59,7 @@ import { addBox } from "./addBox";
 import "./texture3D"
 import { addPrimitive } from "./lxs_volumn"
 import { addChangePosition } from "./addChangePosition";
+import { addArrowLoad } from "./addArrowLoad";
 type toolItemType = {
   title: string;
   value: number;
@@ -239,7 +241,12 @@ let toolList: Ref<toolItemType[]> = ref([
   //   title: '体渲染',
   //   value: 34,
   //   active: false,
-  // }
+  // },
+  {
+    title: 'addArrowLoad',
+    value: 35,
+    active: false
+  }
 ])
 onMounted(async () => {
   console.log('cesium page')
@@ -371,6 +378,9 @@ const toolChecked = (active: boolean, value: number) => {
     case 34:
       addPrimitive(viewer);
       break;
+    case 35:
+      addArrowLoad(viewer, active);
+      break;
     default: break;
   }
 };
@@ -417,6 +427,7 @@ const initCesium = () => {
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
   //深度检测
   viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
+  addArrowLoad(viewer, true)
 };
 
 const TimeFormatter = (time: any, viewModel: any) => {

@@ -6,8 +6,7 @@
     <h1>sum:{{ sum }}</h1>
     <el-button @click="num1++">num1++</el-button>
     <el-button @click="num2++">num2++</el-button>
-    <my-marker :data="overlay"></my-marker>
-    <div>{{ overlay }}</div>
+    <my-marker data="传给子组件data"></my-marker>
     <h1>count:{{ count }}</h1>
     <h1>nested.count:{{ nested.count.value }}</h1>
     <el-button @click="count++">count++</el-button>
@@ -182,12 +181,6 @@ provide("sum", sum);
 let overlay = ref()
 onMounted(async () => {
   // let res = await fetchHome()
-  let newData = ref({})
-  overlay.value = newData.value
-  setInterval(() => {
-    newData.value.age = Math.random()
-    // overlay.value = 1
-  },1000)
 })
 const objectSpanMethod = ({ row, column, rowIndex, columnIndex }: { row: object, column: object, rowIndex: number, columnIndex: number }) => {
   if (columnIndex === 0) {  // 第一列
