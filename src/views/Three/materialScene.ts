@@ -678,7 +678,7 @@ export default class materialScene {
     //棋盘格
     const geometry = new THREE.CircleGeometry(20, 256, 0); //半径，分段
     const material = getChessboardMaterial()
-    this.shaderMaterialList.push(material)
+    // this.shaderMaterialList.push(material)
     const circle = new THREE.Mesh(geometry, material);
     circle.rotation.x = -Math.PI / 2
     this.scene.add(circle);

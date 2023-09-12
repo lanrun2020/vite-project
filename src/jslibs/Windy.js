@@ -33,7 +33,7 @@ var CanvasWindy = function (json,params) {
                 void main() {
                     /*
                     内置变量gl_FragCoord表示WebGL在canvas画布上渲染的所有片元或者说像素的坐标,
-                    坐标原点是canvas画布的左上角, x轴水平向右, y竖直向下, gl_FragCoord坐标的单位是像素,
+                    坐标原点是canvas画布的左下角, x轴水平向右, y竖直向下, gl_FragCoord坐标的单位是像素,
                     gl_FragCoord的值是vec2(x,y),通过gl_FragCoord.x、gl_FragCoord.y方式可以分别访问片元坐标的纵横坐标
                     */
                     gl_FragColor = vec4(v_color.xyz,0.0);

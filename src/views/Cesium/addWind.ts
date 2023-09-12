@@ -134,7 +134,7 @@ const drawCanvas = async (viewer) => {
       canvasWidth:canvasWidth,
       canvasHeight:canvasHeight,
       speedRate:1000,
-      particlesNumber:5000,
+      particlesNumber:2000,
       maxAge:20,
       frameRate:10,
       color:'#ffffff',

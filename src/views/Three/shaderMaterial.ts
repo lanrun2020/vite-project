@@ -773,6 +773,8 @@ export const getChessboardMaterial = (options?: { side?: object, transparent?: b
         gl_FragColor = vec4( 1.0, 1.0, 1.0 - sin(time), 1.0 );
       } else {
         gl_FragColor = vec4( 0.0, 0.0, cos(time), 1.0 );
+        gl_FragColor = vec4(0,0,0,1.0);
+        gl_FragColor.r = gl_FragCoord.y/900.0;
       }
     }`
   }

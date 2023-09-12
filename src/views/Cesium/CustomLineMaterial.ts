@@ -1,6 +1,6 @@
 // 线材质
 import Cesium from '@/utils/importCesium'
-import redimg from '../../assets/ts.png'
+import redimg from '../../assets/arrow01.png'
 export default class CustomLineMaterialProperty {
   private _color: object
   private _speed: number
@@ -75,9 +75,12 @@ export default class CustomLineMaterialProperty {
         czm_material czm_getMaterial(czm_materialInput materialInput)
         {
             czm_material material = czm_getDefaultMaterial(materialInput);
-            vec2 pos = rotate(v_polylineAngle) * gl_FragCoord.xy;
+            //经过测试,gl_FragCoord的值在cesium中代表像素坐标,从画布左下角开始,x是水平像素点,y是垂直像素点
+            //v_polylineAngle 在正南方与画布斜对角之间为90度,PI/4.0,其余为0
+            vec2 pos = rotate(v_polylineAngle) * gl_FragCoord.xy;//得出的是坐标点(斜对角区间内不变(x,y),区间外变(y,-x))
+            // vec2 pos = gl_FragCoord.xy;
             // 获取破折号内从0到1的相对位置
-            float dashPosition = fract(pos.x / (dashLength * czm_pixelRatio));//像素长度*单位像素比例
+            float dashPosition = fract((pos.x) / (dashLength * czm_pixelRatio));//分段的像素长度*像素比例
             // dashPosition 区间为 0-1
             // Figure out the mask index.
             float maskIndex = floor(dashPosition * maskLength);//向下取整,0-16整数
@@ -86,13 +89,19 @@ export default class CustomLineMaterialProperty {
             float maskTest = floor(dashPattern / pow(2.0, maskIndex));//向下取整,255-0
             //mod取余数 0-2 0-2 0-2循环
             vec2 st = materialInput.st;
-            vec4 colorImage = texture2D(image, vec2(st.s*mod(maskTest, 2.0), st.t));//0.1取下,0.9取上
-            vec4 fragColor = (mod(maskTest, 2.0) < 1.0) ? gapColor : (colorImage);
+            vec4 colorImage = texture2D(image, vec2(dashPosition*2.0, st.t));//0.1取下,0.9取上
+            vec4 fragColor = (mod(maskTest, 2.0) < 1.0) ? gapColor : colorImage;
             if (fragColor.a < 0.005) {   // matches 0/255 and 1/255
                 discard;
             }
             fragColor = czm_gammaCorrect(fragColor);
             material.emission = fragColor.rgb;
+            if (v_polylineAngle<0.0000001){
+              fragColor.a = 1.0;
+            } else {
+              fragColor.a = v_polylineAngle-1.57;
+            }
+            fragColor.a = gl_FragCoord.y/900.0;
             material.alpha = fragColor.a;
             return material;
         }`

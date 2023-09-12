@@ -6,7 +6,7 @@
     <h1>sum:{{ sum }}</h1>
     <el-button @click="num1++">num1++</el-button>
     <el-button @click="num2++">num2++</el-button>
-    <my-marker data="传给子组件data"></my-marker>
+    <my-marker :data="myData"></my-marker>
     <h1>count:{{ count }}</h1>
     <h1>nested.count:{{ nested.count.value }}</h1>
     <el-button @click="count++">count++</el-button>
@@ -50,7 +50,8 @@ const newObj = ref(obj.age)
 const newObj2 = toRef(obj, 'age')
 const newObj3 = toRefs(obj)
 const message = ref('dsfsdfsfeeffcs')
-const num3 = ref(num1.value) 
+const num3 = ref(num1.value)
+const myData = ref('传给子组件的data')
 const nested = {
   count,
 };
