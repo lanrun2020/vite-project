@@ -30,6 +30,9 @@
       <el-table-column prop="amount3" label="数值 3（元）">
       </el-table-column>
     </el-table>
+    <div v-for="(item,key) in arr" :key="key">
+      {{ key }}:{{ item }}
+    </div>
   </div>
 </template>
 
@@ -55,6 +58,10 @@ const myData = ref('传给子组件的data')
 const nested = {
   count,
 };
+const arr = ref({
+  name:'ss',
+  age:12
+})
 const nested2 = reactive({
   count,
 });
