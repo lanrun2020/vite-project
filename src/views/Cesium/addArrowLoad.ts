@@ -31,7 +31,6 @@ export const addArrowLoad = async (viewer: any, active: boolean) => {
         material: material2,
       },
     });
-    console.log(line);
     entities.push(line)
     const m = new Cesium.PolylineDashMaterialProperty({
       color: Cesium.Color.CYAN,
@@ -50,7 +49,7 @@ export const addArrowLoad = async (viewer: any, active: boolean) => {
         material: m,
       },
     });
-    console.log(dashedLine);
+    entities.push(dashedLine)
     viewer.flyTo(entities)
   } else {
     if(entities.length){

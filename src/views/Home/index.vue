@@ -237,6 +237,7 @@ const test = async () => {
 };
 const test2 = async () => {
   console.log(num3.value)
+  myData.value = String(Math.random())
 };
 const test3 = async () => {
   // newObj.value = 25

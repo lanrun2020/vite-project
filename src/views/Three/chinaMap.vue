@@ -145,7 +145,7 @@ const init = () => {
     }
   }
 }
-.computer-box-label {
+.chinaMap-label {
   color: #00ffaa;
   /* width: 80px; */
   font-size: 14px;

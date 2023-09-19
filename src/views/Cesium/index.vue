@@ -11,7 +11,8 @@ import { fetchCesium } from "@/apis/an-system";
 import { addPolygon2 } from "./polygon";
 import Cesium from '@/utils/importCesium'
 import "@/jslibs/cesium-VideoShed3D.js"
-
+import img1 from '../../assets/woodFloor.jpg'
+import img2 from '../../assets/woodFloor2.jpg'
 import "./flowLineMaterial";
 import "./RadarMaterial";
 import "./LineMaterial";
@@ -24,6 +25,7 @@ import "./diffuseMaterial";
 import "./diffuseMaterial2";
 import "./cylinderMaterial";
 import "./CustomLineMaterial"
+import TerrainClipPlan from "@/jslibs/terrainClipPlane"
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
 import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
@@ -427,7 +429,15 @@ const initCesium = () => {
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
   //深度检测
   viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
-  addArrowLoad(viewer, true)
+  // addArrowLoad(viewer, true)
+  const earthPositionList = Cesium.Cartesian3.fromDegreesArrayHeights([114, 30, -2000,114.1,30,-2000,114.1,30.1,-2000])
+  let terrainClipPlan = new TerrainClipPlan(viewer, {
+            height: 200,
+            splitNum: 1000,
+            bottomImg: img1,
+            wallImg: img2,
+            positions: earthPositionList,
+        })
 };
 
 const TimeFormatter = (time: any, viewModel: any) => {

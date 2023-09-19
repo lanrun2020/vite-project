@@ -1,4 +1,3 @@
-import option from '../../../public/chinaMap/china.json' //飞机航线
 import Cesium from '@/utils/importCesium'
 
 let dataSourceValue:any

@@ -9,7 +9,7 @@ import { onMounted, onBeforeUnmount } from 'vue';
 let canvas
 let ctx
 let requestId
-const angle = 15
+const angle = 10
 onMounted(() => {
   canvas = document.getElementById('canvas') as HTMLCanvasElement;
   ctx = canvas.getContext('2d')!;
@@ -40,8 +40,8 @@ class Point {
     this.r = 4;
     this.x = getRandom(0, canvas.width - this.r / 2)
     this.y = getRandom(0, canvas.height - this.r / 2)
-    this.dis = getRandom(50, 100)
-    this.speed = 500;
+    this.dis = getRandom(30, 60)
+    this.speed = getRandom(800, 1200);
     this.lastTime = Date.now();
   }
   draw() {
@@ -66,10 +66,8 @@ class Point {
 }
 class Graph {
   points: Point[];
-  maxDis: number;
-  constructor(ponitNumber = 200, maxDis = 300) {
+  constructor(ponitNumber = 300) {
     this.points = new Array(ponitNumber).fill(0).map(() => new Point())
-    this.maxDis = maxDis
   }
   draw() {
     //界面隐藏或切换至其他标签页时requestAnimationFrame会暂停

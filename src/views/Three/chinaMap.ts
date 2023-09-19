@@ -286,7 +286,7 @@ export default class chinaMap {
   addLabel(object: THREE.Group, text: string, position: Array<number>, height, color, bgcolor, name) {
     if(!position || !position.length) return
     const div = document.createElement("div");
-    div.className = "computer-box-label";
+    div.className = "chinaMap-label";
     div.style.color = color;
     div.style.backgroundColor = bgcolor;
     // div.style.cursor = "pointer";

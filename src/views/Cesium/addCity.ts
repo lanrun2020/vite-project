@@ -43,12 +43,12 @@ export const addCity = (viewer: any, active: boolean) => {
     //       }),
     //   })
     // );
-    setTimeout(() => {
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(121.5061830727844, 31.22923471021075, 3000),
-        duration: 1.6,
-      });
-    },100)
+    // setTimeout(() => {
+    //   viewer.camera.flyTo({
+    //     destination: Cesium.Cartesian3.fromDegrees(121.5061830727844, 31.22923471021075, 3000),
+    //     duration: 1.6,
+    //   });
+    // },100)
     if (primitive) {
       viewer.zoomTo(
         tilesetPrimitive,
@@ -63,7 +63,7 @@ export const addCity = (viewer: any, active: boolean) => {
     // const inspectorViewModel = new Cesium.Cesium3DTilesInspector('cesiumContainer',viewer.scene).viewModel
     primitive = viewer.scene.primitives.add(new Cesium.PrimitiveCollection());
     new Cesium.Cesium3DTileset({
-      url: "/city/tileset.json",
+      url: "/chengdu/tileset.json",
     }).readyPromise
       .then((data: any) => {
         tilesetPrimitive = data
@@ -169,13 +169,15 @@ const loadTilesShader = (tileset: any) => {
             void main(void){
               vec4 position = czm_inverseModelView * vec4(${v_position},1); // 位置
               gl_FragColor = ${color}; // 颜色
-              gl_FragColor *= vec4(vec3(position.z / 50.0), 1.0); // 渐变
+              gl_FragColor *= vec4(vec3(position.y / 50.0), 1.0); // 渐变
               // 动态光环
               float time = fract(czm_frameNumber / 180.0);
               time = abs(time - 0.5) * 2.0;
               float glowRange = 180.0; // 光环的移动范围(高度)
-              float diff = step(0.005, abs( clamp(position.z / glowRange, 0.0, 1.0) - time));
+              float diff = step(0.005, abs( clamp(position.y / glowRange, 0.0, 1.0) - time));
               gl_FragColor.rgb += gl_FragColor.rgb * (1.0 - diff);
+              // gl_FragColor = ${color};
+              // gl_FragColor.rgb = vec3(position.xyz);
             }
           `
         })
