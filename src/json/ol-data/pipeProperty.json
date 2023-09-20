@@ -1,0 +1,169 @@
+{
+  "code": 200,
+  "success": true,
+  "msg": "操作成功",
+  "data": [
+      {
+          "id": 29,
+          "pid": 0,
+          "type": "",
+          "name": "区域",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 30,
+          "pid": 0,
+          "type": "",
+          "name": "管径",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 31,
+          "pid": 0,
+          "type": "",
+          "name": "管材",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 32,
+          "pid": 0,
+          "type": "",
+          "name": "管井",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 33,
+          "pid": 0,
+          "type": "",
+          "name": "区域",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 34,
+          "pid": 0,
+          "type": "",
+          "name": "竣工日期",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 35,
+          "pid": 30,
+          "type": "pipeWide",
+          "name": "DN1000",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 36,
+          "pid": 30,
+          "type": "pipeWide",
+          "name": "DN800",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 37,
+          "pid": 30,
+          "type": "pipeWide",
+          "name": "DN500",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 38,
+          "pid": 30,
+          "type": "pipeWide",
+          "name": "DN900",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 39,
+          "pid": 30,
+          "type": "pipeWide",
+          "name": "DN1000（双管）",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 40,
+          "pid": 30,
+          "type": "pipeWide",
+          "name": "DN600",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 43,
+          "pid": 29,
+          "type": "local",
+          "name": "长沙",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 44,
+          "pid": 29,
+          "type": "local",
+          "name": "北京",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 45,
+          "pid": 31,
+          "type": "guac",
+          "name": "外涂聚乙烯内涂环氧树脂复合钢管",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      },
+      {
+          "id": 46,
+          "pid": 31,
+          "type": "guac",
+          "name": "K9级球墨铸铁管",
+          "value": "",
+          "icon": null,
+          "remark": null,
+          "groupName": "element"
+      }
+  ],
+  "time": "2023-09-12 09:16:04",
+  "traceId": "1701404273524494338"
+}

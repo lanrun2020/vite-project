@@ -12,6 +12,7 @@ declare module '*.vue' {
 // }
 declare module 'three'
 declare module 'dagre-d3'
+declare module 'proj4'
 declare module 'leader-line';
 declare interface Window {
   Cesium: any,

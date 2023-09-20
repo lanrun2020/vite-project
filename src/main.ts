@@ -6,6 +6,8 @@ import router from './router'
 import ElementPlus from 'element-plus'
 
 import 'element-plus/dist/index.css'
+import 'ol/ol.css'
+import '../src/assets/font/iconfont.css'
 const app = createApp(App)
 app.use(ElementPlus)
 

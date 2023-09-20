@@ -1,6 +1,6 @@
 import Cesium from "@/utils/importCesium"
 import river from '../../assets/arrow1.jpg'
-import LeaderLine from 'leader-line'
+import LeaderLine from '@/jslibs/leader-line.min.js'
 //LeaderLine报错解决:在leader-line.min.js的最后一行添加export default LeaderLine
 const entities: object[] = []
 let arr:{x:number,y:number, position:typeof Cesium.Cartesian3}[] = []
@@ -285,7 +285,6 @@ export const addBillboard = async (viewer: any, active: boolean) => {
         leaderLine: leaderLine,
       }
     })
-    console.log(viewer.scene);
     viewer.scene.postRender.addEventListener(renderFuc = () => {
       const positionArrNew = arr.map((item) => {
         return Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, item.position._value)

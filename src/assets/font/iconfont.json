@@ -1,0 +1,135 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "1537",
+      "name": "T",
+      "font_class": "T",
+      "unicode": "f0247",
+      "unicode_decimal": 983623
+    },
+    {
+      "icon_id": "666884",
+      "name": "删除",
+      "font_class": "shanchu",
+      "unicode": "e68e",
+      "unicode_decimal": 59022
+    },
+    {
+      "icon_id": "5313517",
+      "name": "tool_polygon",
+      "font_class": "tool_polygon",
+      "unicode": "e658",
+      "unicode_decimal": 58968
+    },
+    {
+      "icon_id": "7789608",
+      "name": "撤销",
+      "font_class": "chexiao",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "7789614",
+      "name": "移动",
+      "font_class": "yidong",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "7789621",
+      "name": "重做",
+      "font_class": "zhongzuo",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "9409400",
+      "name": "sector",
+      "font_class": "shanxing",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "10988349",
+      "name": "测距",
+      "font_class": "ceju",
+      "unicode": "e693",
+      "unicode_decimal": 59027
+    },
+    {
+      "icon_id": "11200411",
+      "name": "线",
+      "font_class": "line",
+      "unicode": "e50e",
+      "unicode_decimal": 58638
+    },
+    {
+      "icon_id": "11468160",
+      "name": "椭圆",
+      "font_class": "tuoyuan",
+      "unicode": "e610",
+      "unicode_decimal": 58896
+    },
+    {
+      "icon_id": "12550392",
+      "name": "删除",
+      "font_class": "shanchu1",
+      "unicode": "e629",
+      "unicode_decimal": 58921
+    },
+    {
+      "icon_id": "12550393",
+      "name": "重做",
+      "font_class": "zhongzuo1",
+      "unicode": "e62a",
+      "unicode_decimal": 58922
+    },
+    {
+      "icon_id": "12550394",
+      "name": "撤销",
+      "font_class": "chexiao1",
+      "unicode": "e62b",
+      "unicode_decimal": 58923
+    },
+    {
+      "icon_id": "12550611",
+      "name": "椭圆",
+      "font_class": "tuoyuan1",
+      "unicode": "e635",
+      "unicode_decimal": 58933
+    },
+    {
+      "icon_id": "12550612",
+      "name": "曲线",
+      "font_class": "quxian",
+      "unicode": "e636",
+      "unicode_decimal": 58934
+    },
+    {
+      "icon_id": "13020691",
+      "name": "测面积-默认",
+      "font_class": "cemianji-moren",
+      "unicode": "e69c",
+      "unicode_decimal": 59036
+    },
+    {
+      "icon_id": "16853921",
+      "name": "叉",
+      "font_class": "cha",
+      "unicode": "e675",
+      "unicode_decimal": 58997
+    },
+    {
+      "icon_id": "22041965",
+      "name": "测角",
+      "font_class": "cejiao",
+      "unicode": "e61d",
+      "unicode_decimal": 58909
+    }
+  ]
+}
