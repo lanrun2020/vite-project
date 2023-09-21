@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import toolBar from './toolBar.vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, provide } from 'vue'
 import Map from 'ol/Map';
 // import OSM from 'ol/source/OSM';
 import TileLayer from 'ol/layer/Tile';
@@ -23,11 +23,15 @@ import Feature from "ol/Feature";
 import { Stroke, Style, Circle, Fill, Text } from "ol/style";
 import GeoJSON from 'ol/format/GeoJSON.js';
 import { addLayers } from './utils';
+import { mapToolEvent } from "./mapToolEvent";
 const map = ref(null)
+//父组件provide传值 - 子、孙组件inject取值
+const mapEvent = new mapToolEvent(map)
+provide("mapEvent", mapEvent);
 const view = new View({
   projection: "EPSG:4326", // 坐标系，有EPSG:4326和EPSG:3857
   center: [113.0657269500363, 29.853459566356534], // 中心点
-  zoom: 14, // // 地图缩放级别(打开页面时默认级别)
+  zoom: 20, // // 地图缩放级别(打开页面时默认级别)
   // extent: [113.4445, 22.0767, 113.7140, 22.4170], // 限制地图显示范围
   maxZoom: 24,
   // minZoom: 1,  // 地图缩放最小级别
@@ -52,67 +56,7 @@ const initMap = () => {
     target: 'map', // 对应页面里 id 为 map 的元素
     view: view,  // 地图视图
   })
-
-  // forEachFeatureAtPixel命中检测
-  let lastFeature = null
-  let lastStyle = null
-  map.value.on('pointermove', (e) => {
-    map.value.getTargetElement().style.cursor = ''
-    if (lastFeature && lastStyle) {
-      lastFeature.setStyle(lastStyle)
-    }
-    map.value.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
-      const type = feature.getGeometry().getType()
-      lastStyle = feature.getStyle()
-      lastFeature = feature
-      map.value.getTargetElement().style.cursor = 'pointer'
-      // const property = feature.getProperties()
-      if (type === 'Point') {
-        feature.setStyle(new Style({
-          image: new Circle({
-            radius: 10,
-            fill: new Fill({
-              color: '#009688',
-            }),
-          })
-        }))
-        return true
-        // feature.setStyle(null) //设置隐藏元素(图层vector样式设置为null才行,否则是设置为默认样式)
-      }
-      if (type === 'LineString') {
-        feature.setStyle(new Style({
-          stroke: new Stroke({
-            color: '#009688',
-            width: 1.5
-          })
-        }))
-        return true
-      }
-      // const coordinate = Extent.getCenter(feature.getGeometry().getExtent())
-    },
-    {
-      hitTolerance: 5//检测范围，在鼠标距离此范围内可被检测
-    })
-  })
-  map.value.on('click', (e) => {
-    // console.log(e);
-    map.value.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
-      const type = feature.getGeometry().getType()
-      // const property = feature.getProperties()
-      if (type === 'Point') {
-        // feature.setStyle(null) //设置隐藏元素(图层vector样式设置为null才行,否则是设置为默认样式)
-        feature.setStyle(new Style({
-          image: new Circle({
-            radius: 10,
-            fill: new Fill({
-              color: '#00ff00',
-            }),
-          })
-        }))
-      }
-      // const coordinate = Extent.getCenter(feature.getGeometry().getExtent())
-    })
-  })
+  mapEvent.handlePointerMove()
 }
 // end地图以及图层显示
 onMounted(async () => {

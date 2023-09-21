@@ -52,13 +52,13 @@ const getPointStyle = () => {
 export const addLayers = (map, data) => {
   const lineFeatures = []
   const pointFeatures = []
-  data.map((item) => {
+  data.map((item, index) => {
     switch (item.shapeType) {
       case 'line':
-        addLine(lineFeatures, item)
+        addLine(lineFeatures, item, index)
         break;
       case 'point':
-        addPoint(pointFeatures, item)
+        addPoint(pointFeatures, item, index)
         break;
       default:
         break;
@@ -98,22 +98,24 @@ export const addLayers = (map, data) => {
   map.addLayer(lineLayer)
   map.addLayer(pointLayer)
 }
-const addLine = (lineFeatures, item) => {
+const addLine = (lineFeatures, item, index) => {
   if (!item.startX || !item.startY || !item.endX || !item.endY) return
   const start = convertT84(item.startX,item.startY)
   const end = convertT84(item.endX,item.endY)
   const feature = new Feature({
     geometry: new LineString([start,end]),
   })
+  feature.setId('line'+index)
   feature.setStyle(getLineStyle()) // 设置线样式,如不设置则采用图层样式或默认样式
   lineFeatures.push(feature)
 }
-const addPoint = (pointFeatures, item) => {
+const addPoint = (pointFeatures, item, index) => {
   if (!item.x || !item.y) return
   const point = convertT84(item.x,item.y)
   const feature = new Feature({
     geometry: new Point(point),
   })
+  feature.setId('point'+index)
   feature.setStyle(getPointStyle()) // 设置线样式,如不设置则采用图层样式或默认样式
   pointFeatures.push(feature)
 }
