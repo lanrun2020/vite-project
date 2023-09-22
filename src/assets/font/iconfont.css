@@ -1,6 +1,6 @@
 @font-face {
   font-family: "iconfont"; /* Project id  */
-  src: url('iconfont.ttf?t=1695201653453') format('truetype');
+  src: url('iconfont.ttf?t=1695371332225') format('truetype');
 }
 
 .iconfont {
@@ -19,24 +19,20 @@
   content: "\e68e";
 }
 
-.icon-tool_polygon:before {
-  content: "\e658";
+.icon-shou:before {
+  content: "\e652";
 }
 
 .icon-chexiao:before {
   content: "\e601";
 }
 
-.icon-yidong:before {
-  content: "\e603";
-}
-
 .icon-zhongzuo:before {
   content: "\e604";
 }
 
-.icon-shanxing:before {
-  content: "\e61b";
+.icon-polygon:before {
+  content: "\e638";
 }
 
 .icon-ceju:before {
@@ -77,6 +73,14 @@
 
 .icon-cha:before {
   content: "\e675";
+}
+
+.icon-dian:before {
+  content: "\ec7b";
+}
+
+.icon-shanxing:before {
+  content: "\e605";
 }
 
 .icon-cejiao:before {

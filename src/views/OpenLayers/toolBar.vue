@@ -17,7 +17,7 @@ const toolList = [
   [
     {
       title: '选择',
-      className: 'icon-yidong',
+      className: 'icon-shou',
       type: 'move'
     },
     {
@@ -86,7 +86,7 @@ const toolList = [
     },
     {
       title: '画多边形',
-      className: 'icon-tool_polygon',
+      className: 'icon-polygon',
       type: 'drawPolygon'
     }
   ],
@@ -115,13 +115,22 @@ const toolActive = (tool) => {
       mapEvent.handleEelect()
       break;
     case 'delete':
-      activeName.value === 'icon-yidong' && mapEvent.handleDelete()
+      activeName.value === 'icon-shou' && mapEvent.handleDelete()
       break;
     case 'last':
       mapEvent.handleLast()
       break;
     case 'next':
       mapEvent.handleNext()
+      break;
+    case 'drawLine':
+      mapEvent.handleDraw('LineString')
+      break;
+    case 'drawPolygon':
+      mapEvent.handleDraw('Polygon')
+      break;
+    case 'drawPoint':
+      mapEvent.handleDraw('Point')
       break;
     default:
       break;
@@ -138,7 +147,7 @@ const toolActive = (tool) => {
   z-index: 999;
   display: flex;
   flex-wrap: nowrap;
-
+  filter: drop-shadow(0px 0px 4px #aaa);
   .tool-list {
     width: 30px;
     height: auto;
@@ -155,10 +164,21 @@ const toolActive = (tool) => {
 
       .iconfont {
         background-color: #fff;
+        color: #005e6de2;
+        // transition: all 0.1s;
+        &:hover {
+          color: #003b45;
+          transform: scale(1.08);
+        }
       }
 
       .icon-active {
-        background-color: #b2ffb2;
+        background-color: #5ba8ba;
+        color: #fff;
+        &:hover {
+          color: #fff;
+          transform: scale(1.0);
+        }
       }
     }
   }

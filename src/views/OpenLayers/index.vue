@@ -56,7 +56,8 @@ const initMap = () => {
     target: 'map', // 对应页面里 id 为 map 的元素
     view: view,  // 地图视图
   })
-  mapEvent.handlePointerMove()
+  mapEvent.init()
+  // mapEvent.handlePointerMove()
 }
 // end地图以及图层显示
 onMounted(async () => {

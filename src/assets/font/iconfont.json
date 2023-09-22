@@ -20,11 +20,11 @@
       "unicode_decimal": 59022
     },
     {
-      "icon_id": "5313517",
-      "name": "tool_polygon",
-      "font_class": "tool_polygon",
-      "unicode": "e658",
-      "unicode_decimal": 58968
+      "icon_id": "2391704",
+      "name": "手",
+      "font_class": "shou",
+      "unicode": "e652",
+      "unicode_decimal": 58962
     },
     {
       "icon_id": "7789608",
@@ -34,13 +34,6 @@
       "unicode_decimal": 58881
     },
     {
-      "icon_id": "7789614",
-      "name": "移动",
-      "font_class": "yidong",
-      "unicode": "e603",
-      "unicode_decimal": 58883
-    },
-    {
       "icon_id": "7789621",
       "name": "重做",
       "font_class": "zhongzuo",
@@ -48,11 +41,11 @@
       "unicode_decimal": 58884
     },
     {
-      "icon_id": "9409400",
-      "name": "sector",
-      "font_class": "shanxing",
-      "unicode": "e61b",
-      "unicode_decimal": 58907
+      "icon_id": "8693335",
+      "name": "polygon",
+      "font_class": "polygon",
+      "unicode": "e638",
+      "unicode_decimal": 58936
     },
     {
       "icon_id": "10988349",
@@ -123,6 +116,20 @@
       "font_class": "cha",
       "unicode": "e675",
       "unicode_decimal": 58997
+    },
+    {
+      "icon_id": "17581860",
+      "name": "点",
+      "font_class": "dian",
+      "unicode": "ec7b",
+      "unicode_decimal": 60539
+    },
+    {
+      "icon_id": "21729452",
+      "name": "扇形",
+      "font_class": "shanxing",
+      "unicode": "e605",
+      "unicode_decimal": 58885
     },
     {
       "icon_id": "22041965",
