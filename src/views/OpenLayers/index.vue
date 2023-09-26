@@ -1,6 +1,6 @@
 <template>
   <div id="map" class="map">
-    <toolBar></toolBar>
+    <toolBar @toolChange="toolChange"></toolBar>
   </div>
 </template>
 
@@ -24,10 +24,7 @@ import { Stroke, Style, Circle, Fill, Text } from "ol/style";
 import GeoJSON from 'ol/format/GeoJSON.js';
 import { addLayers } from './utils';
 import { mapToolEvent } from "./mapToolEvent";
-const map = ref(null)
-//父组件provide传值 - 子、孙组件inject取值
-const mapEvent = new mapToolEvent(map)
-provide("mapEvent", mapEvent);
+let mapEvent
 const view = new View({
   projection: "EPSG:4326", // 坐标系，有EPSG:4326和EPSG:3857
   center: [113.0657269500363, 29.853459566356534], // 中心点
@@ -37,11 +34,10 @@ const view = new View({
   // minZoom: 1,  // 地图缩放最小级别
 });
 
-
 // start地图以及图层显示
 const initMap = () => {
   // 地图实例
-  map.value = new Map({
+  const map = new Map({
     layers: [  // 图层
       new TileLayer({ // 使用瓦片渲染方法
         source: new XYZ({ // 图层数据源
@@ -56,19 +52,57 @@ const initMap = () => {
     target: 'map', // 对应页面里 id 为 map 的元素
     view: view,  // 地图视图
   })
-  mapEvent.init()
-  // mapEvent.handlePointerMove()
+  return map
 }
 // end地图以及图层显示
 onMounted(async () => {
-  initMap()
+  const map = initMap()
   const res = await getLayerList()
-  // console.log(res);
   const res2 = await getmetaData()
-  // console.log(res2);
-  addLayers(map.value, res2.data)
+  addLayers(map, res2.data)
+  mapEvent = new mapToolEvent(map)
+  mapEvent.init()
+  mapEvent.handlePointerMove()
 })
 
+const toolChange = (type, activeName, cancel = false) => {
+  if (cancel) {
+     //todo这里还需要处理,取消选中的工具
+     switch (type) {
+      case 'move':
+        mapEvent.handleEelect(false)
+        break;
+      default:
+        break;
+    }
+    return
+  }
+  switch (type) {
+    case 'move':
+      mapEvent.handleEelect()
+      break;
+    case 'delete':
+      activeName === 'icon-shou' && mapEvent.handleDelete()
+      break;
+    case 'last':
+      mapEvent.handleLast()
+      break;
+    case 'next':
+      mapEvent.handleNext()
+      break;
+    case 'drawLine':
+      mapEvent.handleDraw('LineString')
+      break;
+    case 'drawPolygon':
+      mapEvent.handleDraw('Polygon')
+      break;
+    case 'drawPoint':
+      mapEvent.handleDraw('Point')
+      break;
+    default:
+      break;
+  }
+}
 </script>
 
 <style lang="scss" scoped>

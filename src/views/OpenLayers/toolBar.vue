@@ -9,9 +9,9 @@
 </template>
 
 <script setup lang='ts'>
-import { ref, inject } from "vue";
-import { mapToolEvent } from "./mapToolEvent";
-const mapEvent = inject('mapEvent') as mapToolEvent
+import { ref } from "vue";
+// const props = defineProps(['mapEvent'])
+const emit = defineEmits(['toolChange'])
 const activeName = ref('')
 const toolList = [
   [
@@ -91,18 +91,11 @@ const toolList = [
     }
   ],
 ]
-const onceTool = ['delete','last','next']
+const onceTool = ['delete', 'last', 'next']
 const toolActive = (tool) => {
   if (activeName.value === tool.className) { //与上一次点击相同，关闭上次工具
     activeName.value = ''
-    //todo这里还需要处理
-    switch (tool.type) {
-      case 'move':
-        mapEvent.handleEelect(false)
-        break;
-      default:
-        break;
-    }
+    emit('toolChange', tool.type, activeName.value, true)
     return
   } else { //与上次不同，进行切换工具
     //如果是删除、返回上一步、下一步等按钮, 不需要切换, 直接调用即可,其他的工具则需要切换状态
@@ -110,31 +103,7 @@ const toolActive = (tool) => {
       activeName.value = tool.className
     }
   }
-  switch (tool.type) {
-    case 'move':
-      mapEvent.handleEelect()
-      break;
-    case 'delete':
-      activeName.value === 'icon-shou' && mapEvent.handleDelete()
-      break;
-    case 'last':
-      mapEvent.handleLast()
-      break;
-    case 'next':
-      mapEvent.handleNext()
-      break;
-    case 'drawLine':
-      mapEvent.handleDraw('LineString')
-      break;
-    case 'drawPolygon':
-      mapEvent.handleDraw('Polygon')
-      break;
-    case 'drawPoint':
-      mapEvent.handleDraw('Point')
-      break;
-    default:
-      break;
-  }
+  emit('toolChange', tool.type, activeName.value)
 }
 
 </script>
@@ -148,6 +117,7 @@ const toolActive = (tool) => {
   display: flex;
   flex-wrap: nowrap;
   filter: drop-shadow(0px 0px 4px #aaa);
+
   .tool-list {
     width: 30px;
     height: auto;
@@ -165,6 +135,7 @@ const toolActive = (tool) => {
       .iconfont {
         background-color: #fff;
         color: #005e6de2;
+
         // transition: all 0.1s;
         &:hover {
           color: #003b45;
@@ -175,6 +146,7 @@ const toolActive = (tool) => {
       .icon-active {
         background-color: #5ba8ba;
         color: #fff;
+
         &:hover {
           color: #fff;
           transform: scale(1.0);
