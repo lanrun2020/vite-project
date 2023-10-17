@@ -278,6 +278,7 @@ const toolChecked = (active: boolean, value: number) => {
       addSpreadEllipse(viewer, active);
       break;
     case 2://旋转扫描效果
+      viewer.scene.globe.depthTestAgainstTerrain = false;
       addScanEllipse(viewer, active);
       break;
     case 3://绘制多边形

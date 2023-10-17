@@ -14,6 +14,7 @@ import {
   Pointer as PointerInteraction,
   defaults as defaultInteractions,
 } from "ol/interaction.js";
+import { ElMessage } from "element-plus";
 //地图工具事件
 export class mapToolEvent {
   private map = null
@@ -25,6 +26,9 @@ export class mapToolEvent {
   private drawLineString = null
   private drawPoint = null
 
+  private translating = false
+  private customStyle = null
+
   private modifyInteraction = null
   private lastFeature = null
   private selectFeature = null
@@ -35,6 +39,19 @@ export class mapToolEvent {
   private handleNestSet = [] //保存用户操作记录,用于操作步骤的前进与回退
   constructor(map) {
     this.map = map
+    //公共自定义样式
+    this.customStyle = new Style({
+      stroke: new Stroke({
+        color: '#FF0000',
+        width: 1.5
+      }),
+      image: new Circle({
+        radius: 10,
+        fill: new Fill({
+          color: '#764ba2',
+        }),
+      })
+    })
   }
   //初始化
   init() {
@@ -108,12 +125,15 @@ export class mapToolEvent {
       hitTolerance: 5
     });
     this.selectInteraction.on("select", (event) => {
+      console.log('select');
+      this.selectFeature && this.selectFeature.setStyle(this.customStyle)
       // this.resetLastFeature()
       const selectedFeatures = event.target.getFeatures();
       selectedFeatures.forEach((feature) => {
 
         // this.lastStyle = feature.getStyle()
         this.selectFeature = feature
+        this.selectFeature.setStyle(this.selectStyleFuc(feature))
         // console.log(feature.getGeometry());
         if (feature.getGeometry() instanceof Point) {
           // console.log("点");
@@ -134,13 +154,21 @@ export class mapToolEvent {
     // 可以监听一下拖动开始和结束的事件，拖动后的经纬度可以从e里面获取
     this.translateInteraction.on('translatestart', (e) => {
       // console.log("开始移动", e);
+      this.translating = true
+      unByKey(this.pointerMoveEvent)
       // this.resetLastFeature()
-      this.selectFeature = e.features.getArray()[0]
-      this.selectFeature.setStyle(this.selectStyleFuc(this.selectFeature))
+      // this.selectFeature && this.lastStyle && this.selectFeature.setStyle(this.lastStyle)
+      // this.selectFeature && this.selectFeature.setStyle(this.customStyle)
+      // this.selectFeature = e.features.getArray()[0]
+      // this.lastStyle = this.selectFeature.getStyle().clone()
+      // this.selectFeature.setStyle(this.selectStyleFuc(this.selectFeature))
       origonGeometry = e.features.getArray()[0].getGeometry().clone()
     })
     this.translateInteraction.on('translateend', (e) => {
+      this.translating = false
+      this.handlePointerMove()
       // console.log("结束移动", e);
+      // this.selectFeature && this.selectFeature.setStyle(this.selectStyleFuc(this.selectFeature))
       this.handleLastSet.push({
         type: 'move',
         lastGeometry: origonGeometry, //记录移动前geometry
@@ -155,6 +183,18 @@ export class mapToolEvent {
   }
   //设置选中时点、线等要素的样式
   selectStyleFuc(feature) {
+    return new Style({
+      image: new Circle({
+        radius: 10,
+        fill: new Fill({
+          color: '#009688',
+        }),
+      }),
+      stroke: new Stroke({
+        color: '#009688',
+        width: 1.5
+      })
+    })
     const type = feature.getGeometry().getType()
     if (type === 'Point') {
       return new Style({
@@ -180,10 +220,10 @@ export class mapToolEvent {
     if (!active) { //移除选择监听
       this.translateInteraction.setActive(false)
       this.selectInteraction.setActive(false)
-      this.handlePointerMove()
+      // this.handlePointerMove()
       return
     }
-    unByKey(this.pointerMoveEvent)
+    // unByKey(this.pointerMoveEvent)
     if (this.selectInteraction) {
       this.translateInteraction.setActive(true)
       this.selectInteraction.setActive(true)
@@ -191,10 +231,11 @@ export class mapToolEvent {
     }
   }
   resetLastFeature() {
-    if (this.lastFeature && this.lastStyle) {
-      this.lastFeature.setStyle(this.lastStyle)
-      this.lastFeature = null
-    }
+    this.lastFeature && this.lastFeature.setStyle(this.customStyle)
+    // if (this.lastFeature && this.lastStyle) {
+    //   this.lastFeature.setStyle(this.lastStyle)
+    //   this.lastFeature = null
+    // }
   }
   //监听鼠标移动事件
   handlePointerMove() {
@@ -205,22 +246,11 @@ export class mapToolEvent {
       this.resetLastFeature()
       //forEachFeatureAtPixel命中检测
       this.map.forEachFeatureAtPixel(e.pixel, (feature) => {
-        this.lastStyle = feature.getStyle()
+        // this.lastStyle = feature.getStyle()
         this.lastFeature = feature
         this.map.getViewport().style.cursor = 'pointer'
         // this.map.getTargetElement().style.cursor = 'pointer'
-          feature.setStyle(new Style({
-            image: new Circle({
-              radius: 10,
-              fill: new Fill({
-                color: '#009688',
-              }),
-            }),
-            stroke: new Stroke({
-              color: '#009688',
-              width: 1.5
-            })
-          }))
+          feature.setStyle(this.selectStyleFuc(feature))
           return true
       },
       {
@@ -249,6 +279,7 @@ export class mapToolEvent {
   }
   //删除选中的要素
   handleDelete() {
+    ElMessage.closeAll()
     if (this.selectFeature) {
       const source = this.map.getLayers().getArray().map(layer => layer.getSource()).find(
         source => source.getFeatureById && source.getFeatureById(this.selectFeature.getId())
@@ -262,7 +293,13 @@ export class mapToolEvent {
         })
         // console.log('删除',this.lastFeature.getId());
         this.selectFeature = null
+        ElMessage({
+          message: '删除成功!',
+          type: 'success',
+        })
       }
+    } else {
+      ElMessage('暂无选中要素!')
     }
   }
   //移除监听事件

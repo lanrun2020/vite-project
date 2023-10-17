@@ -79,6 +79,10 @@ export default class materialScene {
       label: '旋转圆',
       method: 'addRotationCircle',
     },{
+      name: 'rotationCircleMore',
+      label: '旋转圆(大量)',
+      method: 'addRotationCircleMore',
+    },{
       name: 'flag',
       label: '旗帜',
       method: 'addFlag',
@@ -573,6 +577,33 @@ export default class materialScene {
     return  {
       entities: [circle],
       materials: [scanMaterial4],
+    }
+  }
+
+   // 旋转扫描 圆
+   addRotationCircleMore() {
+    const marr = []
+    const circles = []
+    new Array(1000).fill('').forEach(() => {
+      const geometry = new THREE.CircleGeometry(20, 128); //半径，分段
+      const scanMaterial4 = getRotateScanMaterial({ speed:Math.random()*2, opacity:Math.random()})
+      this.shaderMaterialList.push(scanMaterial4)
+      marr.push(scanMaterial4)
+      const circle = new THREE.Mesh(geometry, scanMaterial4);
+      circle.rotation.x = -Math.PI / 2
+      circle.material.polygonOffset=true;//开启偏移
+      circle.material.polygonOffsetFactor=-1;//偏移因子
+      circle.material.polygonOffsetUnits=1;//偏移单位
+      const x = 2000
+      const y = x/2
+      circle.position.set(Math.random()*x-y,0,Math.random()*x-y)
+      this.scene.add(circle);
+      circles.push(circle)
+    })
+
+    return  {
+      entities: circles,
+      materials: marr,
     }
   }
 

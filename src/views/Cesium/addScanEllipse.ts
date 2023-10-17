@@ -1,94 +1,68 @@
 // 多页扇形旋转扫描效果
 import Cesium from "@/utils/importCesium"
+import radarMaterialsProperty from "./RadarMaterial4"
+const radarMaterial = new radarMaterialsProperty({ color: new Cesium.Color(.1, 1, 0, 0.8), gradual: true, radiusLine: true,percent:0.3 })
 
-let entities:Array<typeof Cesium.viewer.entity> = []
 const defaultPoint = { lng: 121.5061830727844, lat:31.22723471021075 }
+const entity: Array<object> = []
+let primitive: typeof Cesium.Primitive
+let primitives: any
+const count = 1500
 export const addScanEllipse = (viewer: any, active: boolean, point: { lng: number, lat: number } = defaultPoint) => {
   if (active) {
-    if (entities.length) {
+    if (entity?.length) return
+    const points = Array(count).fill('').map(() => {
+      return {
+        lon: point.lng + Math.random()-0.5,
+        lat: point.lat + Math.random()-0.5,
+      }
+    })
+    const instances = []
+    primitives = viewer.scene.primitives.add(new Cesium.PrimitiveCollection())
+    points.forEach((item,index) => {
+      const instance = addCylinderItem(item,index)
+      instances.push(instance)
+    })
+    primitive = new Cesium.Primitive({
+      geometryInstances: instances,
+      appearance: new Cesium.MaterialAppearance({
+        material: radarMaterial.getMaterial(), faceForward: !1, closed: !0
+      })
+    });
+    primitives.add(primitive)
+    // 监听 Primitive 的加载完成事件
+    const removeListener = viewer.scene.postRender.addEventListener(() => {
+      if (!primitive.ready) {
+        //加载中
+        return;
+      }
+      //加载完成
       viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(defaultPoint.lng, defaultPoint.lat, 5000.0),
+        destination: Cesium.Cartesian3.fromDegrees(defaultPoint.lng, defaultPoint.lat, 150000.0),
         duration: 1.6
       });
-      return
-    }
-    entities.push(viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(point.lng, point.lat),
-      ellipse: {
-        // 椭圆短半轴长度
-        semiMinorAxis: 200,
-        // 椭圆长半轴长度
-        semiMajorAxis: 200,
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        // height: 0.0,
-        // extrudedHeight: 0,
-        material: new Cesium.RotationMaterialProperty({
-          color: new Cesium.Color(0.0, 1.0, 0.0, 1.0),
-          speed: 0.5,
-          outLineShow: true,
-          outLineWidth: 0.02,
-          edge: 3.0,
-          percent: 0.4,
-          gradual: true,
-          reverse: true,
-          radiusLine: true,
-          radiusLineNumber: 6.0,
-        }),
-      },
-    }))
-    entities.push(viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(point.lng + 0.003, point.lat - 0.005),
-      ellipse: {
-        // 椭圆短半轴长度
-        semiMinorAxis: 500,
-        // 椭圆长半轴长度
-        semiMajorAxis: 500,
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        // height: 0.0,
-        // extrudedHeight: 0,
-        material: new Cesium.RotationMaterialProperty({
-          color: new Cesium.Color(0.0, 1.0, 1.0, 1.0),
-          speed: 0.5,
-          outLineShow: false,
-          outLineWidth: 0.02,
-          edge: 1.0,
-          percent: 0.2,
-          gradual: true,
-          radiusLine: true,
-        }),
-      },
-    }))
-    entities.push(viewer.entities.add({
-      position: Cesium.Cartesian3.fromDegrees(point.lng - 0.003, point.lat + 0.005),
-      ellipse: {
-        // 椭圆短半轴长度
-        semiMinorAxis: 500,
-        // 椭圆长半轴长度
-        semiMajorAxis: 500,
-        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-        // height: 0.0,
-        // extrudedHeight: 0,
-        material: new Cesium.RotationMaterialProperty({
-          color: new Cesium.Color(1.0, 0.0, 0.0, 1.0),
-          speed: 0.5,
-          outLineShow: true,
-          outLineWidth: 0.02,
-          edge: 3.0,
-          percent: 0.3,
-          gradual: true,
-        }),
-      },
-    }))
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(defaultPoint.lng, defaultPoint.lat, 5000.0),
-      duration: 1.6
+      //自调用移除监听
+      removeListener();
     });
+    setTimeout(() => {
+      radarMaterial.updateMaterial('color', new Cesium.Color(0, 1, 1, 0.8))
+    },5000)
+    
   } else {
-    if (entities.length) {
-      entities.forEach((entity) => {
-        viewer.entities.remove(entity)
-      })
-      entities = []
+    if (primitives) {
+      primitives.removeAll()
+      radarMaterial.close()
     }
   }
-};
+}
+const addCylinderItem = (point: { lon: number, lat: number},index) => {
+  const instance = new Cesium.GeometryInstance({
+    geometry:new Cesium.EllipseGeometry({
+      center: Cesium.Cartesian3.fromDegrees(point.lon, point.lat),
+      height: index/count,
+      semiMajorAxis : 2000.0,
+      semiMinorAxis : 2000.0,
+    }),
+  });
+  return instance
+}
