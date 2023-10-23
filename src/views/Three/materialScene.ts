@@ -586,7 +586,7 @@ export default class materialScene {
     const circles = []
     new Array(1000).fill('').forEach(() => {
       const geometry = new THREE.CircleGeometry(20, 128); //半径，分段
-      const scanMaterial4 = getRotateScanMaterial({ speed:Math.random()*2, opacity:Math.random()})
+      const scanMaterial4 = getRotateScanMaterial({ speed:Math.random()*2, opacity:Math.random(), percent:Math.random()})
       this.shaderMaterialList.push(scanMaterial4)
       marr.push(scanMaterial4)
       const circle = new THREE.Mesh(geometry, scanMaterial4);

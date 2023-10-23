@@ -181,6 +181,7 @@ const loadTilesShader = (tileset: any) => {
             }
           `
         })
+        debugger
         model._shouldRegenerateShaders = true
       }
     }

@@ -27,6 +27,13 @@
       "unicode_decimal": 58962
     },
     {
+      "icon_id": "2581512",
+      "name": "深度",
+      "font_class": "shendu",
+      "unicode": "e987",
+      "unicode_decimal": 59783
+    },
+    {
       "icon_id": "7789608",
       "name": "撤销",
       "font_class": "chexiao",
@@ -125,6 +132,13 @@
       "unicode_decimal": 60539
     },
     {
+      "icon_id": "21007417",
+      "name": "地形",
+      "font_class": "dixing",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
       "icon_id": "21729452",
       "name": "扇形",
       "font_class": "shanxing",
@@ -137,6 +151,13 @@
       "font_class": "cejiao",
       "unicode": "e61d",
       "unicode_decimal": 58909
+    },
+    {
+      "icon_id": "31273931",
+      "name": "地形",
+      "font_class": "dixing1",
+      "unicode": "e6a0",
+      "unicode_decimal": 59040
     }
   ]
 }

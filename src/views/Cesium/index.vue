@@ -1,6 +1,10 @@
 <template>
   <div id="cesiumContainer">
     <toolbox :toolList="toolList" @toolChecked="toolChecked"></toolbox>
+    <div class="top-bar">
+      <div class="tool-bar-icon iconfont icon-shendu" :class="{'active-icon':depthFlag}" title="深度检测" @click="depthChange"></div>
+      <div class="tool-bar-icon iconfont icon-dixing" :class="{'active-icon':terrainFlag}" title="地形" @click="terrainChange"></div>
+    </div>
   </div>
 </template>
 
@@ -250,6 +254,8 @@ let toolList: Ref<toolItemType[]> = ref([
     active: false
   }
 ])
+const depthFlag = ref(false)
+const terrainFlag = ref(false)
 onMounted(async () => {
   console.log('cesium page')
   let res = await fetchCesium();
@@ -260,6 +266,22 @@ onBeforeUnmount(() => {
     viewer.destroy();
   }
 })
+const depthChange = () => {
+  depthFlag.value = !depthFlag.value
+  viewer.scene.globe.depthTestAgainstTerrain = depthFlag.value
+}
+const terrainChange = () => {
+  terrainFlag.value = !terrainFlag.value
+  if (terrainFlag.value){
+    //cesium最新版本请使用Cesium.Terrain.fromWorldTerrain()
+    viewer.terrainProvider = Cesium.createWorldTerrain({
+      requestVertexNormals: true,
+      requestWaterMask: false
+    })
+  } else {
+    viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider()
+  }
+}
 const toolChecked = (active: boolean, value: number) => {
   if (!active) {
     viewer.camera.flyTo({
@@ -274,19 +296,15 @@ const toolChecked = (active: boolean, value: number) => {
       addFlyLine(viewer, active);
       break;
     case 1:// 扩散扫描效果
-      viewer.scene.globe.depthTestAgainstTerrain = false;
       addSpreadEllipse(viewer, active);
       break;
     case 2://旋转扫描效果
-      viewer.scene.globe.depthTestAgainstTerrain = false;
       addScanEllipse(viewer, active);
       break;
     case 3://绘制多边形
-      viewer.scene.globe.depthTestAgainstTerrain = true;
       addPolygon2(viewer, active);
       break;
     case 4://动态河流淹没
-      viewer.scene.globe.depthTestAgainstTerrain = true;
       addRiverFlood(viewer, active);
       break;
     case 5: //雷达模型
@@ -317,11 +335,9 @@ const toolChecked = (active: boolean, value: number) => {
       addWall(viewer, active);
       break;
     case 14: //测量距离
-      viewer.scene.globe.depthTestAgainstTerrain = true;
       serveyDistance(viewer, active);
       break;
     case 15: //测量面积
-     viewer.scene.globe.depthTestAgainstTerrain = true;
       serveyArea(viewer, active);
       break;
     case 16: //环绕卫星
@@ -425,11 +441,12 @@ const initCesium = () => {
   viewer.animation.viewModel.timeFormatter = TimeFormatter
   viewer.timeline.makeLabel = DateTimeFormatter
   viewer.scene.debugShowFramesPerSecond = true;
+  viewer.scene.enableOcclude = true
   // viewer.scene.globe.enableLighting = true;
   viewer.clock.shouldAnimate = true
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
   //深度检测
-  viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
+  // viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
   // addArrowLoad(viewer, true)
   const earthPositionList = Cesium.Cartesian3.fromDegreesArrayHeights([114, 30, -2000,114.1,30,-2000,114.1,30.1,-2000])
   let terrainClipPlan = new TerrainClipPlan(viewer, {
@@ -491,6 +508,36 @@ const DateTimeFormatter = (datetime: any, viewModel: any, ignoredate: any) => {
   width: 400px;
   height: 256px;
   z-index: 100;
+}
+.top-bar {
+  position: absolute;
+  display: flex;
+  flex-wrap: nowrap;
+  top: 4px;
+  right: 120px;
+  z-index: 999;
+  color: #ddd;
+  .tool-bar-icon {
+    background-color: rgb(59, 59, 59);
+    border-radius: 4px;
+    margin: 4px;
+    padding: 4px;
+    cursor: pointer;
+    font-size: 24px;
+    border: 1px solid transparent;
+    &:hover{
+      color: #fff;
+      background: #48b;
+      border-color: #aef;
+      box-shadow: 0 0 8px #fff;
+    }
+  }
+  .active-icon {
+    color: #00ffff;
+    &:hover{
+      color: #00ffff;
+    }
+  }
 }
 </style>
 

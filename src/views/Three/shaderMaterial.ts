@@ -951,7 +951,7 @@ export const getFlowMaterialByY2 = (options?: { side?: object, transparent?: boo
   return material
 }
 // 扫描材质 圆的旋转扫描材质
-export const getRotateScanMaterial = (options?: { side?: object, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number }) => {
+export const getRotateScanMaterial = (options?: { side?: object, percent?: number, transparent?: boolean, color?: THREE.Color, speed?: number, opacity?: number }) => {
   //常用矩阵
   //modelMatrix模型矩阵
   //modelViewMatrix模型视图矩阵
@@ -1016,9 +1016,10 @@ export const getRotateScanMaterial = (options?: { side?: object, transparent?: b
       uniform float opacity;
       uniform vec3 color;
       uniform float PI;
+      uniform float percent;
       `+ angleFuc + `
       void main() {
-        float e = angleFuc(vUv2.x-0.5,vUv2.y-0.5)/PI/2.0; //结果在0到1之间 //计算旋转的弧度(0-2PI)
+        float e = angleFuc(vUv2.x-0.5,vUv2.y-0.5)/PI/2.0 - 1.0 + percent; //结果在0到1之间 //计算旋转的弧度(0-2PI)
         gl_FragColor = vec4(color, e * opacity);
       }`
   }
@@ -1044,6 +1045,10 @@ export const getRotateScanMaterial = (options?: { side?: object, transparent?: b
         value: Math.PI,
         type: "f"
       },
+      percent: {
+        value:  options?.opacity || 1.0,
+        type: "f"
+      }
     },
     side: options?.side || THREE.DoubleSide,// side属性的默认值是前面THREE.FrontSide，. 其他值：后面THREE.BackSide 或 双面THREE.DoubleSide.
     transparent: options?.transparent || true,// 是否透明

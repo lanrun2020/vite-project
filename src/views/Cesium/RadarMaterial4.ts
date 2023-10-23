@@ -74,6 +74,7 @@ czm_material czm_getMaterial(czm_materialInput materialInput)
 const fabric = {
   uniforms: {
     time: 0,
+    speed: 1.0,
     color: new Cesium.Color(.1, 1, 0, 1),
     PI: Math.PI,
     edge: 1.0,
@@ -81,10 +82,10 @@ const fabric = {
     gradual: true, //是否渐变
     reverse: false, //是否逆向旋转
     outLineShow: false, //是否需要展示椭圆的外围圆圈
-    outLineWidth: 0.2, //0-1之间取值，从圆心到半径为1
-    radiusLine: false,
+    outLineWidth: 0.1, //0-1之间取值，从圆心到半径为1
+    radiusLine: false, //以半径划分圆环切割线
     radiusLineNumber: 3,
-    angleLine: false,
+    angleLine: false, //以角度划分切割线
     angleLineNumber: 3,
   },
   source: source
@@ -92,38 +93,26 @@ const fabric = {
 
 export default class radarMaterialsProperty {
   private material: any
-  private speed: number
   private _time: number
-  constructor(options?: Options ) {
+  constructor() {
     this.material = new Cesium.Material({ fabric, translucent: true })
-    this.material.uniforms.color = options?.color ?? new Cesium.Color(.1, 1, 0, 1)
-    this.material.uniforms.edge = options?.edge ?? 1
-    this.material.uniforms.percent = options?.percent ?? 1
-    this.material.uniforms.reverse = options?.reverse ?? false
-    this.material.uniforms.gradual = options?.gradual ?? false
-    this.material.uniforms.outLineShow = options?.outLineShow ?? false
-    this.material.uniforms.radiusLine = options?.radiusLine ?? false
-    this.material.uniforms.angleLine = options?.angleLine ?? false
-
-    this.speed = options?.speed ?? 1
     this._time = (new Date()).getTime()
   }
   close() {
     this.material.uniforms.close = true
   }
-  getMaterial() {
+  getMaterial(options?: Options) {
+    this.material.uniforms = {...fabric.uniforms, ...options }
     this.material.uniforms.close = false
     this.tick()
     return this.material
   }
-  updateMaterial(key,value) {
-    if(this.material.uniforms[key]!==undefined){
-      this.material.uniforms[key] = value
-    }
+  setOptions(options?: Options) {
+    this.material.uniforms = { ...this.material.uniforms, ...options }
   }
   tick: Function = () => {
     if (!this.material.uniforms.close) {
-      this.material.uniforms.time = ((new Date()).getTime() - this._time)/500.0 * this.speed
+      this.material.uniforms.time = ((new Date()).getTime() - this._time) / 500.0 * this.material.uniforms.speed
       Cesium.requestAnimationFrame(this.tick);
     }
   }
