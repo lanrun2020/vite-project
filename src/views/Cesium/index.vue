@@ -50,7 +50,7 @@ import { addEcharts } from "./addEcharts";
 import { addCity } from "./addCity";
 import { addLoad } from "./addLoad";
 import { addAirLine } from "./addAirLine";
-import { addShader } from "./addShader";
+import { addShader } from "./addShader copy 2";
 import { addMoveCar } from "./addMoveCar";
 import { addPlaneLine } from "./addPlaneLine";
 import { addPlaneLineByTime } from "./addPlaneLineByTime";

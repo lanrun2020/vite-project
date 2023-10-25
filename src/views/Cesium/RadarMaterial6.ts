@@ -20,8 +20,7 @@ void main()
 {
     //czm_computePosition 返回模型坐标相对于眼睛的位置
     vec4 p = czm_computePosition(); //使用czm_computePosition必须要使用---> position3DHigh,position3DLow,batchId;
-    //v_positionEC = (czm_modelViewRelativeToEye * p).xyz; //模型坐标转眼睛坐标
-    v_positionEC = p.xyz;
+    v_positionEC = (czm_modelViewRelativeToEye * p).xyz; //模型坐标转眼睛坐标
     gl_Position = czm_modelViewProjectionRelativeToEye * p;
 }`
 const f = `
@@ -35,7 +34,8 @@ void main()
 {
     vec4 color = v_color;
     vec4 pos = czm_inverseModelView * vec4(v_positionEC, 1.0);//眼睛坐标转换到模型坐标
-    gl_FragColor = vec4(color.xyz, color.w);
+    gl_FragColor = vec4(color.xyz, pos.z/500000.0);
+    //gl_FragColor = vec4(color.xyz, color.w);
 }`
 const uniforms:Options = {
     v_color: new Cesium.Color(.1, 1, 0, 1),
@@ -50,8 +50,9 @@ export default class radarMaterialsProperty {
   private _time: number
   constructor() {
     this.appearance = new Cesium.MaterialAppearance({
-      faceForward: !1,
-      closed: !1,
+      flat: false,
+      faceForward: true,
+      closed: true,
       translucent: true,
       vertexShaderSource: v,
       fragmentShaderSource: f,
