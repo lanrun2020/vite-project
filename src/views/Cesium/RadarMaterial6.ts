@@ -16,11 +16,24 @@ varying float dis;
 varying vec2 v_st;
 varying vec2 f_dis;
 varying vec3 v_positionEC;
+float cartesianToGeographic(vec3 cartesian)
+{
+    vec3 inverseRadii = czm_ellipsoidInverseRadii;
+    float radiix = 1.0/inverseRadii.x;
+    float radiiy = 1.0/inverseRadii.y;
+    float radiiz = 1.0/inverseRadii.z;
+    float scale = sqrt( 1.0 / (cartesian.x * cartesian.x / (radiix * radiix) + cartesian.y * cartesian.y / (radiiy * radiiy) + cartesian.z * cartesian.z / (radiiz * radiiz)));
+    vec3 pos = scale * cartesian;
+    float dis = distance(cartesian, pos);
+    return dis;
+}
 void main()
 {
     //czm_computePosition 返回模型坐标相对于眼睛的位置
     vec4 p = czm_computePosition(); //使用czm_computePosition必须要使用---> position3DHigh,position3DLow,batchId;
     v_positionEC = (czm_modelViewRelativeToEye * p).xyz; //模型坐标转眼睛坐标
+    vec4 pos = czm_inverseModelView * vec4(v_positionEC, 1.0);//眼睛坐标转换到模型坐标
+    float height = cartesianToGeographic(pos.xyz);
     gl_Position = czm_modelViewProjectionRelativeToEye * p;
 }`
 const f = `
@@ -30,12 +43,30 @@ uniform float time;
 uniform float repeat;
 uniform float thickness;
 uniform float fromCartesian;
+float cartesianToGeographic(vec3 cartesian)
+{
+    vec3 inverseRadii = czm_ellipsoidInverseRadii;
+    float radiix = 1.0/inverseRadii.x;
+    float radiiy = 1.0/inverseRadii.y;
+    float radiiz = 1.0/inverseRadii.z;
+    float scale = sqrt( 1.0 / (cartesian.x * cartesian.x / (radiix * radiix) + cartesian.y * cartesian.y / (radiiy * radiiy) + cartesian.z * cartesian.z / (radiiz * radiiz)));
+    vec3 pos = scale * cartesian;
+    float dis = distance(cartesian, pos);
+    return dis;
+}
 void main()
 {
     vec4 color = v_color;
     vec4 pos = czm_inverseModelView * vec4(v_positionEC, 1.0);//眼睛坐标转换到模型坐标
-    gl_FragColor = vec4(color.xyz, pos.z/500000.0);
-    //gl_FragColor = vec4(color.xyz, color.w);
+    float height = cartesianToGeographic(pos.xyz) /100000.0;
+    float sp = 1.0/5.0;\n
+    float dis = height - fract(time);\n
+    float m = mod(dis, sp);\n
+    float a = step(sp*(1.0-0.5), m);\n
+    if(height<0.01){
+      discard;
+    }
+    gl_FragColor = vec4(color.xyz,color.w * a * (1.0 - height) );
 }`
 const uniforms:Options = {
     v_color: new Cesium.Color(.1, 1, 0, 1),
@@ -50,10 +81,9 @@ export default class radarMaterialsProperty {
   private _time: number
   constructor() {
     this.appearance = new Cesium.MaterialAppearance({
-      flat: false,
-      faceForward: true,
+      faceForward: false,
       closed: true,
-      translucent: true,
+      translucent: false,
       vertexShaderSource: v,
       fragmentShaderSource: f,
     })

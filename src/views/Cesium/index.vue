@@ -29,6 +29,7 @@ import "./diffuseMaterial";
 import "./diffuseMaterial2";
 import "./cylinderMaterial";
 import "./CustomLineMaterial"
+import "./contourLineMaterial";
 import TerrainClipPlan from "@/jslibs/terrainClipPlane"
 import { addFlyLine } from '@/views/Cesium/addFlyLine'
 import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
@@ -66,6 +67,7 @@ import "./texture3D"
 import { addPrimitive } from "./lxs_volumn"
 import { addChangePosition } from "./addChangePosition";
 import { addArrowLoad } from "./addArrowLoad";
+import { addContourLine } from "./addContourLine";
 type toolItemType = {
   title: string;
   value: number;
@@ -252,6 +254,11 @@ let toolList: Ref<toolItemType[]> = ref([
     title: 'addArrowLoad',
     value: 35,
     active: false
+  },
+  {
+    title: 'addContourLine',
+    value: 36,
+    active: false
   }
 ])
 const depthFlag = ref(false)
@@ -400,6 +407,9 @@ const toolChecked = (active: boolean, value: number) => {
     case 35:
       addArrowLoad(viewer, active);
       break;
+    case 36:
+    addContourLine(viewer, active);
+      break;
     default: break;
   }
 };
@@ -455,7 +465,8 @@ const initCesium = () => {
             bottomImg: img1,
             wallImg: img2,
             positions: earthPositionList,
-        })
+  })
+  addContourLine(viewer, true);
 };
 
 const TimeFormatter = (time: any, viewModel: any) => {

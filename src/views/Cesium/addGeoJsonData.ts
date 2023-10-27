@@ -15,11 +15,18 @@ export const addGeoJsonData = (viewer: any, active: boolean) => {
       const colorHash = {}
       for (let i = 0; i < entities.length; i++) {
         const entity = entities[i]
+        const name = entity.name
+        let color = colorHash[name]
+        if (!color) {
+          color = new Cesium.Color(0.0,1.0,1.0,0.4)
+          // color = Cesium.Color.fromRandom({
+          //   alpha: 0.4
+          // })
+          colorHash[name] = color
+        }
         const radarMaterial = new radarMaterialsProperty()
         const appearance = radarMaterial.getAppearance({
-          v_color: new Cesium.Color.fromRandom({
-            alpha: 0.4
-          }),
+          v_color: color
         })
         // 获取多边形的几何数据
         const h = Math.random()*100000
@@ -42,7 +49,7 @@ export const addGeoJsonData = (viewer: any, active: boolean) => {
               polygonHierarchy: new Cesium.PolygonHierarchy(positions),
               height: 0,
               perPositionHeight: false,
-              extrudedHeight: 2000
+              extrudedHeight: 100000
             })
           }),
           appearance: appearance

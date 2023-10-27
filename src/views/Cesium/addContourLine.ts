@@ -1,38 +1,59 @@
-// 着色器
+// 等高线
 import Cesium from "@/utils/importCesium"
-// let entities: Array<any> = []
-let primitiveShader
-export const addShader = (viewer: any, active: boolean) => {
+import * as turf from "@turf/turf"
+const entity: Array<object> = []
+let primitive: object
+let primitives: any
+export const addContourLine = (viewer: any, active: boolean) => {
   if (active) {
-    const lng = 110
-    const lat = 32
-    const position = new Cesium.Cartographic.fromCartesian( Cesium.Cartesian3.fromDegrees(lng, lat, 2000));
-    if(primitiveShader){
-      viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(lng, lat, 50000),
-      });
-      return
-    }
-    primitiveShader = viewer.scene.primitives.add(
-      new CustomPrimitive(position)
-    );
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(lng, lat, 50000),
-      // duration: 0.1,
-    });
+    if (entity?.length) return
+      const terrainProvider = new Cesium.createWorldTerrain()
+      const pos = []
+      const extent = [106.64396446248583,30.077195435475748, 106.80509638145465, 30.209849307650593];
+      const cellSide = 0.5;
+      const options = {units: 'miles'};
+
+      const grid = turf.pointGrid(extent, cellSide, options); //计算点网格
+      console.log(grid);//经纬度
+      grid.features.forEach((item) => {
+        pos.push(Cesium.Cartographic.fromDegrees(item.geometry.coordinates[0], item.geometry.coordinates[1]))
+        viewer.entities.add({
+          position: Cesium.Cartesian3.fromDegrees(...item.geometry.coordinates),
+          point: {
+            pixelSize: 10,
+            color: Cesium.Color.YELLOW,
+            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+          },
+        })
+      })
+      const promise = Cesium.sampleTerrain(terrainProvider, 11, pos);
+      Promise.resolve(promise).then(function(updatedPositions) {
+        //console.log(updatedPositions)//弧度加高度
+        //转世界坐标
+        const arr = updatedPositions.map((item) => {
+          //item
+          const cartesian3 = new Cesium.Cartesian3();
+          Cesium.Ellipsoid.WGS84.cartographicToCartesian(
+            item,
+            cartesian3
+          );
+          return cartesian3 //笛卡尔世界坐标集合
+        })
+      })
+      // const primitiveShader = viewer.scene.primitives.add(
+      //   new CustomPrimitive(position)
+      // );
+        viewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(106.70296568464478, 30.209849307650593, 3000.0),
+          duration: 1.6
+        });
   } else {
-    if (primitiveShader){
-      primitiveShader.destroy()
-      viewer.scene.primitives.remove(primitiveShader)
+    if (primitives) {
+      primitives.removeAll()
     }
-    primitiveShader = null
   }
 }
-/**
- * Simple example of writing a Primitive from scratch. This
- * primitive displays a procedurally-generated surface at a given
- * position on the globe.
- */
+
 class CustomPrimitive {
   private show
   private drawCommand: any
@@ -161,49 +182,6 @@ const generateIndices = (faceResolution: number) => {
   return indices;
 }
 
-const scratchColor = new Cesium.Color();
-/**
- * Generate a 1D texture for the color palette
- * 纹理图片
- */
-const generateTexture = (context: any) => {
-  const width = 256;
-  const textureTypedArray = new Uint8Array(width * 4);
-  for (let i = 0; i < width; i++) {
-    const bucket32 = 32 * Math.floor(i / 32);
-    const bucket4 = 4 * Math.floor(i / 4);
-    const color = Cesium.Color.fromHsl(
-      bucket32 / width,
-      bucket32 / width,
-      (255 - bucket4) / width,
-      1.0,
-      scratchColor
-    );
-    textureTypedArray[4 * i] = 255 * color.red;
-    textureTypedArray[4 * i + 1] = 255 * color.green;
-    textureTypedArray[4 * i + 2] = 255 * color.blue;
-    textureTypedArray[4 * i + 3] = 255 * color.alpha;
-  }
-
-  return new Cesium.Texture({
-    context: context,
-    pixelFormat: Cesium.PixelFormat.RGBA,
-    pixelDataType: Cesium.ComponentDatatype.fromTypedArray(
-      textureTypedArray
-    ),
-    source: {
-      width: width,
-      height: 1,
-      arrayBufferView: textureTypedArray,
-    },
-    flipY: false,
-    sampler: new Cesium.Sampler({
-      minificationFilter: Cesium.TextureMinificationFilter.NEAREST,
-      magnificationFilter: Cesium.TextureMagnificationFilter.NEAREST,
-    }),
-  });
-}
-
 const initialize = (primitive: any, context: any) => {
   // context绘制的上下文
   // Inteference patterns made by two plane waves crossing each
@@ -229,7 +207,6 @@ const initialize = (primitive: any, context: any) => {
   const fragmentShader = `
     varying vec3 v_position;
     uniform float u_time;
-    uniform sampler2D u_texture;
     varying float v_h;
     void main()
     {
@@ -242,7 +219,6 @@ const initialize = (primitive: any, context: any) => {
         z *= 0.5;
         // signed -> unsigned
         z = 0.5 + 0.5 * z;
-        // gl_FragColor = texture2D(u_texture, vec2(z, 0.1));
         vec3 color = vec3(0.0,1.0,0.0);
         color = mix(vec3(0.0,1.0,0.0),vec3(1.0,0.0,0.0),v_h);
         gl_FragColor = vec4(color, v_h);
@@ -298,18 +274,12 @@ const initialize = (primitive: any, context: any) => {
     indexBuffer: indexBuffer,
   });
 
-  const texture = generateTexture(context);
-
   primitive.time = performance.now();
   const uniformMap = {
     u_time: function () {
       const now = performance.now();
       return now - primitive.time;
       //return 1.0;
-    },
-    //可以传图片到着色器
-    u_texture: function () {
-      return texture;
     },
   };
 
@@ -321,7 +291,7 @@ const initialize = (primitive: any, context: any) => {
     //为了获得最佳渲染性能，请使用尽可能小的边界体积。
     //虽然未定义是允许的，但总是尝试提供一个边界体积，以允许为场景计算尽可能紧密的近平面和远平面，并最小化所需的截锥体数量。
     //modelMatrix,这里可以传一个空间变换，那么使用的位置数据会根据这个进行变换，如果没有定义，则认为是世界坐标
-    modelMatrix: primitive.modelMatrix, // 从模型空间中的几何图形到世界空间中的变换。如果未定义，则假定几何体在世界空间中定义。
+    //modelMatrix: primitive.modelMatrix, // 从模型空间中的几何图形到世界空间中的变换。如果未定义，则假定几何体在世界空间中定义。
     pass: Cesium.Pass.TRANSLUCENT, //渲染通道 OPAQUE不透明, OVERLAY覆盖, TRANSLUCENT半透明
     shaderProgram: shaderProgram, //着色器程序
     renderState: renderState, //渲染状态
@@ -332,6 +302,3 @@ const initialize = (primitive: any, context: any) => {
   });
   primitive.drawCommand = drawCommand;//绘制命令
 }
-
-
-
