@@ -25,15 +25,15 @@ export default defineConfig({
     port: 3015,
     proxy: {
       '/map': {
-        target: 'http://localhost:8088/map',
+        target: 'http://127.0.0.1:8088',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/map/, '')
+        // rewrite: (path) => path.replace(/^\/map/, '')
       },
-      '/cesiumtif': {
-        target: 'http://localhost:8080/geoserver/cesium/wms',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/cesiumtif/, '')
-      }
+      // '/cesiumtif': {
+      //   target: 'http://localhost:8080/geoserver/cesium/wms',
+      //   changeOrigin: true,
+      //   rewrite: (path) => path.replace(/^\/cesiumtif/, '')
+      // }
     }
   },
   css: {

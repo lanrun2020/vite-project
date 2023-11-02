@@ -322,7 +322,7 @@ const initialize = (primitive: any, context: any) => {
     //虽然未定义是允许的，但总是尝试提供一个边界体积，以允许为场景计算尽可能紧密的近平面和远平面，并最小化所需的截锥体数量。
     //modelMatrix,这里可以传一个空间变换，那么使用的位置数据会根据这个进行变换，如果没有定义，则认为是世界坐标
     modelMatrix: primitive.modelMatrix, // 从模型空间中的几何图形到世界空间中的变换。如果未定义，则假定几何体在世界空间中定义。
-    pass: Cesium.Pass.TRANSLUCENT, //渲染通道 OPAQUE不透明, OVERLAY覆盖, TRANSLUCENT半透明
+    pass: Cesium.Pass.OPAQUE, //渲染通道 OPAQUE不透明, OVERLAY覆盖, TRANSLUCENT半透明
     shaderProgram: shaderProgram, //着色器程序
     renderState: renderState, //渲染状态
     vertexArray: vertexArray, //顶点数组121 11×11

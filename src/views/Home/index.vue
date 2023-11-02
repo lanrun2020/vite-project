@@ -16,7 +16,7 @@
     <el-button @click="screenFull">全屏</el-button>
     <input type="file" @change="changeFile" />
     <input ref="input1" type="number" @click="changeNumber" />
-
+    <UploadFile :file-list="fileList" @updateFileList="updateFileList"></UploadFile>
 
     <el-table :data="tableData" border :span-method="objectSpanMethod" style="width: 100%; margin-top: 20px">
       <el-table-column prop="id" label="ID" width="180">
@@ -38,15 +38,17 @@
 
 <script setup lang="ts">
 import { fetchTest, fetchHome } from "@/apis/an-system";
-import { reactive, ref, toRef } from "vue";
+import { reactive, ref, toRef, toRaw } from "vue";
 import { computed, onMounted, provide, watch } from "vue";
 import SparkMD5 from 'spark-md5'
 import { toRefs } from "vue";
 import myMarker from "./myMarker.vue";
+import UploadFile from "./File.vue"
 // ref会返回一个可变的响应式对象,只包含一个名为 value 的 property
 const num1 = ref(0);
 const num2 = ref(0);
 const count = ref(0);
+const fileList = ref([])
 const obj = { name: 'jack', age: 20 }
 const input1 = ref();
 const newObj = ref(obj.age)
@@ -65,6 +67,10 @@ const arr = ref({
 const nested2 = reactive({
   count,
 });
+const updateFileList = (val) => {
+  debugger
+  fileList.value = val
+}
 const tableData = [{
   id: '12987122',
   name: '王小虎',

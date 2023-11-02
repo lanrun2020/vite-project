@@ -418,12 +418,6 @@ const initCesium = () => {
     viewer.destroy();
   }
 
-  // const overlay = new Cesium.TileMapServiceImageryProvider({
-  //   url:'/map',
-  //   fileExtension: 'png',
-  //   // fileExtension:'png',
-  //   maximumLevel:19,
-  // })
   viewer = new Cesium.Viewer("cesiumContainer", {
     animation: true, // 是否显示时钟clock动画控件
     baseLayerPicker: true, // 是否显示图层选择控件
@@ -442,10 +436,26 @@ const initCesium = () => {
     //   requestVertexNormals: true,
     //   requestWaterMask: false
     // }),
-    // imageryProvider: new Cesium.ArcGisMapServerImageryProvider({
-    //  url: 'http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer'
-    // })
+    // imageryProvider:[],
   });
+  // const overlay = new Cesium.TileMapServiceImageryProvider({
+  //   url:'/map',
+  //   fileExtension: 'png',
+  //   // fileExtension:'png',
+  //   //maximumLevel:7,
+  // })
+  // 
+  // const overlay = new Cesium.UrlTemplateImageryProvider({
+  //       url:'/map/{z}/{x}/{y}.png',
+  //       fileExtension: 'png',
+  //       alpha:0.2
+  //   // fileExtension:'png',
+  //   // maximumLevel:7,
+  // })
+  // viewer.imageryLayers.addImageryProvider(overlay);
+  // viewer.imageryLayers._layers[1].alpha = 0.6
+  // console.log(viewer.imageryLayers);
+  
   //时间轴设置成中文
   viewer.animation.viewModel.dateFormatter = DateTimeFormatter
   viewer.animation.viewModel.timeFormatter = TimeFormatter

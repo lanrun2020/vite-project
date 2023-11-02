@@ -41,12 +41,13 @@ const initMap = () => {
     layers: [  // 图层
       new TileLayer({ // 使用瓦片渲染方法
         source: new XYZ({ // 图层数据源
-          url: 'https://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}',//高德街道地图
+          //url: 'https://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}',//高德街道地图
           // url: 'https://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetWarm/MapServer/tile/{z}/{y}/{x}',//中国暖色版地图
-          // url: 'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}',//中国蓝黑版地图
-          // url: 'http://t3.tianditu.com/DataServer?T=img_w&tk=5a257cd2df1b3311723bd77b0de14baf&x={x}&y={y}&l={z}'
+          url: 'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}',//中国蓝黑版地图
+          //  url: 'http://t0.tianditu.com/DataServer?T=vec_w&tk=5a257cd2df1b3311723bd77b0de14baf&x={x}&y={y}&l={z}'
+          //  url: 'http://t0.tianditu.com/DataServer?T=cva_w&tk=5a257cd2df1b3311723bd77b0de14baf&x={x}&y={y}&l={z}'
         })
-      }),
+      })
     ],
     // keyboardEventTarget: document,
     target: 'map', // 对应页面里 id 为 map 的元素
