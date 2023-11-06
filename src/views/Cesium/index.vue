@@ -68,6 +68,7 @@ import { addPrimitive } from "./lxs_volumn"
 import { addChangePosition } from "./addChangePosition";
 import { addArrowLoad } from "./addArrowLoad";
 import { addContourLine } from "./addContourLine";
+import { addScanEllipse3 } from "./addScanEllipse3";
 type toolItemType = {
   title: string;
   value: number;
@@ -303,7 +304,8 @@ const toolChecked = (active: boolean, value: number) => {
       addFlyLine(viewer, active);
       break;
     case 1:// 扩散扫描效果
-      addSpreadEllipse(viewer, active);
+      // addSpreadEllipse(viewer, active);
+      addScanEllipse3(viewer, active);
       break;
     case 2://旋转扫描效果
       addScanEllipse(viewer, active);
@@ -476,7 +478,7 @@ const initCesium = () => {
             wallImg: img2,
             positions: earthPositionList,
   })
-  addContourLine(viewer, true);
+  // addContourLine(viewer, true);
 };
 
 const TimeFormatter = (time: any, viewModel: any) => {

@@ -182,8 +182,8 @@ export const addSpreadEllipse = (viewer: any, active: boolean, point: { lng: num
           polygonHierarchy: new Cesium.PolygonHierarchy(
             Cesium.Cartesian3.fromDegreesArray(calcPoints(g.lng, g.lat, g.radius, g.angle[0], g.angle[1]))
           ),
-          //height: index*0.01,
-          perPositionHeight: true,
+          height: index*100,
+          // perPositionHeight: true,
         }),
       });
       const radarMaterial = new radarMaterialsProperty()

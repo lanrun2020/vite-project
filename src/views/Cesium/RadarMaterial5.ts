@@ -36,13 +36,14 @@ uniform float thickness;
 void main()
 {
     vec4 color = v_color;
-    vec4 pos = czm_inverseModelView * vec4(v_positionEC, 1.0);
+    vec4 pos = czm_inverseModelView3D * vec4(v_positionEC, 1.0);
     float dis = distance(vec4(v_center,1.0),pos);
     float sp = 1.0/repeat;
-    float d = 1.1 - dis/v_radius;//1~0范围内
+    float d = 1.0 - dis/v_radius;//1~0范围内
     float m = mod(d + time, sp);
     float a = step(m, sp*thickness)+0.01;//这里加上0.01是保证颜色透明度最低不等于0,这样鼠标才可以拾取到透明度为0的部分
-    gl_FragColor = vec4(color.xyz, a * d * color.w);
+    gl_FragColor = vec4(1.0,0.0,0.0, a * d);
+    // gl_FragColor = vec4(1.0,0.0,0.0, 1.0);
 }`
 
 const uniforms:Options = {
