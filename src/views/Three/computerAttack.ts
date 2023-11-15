@@ -607,6 +607,12 @@ export default class computerAttack {
           mroot.position.y += (size.y * 0.5); //高度
           mroot.position.x = node.y//因为布局位置做了参数交换，界面展示更好看
           mroot.position.z = node.x
+          // new Array(200).fill('').map(() => {
+          //   const model = mroot.clone()
+          //   model.position.x = Math.random()*800 - 400
+          //   model.position.z = Math.random()*800 - 400
+          //   that.group.add(model)
+          // })
           that.group.add(mroot)
           const boxGeometry = new THREE.BoxGeometry(...size)
           const material = new THREE.MeshBasicMaterial({ color: 0xfff, transparent: true, opacity: 0.1 })
