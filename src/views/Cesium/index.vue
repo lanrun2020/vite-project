@@ -1,9 +1,19 @@
 <template>
-  <div id="cesiumContainer">
+  <div id="cesiumContainer" ref="mapContainer">
     <toolbox :toolList="toolList" @toolChecked="toolChecked"></toolbox>
     <div class="top-bar">
-      <div class="tool-bar-icon iconfont icon-shendu" :class="{'active-icon':depthFlag}" title="深度检测" @click="depthChange"></div>
-      <div class="tool-bar-icon iconfont icon-dixing" :class="{'active-icon':terrainFlag}" title="地形" @click="terrainChange"></div>
+      <div
+        class="tool-bar-icon iconfont icon-shendu"
+        :class="{ 'active-icon': depthFlag }"
+        title="深度检测"
+        @click="depthChange"
+      ></div>
+      <div
+        class="tool-bar-icon iconfont icon-dixing"
+        :class="{ 'active-icon': terrainFlag }"
+        title="地形"
+        @click="terrainChange"
+      ></div>
     </div>
   </div>
 </template>
@@ -13,10 +23,10 @@ import Toolbox from "./toolbox.vue";
 import { ref, Ref, onMounted, onBeforeUnmount } from "vue";
 import { fetchCesium } from "@/apis/an-system";
 import { addPolygon2 } from "./polygon";
-import Cesium from '@/utils/importCesium'
-import "@/jslibs/cesium-VideoShed3D.js"
-import img1 from '../../assets/woodFloor.jpg'
-import img2 from '../../assets/woodFloor2.jpg'
+import Cesium from "@/utils/importCesium";
+import "@/jslibs/cesium-VideoShed3D.js";
+import img1 from "../../assets/woodFloor.jpg";
+import img2 from "../../assets/woodFloor2.jpg";
 import "./flowLineMaterial";
 import "./RadarMaterial";
 import "./LineMaterial";
@@ -28,14 +38,14 @@ import "./rotationMaterial";
 import "./diffuseMaterial";
 import "./diffuseMaterial2";
 import "./cylinderMaterial";
-import "./CustomLineMaterial"
+import "./CustomLineMaterial";
 import "./contourLineMaterial";
-import TerrainClipPlan from "@/jslibs/terrainClipPlane"
-import { addFlyLine } from '@/views/Cesium/addFlyLine'
-import { addSpreadEllipse } from '@/views/Cesium/addSpreadEllipse'
-import { addScanEllipse } from '@/views/Cesium/addScanEllipse'
-import { addRiverFlood } from '@/views/Cesium/addRiverFlood'
-import { addStaticRadar } from '@/views/Cesium/addStaticRadar'
+import TerrainClipPlan from "@/jslibs/terrainClipPlane";
+import { addFlyLine } from "@/views/Cesium/addFlyLine";
+import { addSpreadEllipse } from "@/views/Cesium/addSpreadEllipse";
+import { addScanEllipse } from "@/views/Cesium/addScanEllipse";
+import { addRiverFlood } from "@/views/Cesium/addRiverFlood";
+import { addStaticRadar } from "@/views/Cesium/addStaticRadar";
 import { addScanWall } from "@/views/Cesium/addScanWall";
 import { addPlaneModel } from "@/views/Cesium/addPlaneModel";
 import { addTude } from "./addTube";
@@ -63,17 +73,20 @@ import { addParticleSystem2 } from "./addParticleSystem2";
 import { addCircleWall } from "./addCircleWall";
 import { addWind } from "./addWind";
 import { addBox } from "./addBox";
-import "./texture3D"
-import { addPrimitive } from "./lxs_volumn"
+import "./texture3D";
+import { addPrimitive } from "./lxs_volumn";
 import { addChangePosition } from "./addChangePosition";
 import { addArrowLoad } from "./addArrowLoad";
 import { addContourLine } from "./addContourLine";
 import { addScanEllipse3 } from "./addScanEllipse3";
+import TerrainCutting from "./clippingPlaneCollection";
+import bottom from "../../assets/bottom.jpg";
+import wall from "../../assets/wall.jpg";
 type toolItemType = {
   title: string;
   value: number;
   active: boolean;
-}
+};
 let viewer: any;
 let toolList: Ref<toolItemType[]> = ref([
   {
@@ -244,7 +257,7 @@ let toolList: Ref<toolItemType[]> = ref([
   {
     title: "addChangePosition",
     value: 33,
-    active: false
+    active: false,
   },
   // {
   //   title: '体渲染',
@@ -252,44 +265,59 @@ let toolList: Ref<toolItemType[]> = ref([
   //   active: false,
   // },
   {
-    title: 'addArrowLoad',
+    title: "addArrowLoad",
     value: 35,
-    active: false
+    active: false,
   },
   {
-    title: 'addContourLine',
+    title: "addContourLine",
     value: 36,
-    active: false
-  }
-])
-const depthFlag = ref(false)
-const terrainFlag = ref(false)
+    active: false,
+  },
+  {
+    title: "地形开挖",
+    value: 37,
+    active: false,
+  },
+]);
+const depthFlag = ref(false);
+const terrainFlag = ref(false);
+let TerrainCuttingObj = ref(null);
+let mapContainer = ref(null);
+let isCut = ref(false);
 onMounted(async () => {
-  console.log('cesium page')
+  console.log("cesium page");
   let res = await fetchCesium();
   initCesium();
+  TerrainCuttingObj.value = new TerrainCutting({
+    viewer,
+    dom: mapContainer.value, //初始化地球的节点
+    deep: 10000, //挖掘深度
+    bottom, //底部图片
+    wall, //墙的图片
+  });
 });
 onBeforeUnmount(() => {
   if (viewer) {
     viewer.destroy();
   }
-})
+});
 const depthChange = () => {
-  depthFlag.value = !depthFlag.value
-  viewer.scene.globe.depthTestAgainstTerrain = depthFlag.value
-}
+  depthFlag.value = !depthFlag.value;
+  viewer.scene.globe.depthTestAgainstTerrain = depthFlag.value;
+};
 const terrainChange = () => {
-  terrainFlag.value = !terrainFlag.value
-  if (terrainFlag.value){
+  terrainFlag.value = !terrainFlag.value;
+  if (terrainFlag.value) {
     //cesium最新版本请使用Cesium.Terrain.fromWorldTerrain()
     viewer.terrainProvider = Cesium.createWorldTerrain({
       requestVertexNormals: true,
-      requestWaterMask: false
-    })
+      requestWaterMask: false,
+    });
   } else {
-    viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider()
+    viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider();
   }
-}
+};
 const toolChecked = (active: boolean, value: number) => {
   if (!active) {
     viewer.camera.flyTo({
@@ -297,23 +325,23 @@ const toolChecked = (active: boolean, value: number) => {
       duration: 1.6,
     });
   }
-  const tool = toolList.value.find((item) => item.value === value)
-  tool && (tool.active = active)
+  const tool = toolList.value.find((item) => item.value === value);
+  tool && (tool.active = active);
   switch (value) {
-    case 0:// 增加迁徙线
+    case 0: // 增加迁徙线
       addFlyLine(viewer, active);
       break;
-    case 1:// 扩散扫描效果
+    case 1: // 扩散扫描效果
       // addSpreadEllipse(viewer, active);
       addScanEllipse3(viewer, active);
       break;
-    case 2://旋转扫描效果
+    case 2: //旋转扫描效果
       addScanEllipse(viewer, active);
       break;
-    case 3://绘制多边形
+    case 3: //绘制多边形
       addPolygon2(viewer, active);
       break;
-    case 4://动态河流淹没
+    case 4: //动态河流淹没
       addRiverFlood(viewer, active);
       break;
     case 5: //雷达模型
@@ -370,10 +398,10 @@ const toolChecked = (active: boolean, value: number) => {
     case 22:
       addMoveCar(viewer, active);
       break;
-    case 23:// 增加航迹线
+    case 23: // 增加航迹线
       addPlaneLine(viewer, active);
       break;
-    case 24:// 增加实时航迹线
+    case 24: // 增加实时航迹线
       addPlaneLineByTime(viewer, active);
       break;
     case 25:
@@ -410,10 +438,18 @@ const toolChecked = (active: boolean, value: number) => {
       addArrowLoad(viewer, active);
       break;
     case 36:
-    addContourLine(viewer, active);
+      addContourLine(viewer, active);
       break;
-    default: break;
+    case 37:
+      handleCutTerrian(active);
+      break;
+    default:
+      break;
   }
+};
+let handleCutTerrian = (active) => {
+  if (active) TerrainCuttingObj.value.create();
+  if (!active) TerrainCuttingObj.value.stop();
 };
 const initCesium = () => {
   if (viewer) {
@@ -433,7 +469,7 @@ const initCesium = () => {
     //Cesium默认使用 WebGL1
     contextOptions: {
       requestWebgl2: true, // 开启webgl2
-    },//Context和WebGL创建属性对应于Context#options
+    }, //Context和WebGL创建属性对应于Context#options
     // terrainProvider: Cesium.createWorldTerrain({
     //   requestVertexNormals: true,
     //   requestWaterMask: false
@@ -446,7 +482,7 @@ const initCesium = () => {
   //   // fileExtension:'png',
   //   //maximumLevel:7,
   // })
-  // 
+  //
   // const overlay = new Cesium.UrlTemplateImageryProvider({
   //       url:'/map/{z}/{x}/{y}.png',
   //       fileExtension: 'png',
@@ -457,52 +493,63 @@ const initCesium = () => {
   // viewer.imageryLayers.addImageryProvider(overlay);
   // viewer.imageryLayers._layers[1].alpha = 0.6
   // console.log(viewer.imageryLayers);
-  
+
   //时间轴设置成中文
-  viewer.animation.viewModel.dateFormatter = DateTimeFormatter
-  viewer.animation.viewModel.timeFormatter = TimeFormatter
-  viewer.timeline.makeLabel = DateTimeFormatter
+  viewer.animation.viewModel.dateFormatter = DateTimeFormatter;
+  viewer.animation.viewModel.timeFormatter = TimeFormatter;
+  viewer.timeline.makeLabel = DateTimeFormatter;
   viewer.scene.debugShowFramesPerSecond = true;
-  viewer.scene.enableOcclude = true
+  viewer.scene.enableOcclude = true;
   // viewer.scene.globe.enableLighting = true;
-  viewer.clock.shouldAnimate = true
-  viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
+  viewer.clock.shouldAnimate = true;
+  viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
   //深度检测
   // viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
   // addArrowLoad(viewer, true)
-  const earthPositionList = Cesium.Cartesian3.fromDegreesArrayHeights([114, 30, -2000,114.1,30,-2000,114.1,30.1,-2000])
+  const earthPositionList = Cesium.Cartesian3.fromDegreesArrayHeights([
+    114, 30, -2000, 114.1, 30, -2000, 114.1, 30.1, -2000,
+  ]);
   let terrainClipPlan = new TerrainClipPlan(viewer, {
-            height: 200,
-            splitNum: 1000,
-            bottomImg: img1,
-            wallImg: img2,
-            positions: earthPositionList,
-  })
+    height: 200,
+    splitNum: 1000,
+    bottomImg: img1,
+    wallImg: img2,
+    positions: earthPositionList,
+  });
   // addContourLine(viewer, true);
 };
 
 const TimeFormatter = (time: any, viewModel: any) => {
-  return DateTimeFormatter(time, viewModel, true)
-}
+  return DateTimeFormatter(time, viewModel, true);
+};
 const DateTimeFormatter = (datetime: any, viewModel: any, ignoredate: any) => {
-  let julianDate = new Cesium.JulianDate()
-  Cesium.JulianDate.addHours(datetime, 8, julianDate)
-  let gregorianDT = Cesium.JulianDate.toGregorianDate(julianDate)
-  let objDT
-  if (ignoredate) objDT = ''
+  let julianDate = new Cesium.JulianDate();
+  Cesium.JulianDate.addHours(datetime, 8, julianDate);
+  let gregorianDT = Cesium.JulianDate.toGregorianDate(julianDate);
+  let objDT;
+  if (ignoredate) objDT = "";
   else {
-    objDT = new Date(gregorianDT.year, gregorianDT.month, gregorianDT.day)
-    objDT = gregorianDT.year + '年' + gregorianDT.month + '月' + gregorianDT.day + '日'
-    if (viewModel || gregorianDT.hour + gregorianDT.minute === 0) return objDT
-    objDT += ''
+    objDT = new Date(gregorianDT.year, gregorianDT.month, gregorianDT.day);
+    objDT =
+      gregorianDT.year +
+      "年" +
+      gregorianDT.month +
+      "月" +
+      gregorianDT.day +
+      "日";
+    if (viewModel || gregorianDT.hour + gregorianDT.minute === 0) return objDT;
+    objDT += "";
   }
   // return objDT + Cesium.sprintf('%02d:%02d:%02d', gregorianDT.hour, gregorianDT.minute, gregorianDT.second)
-  return objDT + gregorianDT.hour.toString().padStart(2, '0') + ':' + gregorianDT.minute.toString().padStart(2, '0') + ':' + gregorianDT.second.toString().padStart(2, '0')
-}
-
-
-
-
+  return (
+    objDT +
+    gregorianDT.hour.toString().padStart(2, "0") +
+    ":" +
+    gregorianDT.minute.toString().padStart(2, "0") +
+    ":" +
+    gregorianDT.second.toString().padStart(2, "0")
+  );
+};
 </script>
 
 <style lang="scss">
@@ -524,7 +571,7 @@ const DateTimeFormatter = (datetime: any, viewModel: any, ignoredate: any) => {
 .cesium-viewer-fullscreenContainer {
   display: none !important;
 }
-#myVideo{
+#myVideo {
   position: absolute;
   top: 0;
   left: 0;
@@ -548,7 +595,7 @@ const DateTimeFormatter = (datetime: any, viewModel: any, ignoredate: any) => {
     cursor: pointer;
     font-size: 24px;
     border: 1px solid transparent;
-    &:hover{
+    &:hover {
       color: #fff;
       background: #48b;
       border-color: #aef;
@@ -557,7 +604,7 @@ const DateTimeFormatter = (datetime: any, viewModel: any, ignoredate: any) => {
   }
   .active-icon {
     color: #00ffff;
-    &:hover{
+    &:hover {
       color: #00ffff;
     }
   }
