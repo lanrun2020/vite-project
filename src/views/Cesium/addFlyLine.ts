@@ -25,7 +25,31 @@ const createFlyLine = (viewer: any, start: { longitude: number, latitude: number
     start.latitude,
     0
   ); // Cartesian3.fromDegrees经纬度转为笛卡尔坐标位置
-  if (entities?.length){
+  const material5 = new Cesium.PolylineMaterialProperty({
+    color: new Cesium.Color(0.0, 1.0, 0.0, 1.0),
+    speed: 10,
+    repeat: 1,
+    thickness: .5
+  });
+  const arr = new Array(500).fill('').forEach(() => {
+    const lng = start.longitude + Math.random()
+    const lat = start.latitude + Math.random()
+    entities.push(viewer.entities.add({
+      polyline: {
+        positions: Cesium.Cartesian3.fromDegreesArrayHeights([
+          lng,
+          lat,
+          5000,
+          lng,
+          lat,
+          0,
+        ]), // 多个点坐标构成线条路径
+        width: 2,
+        material: material5,
+      },
+    }));
+  })
+  if (entities?.length) {
     viewer.flyTo(entities)
     return
   }

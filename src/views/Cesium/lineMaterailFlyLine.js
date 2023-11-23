@@ -1,6 +1,5 @@
 import Cesium from "@/utils/importCesium";
-const dataSource = new Cesium.CustomDataSource('myEntity');
-const myEntityCollection = dataSource.entities;
+let polylineCollection = null;
 /*
  * @Description: 飞线效果（参考开源代码）
  * @Version: 1.0
@@ -113,8 +112,8 @@ function generateRandomPosition(position, num) {
     let list = []
     for (let i = 0; i < num; i++) {
         // random产生的随机数范围是0-1，需要加上正负模拟
-        let lon = position[0] + Math.random() * 0.02 * (i % 2 == 0 ? 1 : -1);
-        let lat = position[1] + Math.random() * 0.02 * (i % 2 == 0 ? 1 : -1);
+        let lon = position[0] + Math.random() * 0.1 * (i % 2 == 0 ? 1 : -1);
+        let lat = position[1] + Math.random() * 0.05 * (i % 2 == 0 ? 1 : -1);
         list.push([lon, lat])
     }
     return list
@@ -125,9 +124,10 @@ function generateRandomPosition(position, num) {
  * @param {*} _viewer
  * @param {*} _center ：中心点
  * @param {*} _num ：数量
+ * @param {*} flag 1雨，2雪
  * @return {*}
  */
-export function lineFlowInit(_viewer, _center, _num) {
+export function lineFlowInit(_viewer, _center, _num, flag) {
     let num = _num > 300 ? 300 : _num;
     let _positions = generateRandomPosition(_center, num);
     _positions.forEach(item => {
@@ -137,7 +137,8 @@ export function lineFlowInit(_viewer, _center, _num) {
         let height = 1000 * Math.random() + 5000;
         let startPoint = new Cesium.Cartesian3.fromDegrees(start_lon, start_lat, height);
         // 随机高度
-        let endPoint = new Cesium.Cartesian3.fromDegrees(start_lon, start_lat, 0);
+        let random = flag == 1 ? 0 : 0.1, random1 = flag == 1 ? 0 : 0.05;
+        let endPoint = new Cesium.Cartesian3.fromDegrees(start_lon + Math.random() * random, start_lat + Math.random() * random1, 0);
         let linePositions = [];
         linePositions.push(startPoint);
         linePositions.push(endPoint);
@@ -146,7 +147,7 @@ export function lineFlowInit(_viewer, _center, _num) {
                 positions: linePositions,
                 material: new Cesium.LineFlowMaterialProperty({
                     color: new Cesium.Color(1.0, 1.0, 1.0, 0.2),
-                    speed: 15 * Math.random(),
+                    speed: flag == 1 ? 5 * Math.random() + 5 : 3 * Math.random() + 3,
                     percent: 0.005,
                     gradient: 0.01
                 })

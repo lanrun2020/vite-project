@@ -306,6 +306,11 @@ let toolList: Ref<toolItemType[]> = ref([
     value: 41,
     active: false,
   },
+  {
+    title: "模仿下雪",
+    value: 42,
+    active: false,
+  },
 ]);
 const depthFlag = ref(false);
 const terrainFlag = ref(false);
@@ -484,15 +489,18 @@ const toolChecked = (active: boolean, value: number) => {
       addFogEffect(viewer, active);
       break;
     case 41:
-      addRains(viewer, active);
+      addRains(viewer, active, 1);
+      break;
+      case 42:
+      addRains(viewer, active, 2);
       break;
     default:
       break;
   }
 };
-let addRains = (viewer, active) => {
+let addRains = (viewer, active, flag) => {
   if (active) {
-    lineFlowInit(viewer, [120, 27.025], 200)
+    lineFlowInit(viewer, [120, 27.025], 200, flag)
     // createRain(viewer, { longitude: 120, latitude: 27.025 });
   } else {
     // removeRain(viewer)
