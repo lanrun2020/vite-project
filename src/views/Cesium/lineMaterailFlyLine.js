@@ -128,7 +128,8 @@ function generateRandomPosition(position, num) {
  * @return {*}
  */
 export function lineFlowInit(_viewer, _center, _num) {
-    let _positions = generateRandomPosition(_center, _num);
+    let num = _num > 300 ? 300 : _num;
+    let _positions = generateRandomPosition(_center, num);
     _positions.forEach(item => {
         // 经纬度
         let start_lon = item[0];
