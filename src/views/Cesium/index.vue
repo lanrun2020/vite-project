@@ -86,6 +86,8 @@ import "./addSnow";
 import "./addRain";
 import "./addFog";
 import Weather from "./weather";
+import { createRain, removeRain } from "./likeRain";
+import { lineFlowInit, removeRainEntity } from "./lineMaterailFlyLine"
 let weatherObj = null;
 type toolItemType = {
   title: string;
@@ -299,6 +301,11 @@ let toolList: Ref<toolItemType[]> = ref([
     value: 40,
     active: false,
   },
+  {
+    title: "模仿下雨",
+    value: 41,
+    active: false,
+  },
 ]);
 const depthFlag = ref(false);
 const terrainFlag = ref(false);
@@ -476,8 +483,20 @@ const toolChecked = (active: boolean, value: number) => {
     case 40:
       addFogEffect(viewer, active);
       break;
+    case 41:
+      addRains(viewer, active);
+      break;
     default:
       break;
+  }
+};
+let addRains = (viewer, active) => {
+  if (active) {
+    lineFlowInit(viewer, [120, 27.025], 200)
+    // createRain(viewer, { longitude: 120, latitude: 27.025 });
+  } else {
+    // removeRain(viewer)
+    removeRainEntity(viewer);
   }
 };
 //消除天气效果
