@@ -141,6 +141,7 @@ export default class TerrainCutting {
       planes: clippingPlanes,
       edgeWidth: 1,
     });
+    console.log(this.clippingPlanesArray)
     // 侧边墙体
     this.clippingWallEntities = this.viewer.entities.add({
       corridor: {
@@ -329,7 +330,6 @@ export default class TerrainCutting {
             this.clippingPlanesArray[this.clippingPlanesArray.length - 1],
             Cesium.Cartesian2()
           );
-          console.log(canvasPosition);
           if (canvasPosition) {
             this.infoWindowElement.style.left = canvasPosition.x - 25 + "px";
             this.infoWindowElement.style.top =

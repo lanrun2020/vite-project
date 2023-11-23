@@ -82,6 +82,11 @@ import { addScanEllipse3 } from "./addScanEllipse3";
 import TerrainCutting from "./clippingPlaneCollection";
 import bottom from "../../assets/bottom.jpg";
 import wall from "../../assets/wall.jpg";
+import "./addSnow";
+import "./addRain";
+import "./addFog";
+import Weather from "./weather";
+let weatherObj = null;
 type toolItemType = {
   title: string;
   value: number;
@@ -279,12 +284,30 @@ let toolList: Ref<toolItemType[]> = ref([
     value: 37,
     active: false,
   },
+  {
+    title: "全宇宙下雪",
+    value: 38,
+    active: false,
+  },
+  {
+    title: "全宇宙下雨",
+    value: 39,
+    active: false,
+  },
+  {
+    title: "全宇宙起雾",
+    value: 40,
+    active: false,
+  },
 ]);
 const depthFlag = ref(false);
 const terrainFlag = ref(false);
 let TerrainCuttingObj = ref(null);
 let mapContainer = ref(null);
 let isCut = ref(false);
+let snow = ref(null);
+let rain = ref(null);
+let fog = ref(null);
 onMounted(async () => {
   console.log("cesium page");
   let res = await fetchCesium();
@@ -296,6 +319,7 @@ onMounted(async () => {
     bottom, //底部图片
     wall, //墙的图片
   });
+  weatherObj = new Weather(viewer);
 });
 onBeforeUnmount(() => {
   if (viewer) {
@@ -443,8 +467,72 @@ const toolChecked = (active: boolean, value: number) => {
     case 37:
       handleCutTerrian(active);
       break;
+    case 38:
+      addSnowEffect(viewer, active);
+      break;
+    case 39:
+      addRainEffect(viewer, active);
+      break;
+    case 40:
+      addFogEffect(viewer, active);
+      break;
     default:
       break;
+  }
+};
+//消除天气效果
+let destoryWeather = () => {
+  if (snow.value) {
+    snow.value.destroy();
+    snow.value = null;
+  }
+  if (rain.value) {
+    rain.value.destroy();
+    rain.value = null;
+  }
+  if (fog.value) {
+    fog.value.destroy();
+    fog.value = null;
+  }
+};
+// 渲染下雨天气，可通过传参改变渲染效果
+// weather.rain();
+// 渲染雾霾天气，可通过传参改变渲染效果
+// weather.fog(0.2);
+//添加雪(下面两种方式是一样的效果)
+let addSnowEffect = async (viewer, active) => {
+  if (active) {
+    weatherObj.snow();
+    // snow.value = new Cesium.SnowEffect(viewer, {
+    //   snowSize: 0.02, //雪大小 ，默认可不写
+    //   snowSpeed: 60.0, //雪速，默认可不写
+    // });
+  } else {
+    weatherObj.remove();
+    // destoryWeather();
+  }
+};
+//添加雨
+let addRainEffect = (viewer, active) => {
+  if (active) {
+    rain.value = new Cesium.RainEffect(viewer, {
+      tiltAngle: -0.6, //倾斜角度
+      rainSize: 0.6, //雨大小
+      rainSpeed: 120.0, //雨速
+    });
+  } else {
+    destoryWeather();
+  }
+};
+//添加雾
+let addFogEffect = (viewer, active) => {
+  if (active) {
+    fog.value = new Cesium.FogEffect(viewer, {
+      visibility: 0.2,
+      color: new Cesium.Color(0.8, 0.8, 0.8, 0.3),
+    });
+  } else {
+    destoryWeather();
   }
 };
 let handleCutTerrian = (active) => {
@@ -503,6 +591,15 @@ const initCesium = () => {
   // viewer.scene.globe.enableLighting = true;
   viewer.clock.shouldAnimate = true;
   viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
+  // 修改homeButton的默认返回位置
+  viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (
+    e
+  ) {
+    e.cancel = true;
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(116.404269, 39.922793, 800000),
+    });
+  });
   //深度检测
   // viewer.scene.globe.depthTestAgainstTerrain = true; //几何图形是否有高程遮挡效果
   // addArrowLoad(viewer, true)
