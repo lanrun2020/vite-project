@@ -145,9 +145,10 @@ export function lineFlowInit(_viewer, _center, _num, flag) {
         _viewer.entities.add({
             polyline: {
                 positions: linePositions,
+                width: flag == 1 ? 1 : 3,
                 material: new Cesium.LineFlowMaterialProperty({
                     color: new Cesium.Color(1.0, 1.0, 1.0, 0.2),
-                    speed: flag == 1 ? 5 * Math.random() + 5 : 3 * Math.random() + 3,
+                    speed: flag == 1 ? 5 * Math.random() + 5 : 1 * Math.random() + 1,
                     percent: 0.005,
                     gradient: 0.01
                 })
