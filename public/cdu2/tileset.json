@@ -1,0 +1,438 @@
+{
+  "asset": {
+    "generatetool": "cesiumlab2@www.cesiumlab.com/model2tiles",
+    "version": "1.0"
+  },
+  "extras": {
+    "scenetree": "scenetree.json"
+  },
+  "geometricError": 1009.32368442696,
+  "properties": {
+    "OBJECTID": {
+      "extras": {
+        "group": "",
+        "id": "53ba12de2b999e7c6d445c24be98d343",
+        "name": "OBJECTID",
+        "type": "int32_t",
+        "unittype": ""
+      },
+      "maximum": 67.0,
+      "minimum": 1.0
+    },
+    "OSMID": {
+      "extras": {
+        "group": "",
+        "id": "90de94232b707cc50264780196527aaa",
+        "name": "OSMID",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "SHAPE_Area": {
+      "extras": {
+        "group": "",
+        "id": "29b7eaef893c60df9689272437f83168",
+        "name": "SHAPE_Area",
+        "type": "double",
+        "unittype": ""
+      },
+      "maximum": 6.58462245007e-07,
+      "minimum": 4.55936500019e-09
+    },
+    "SHAPE_Leng": {
+      "extras": {
+        "group": "",
+        "id": "cd65daf8faff711d58f4470da1e25dc0",
+        "name": "SHAPE_Leng",
+        "type": "double",
+        "unittype": ""
+      },
+      "maximum": 0.00537423640486,
+      "minimum": 0.000270206304899
+    },
+    "aerialway": {
+      "extras": {
+        "group": "",
+        "id": "4adb8a5b5828862cd0b943af43c29bc4",
+        "name": "aerialway",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "aeroway": {
+      "extras": {
+        "group": "",
+        "id": "42b3ee1922a015761ea183cc433d4ff0",
+        "name": "aeroway",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "amenity": {
+      "extras": {
+        "group": "",
+        "id": "9792aa5356b9c7ed037e70f62065e81f",
+        "name": "amenity",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "barrier": {
+      "extras": {
+        "group": "",
+        "id": "c398b32535ed591428067dc599008f1b",
+        "name": "barrier",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "boundary": {
+      "extras": {
+        "group": "",
+        "id": "2e6404b07af4dac10098b851d5db9e4c",
+        "name": "boundary",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "building": {
+      "extras": {
+        "group": "",
+        "id": "f80be729ad9089b4627eccf4e95146f8",
+        "name": "building",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "geological": {
+      "extras": {
+        "group": "",
+        "id": "0b9e134a8d41746d489a4e38e825ba8d",
+        "name": "geological",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "height": {
+      "extras": {
+        "group": "",
+        "id": "9c0449de2539cf3bbce0194aa532d778",
+        "name": "height",
+        "type": "double",
+        "unittype": ""
+      },
+      "maximum": 30.0,
+      "minimum": 1.5
+    },
+    "highway": {
+      "extras": {
+        "group": "",
+        "id": "5daa44e750d14008b3b285be11203e4b",
+        "name": "highway",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "historic": {
+      "extras": {
+        "group": "",
+        "id": "1fdd5247f8e422604e552d0de1f06a96",
+        "name": "historic",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "landuse": {
+      "extras": {
+        "group": "",
+        "id": "149070ca7421dbfcdaab360fe08e7bed",
+        "name": "landuse",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "leisure": {
+      "extras": {
+        "group": "",
+        "id": "ad9fd62edef8d86c64f4b1cbd043b280",
+        "name": "leisure",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "man_made": {
+      "extras": {
+        "group": "",
+        "id": "dd38d7e7b713597d5dcd78b899847d8e",
+        "name": "man_made",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "military": {
+      "extras": {
+        "group": "",
+        "id": "0f320112ef3885f89b041b114cd8ce97",
+        "name": "military",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "natural": {
+      "extras": {
+        "group": "",
+        "id": "216d3002b5585fa5f36e56b86e59924a",
+        "name": "natural",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "osmSupport": {
+      "extras": {
+        "group": "",
+        "id": "43f867b69cf0077d970e9f01b7809c94",
+        "name": "osmSupport",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "osmchanges": {
+      "extras": {
+        "group": "",
+        "id": "86fde32870fd85cf9c94802d3d1feac9",
+        "name": "osmchanges",
+        "type": "int32_t",
+        "unittype": ""
+      },
+      "maximum": 121709448.0,
+      "minimum": 60333620.0
+    },
+    "osmtimesta": {
+      "extras": {
+        "group": "",
+        "id": "6897986482d36f598d79cc759238c474",
+        "name": "osmtimesta",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "osmuid": {
+      "extras": {
+        "group": "",
+        "id": "6b389aa44120b643fb01f3556c3ad6c2",
+        "name": "osmuid",
+        "type": "int32_t",
+        "unittype": ""
+      },
+      "maximum": 8492320.0,
+      "minimum": 3020225.0
+    },
+    "osmuser": {
+      "extras": {
+        "group": "",
+        "id": "2a1973d0d0830b7c222d1d107f83d9cc",
+        "name": "osmuser",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "osmversion": {
+      "extras": {
+        "group": "",
+        "id": "13406cb17a5501aa9fd3f79d5dcecb96",
+        "name": "osmversion",
+        "type": "int32_t",
+        "unittype": ""
+      },
+      "maximum": 4.0,
+      "minimum": 1.0
+    },
+    "osmvisible": {
+      "extras": {
+        "group": "",
+        "id": "9b5636bb2d439b643654c5c0b44c2ea1",
+        "name": "osmvisible",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "place": {
+      "extras": {
+        "group": "",
+        "id": "d08a10f0833edb9ff21a528bff498697",
+        "name": "place",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "power": {
+      "extras": {
+        "group": "",
+        "id": "53c286cfa75dd2eee19894604fec2eaa",
+        "name": "power",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "railway": {
+      "extras": {
+        "group": "",
+        "id": "818d7731b89acb1afc7ae9b0f9634cb0",
+        "name": "railway",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "route": {
+      "extras": {
+        "group": "",
+        "id": "d10cc60a40a063534dc569b1ff1d550e",
+        "name": "route",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "shop": {
+      "extras": {
+        "group": "",
+        "id": "f5fa6443eddf74666bd06d789563cc57",
+        "name": "shop",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "tourism": {
+      "extras": {
+        "group": "",
+        "id": "316e83fb6ede64ee878aec5250948d39",
+        "name": "tourism",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    },
+    "waterway": {
+      "extras": {
+        "group": "",
+        "id": "a755b104f599d4945087461ac4e6904f",
+        "name": "waterway",
+        "type": "string",
+        "unittype": ""
+      },
+      "maximum": -2147483647.0,
+      "minimum": 2147483647.0
+    }
+  },
+  "refine": "REPLACE",
+  "root": {
+    "boundingVolume": {
+      "box": [
+        6.98491930961609e-10,
+        0.0118709316011518,
+        16.0000005639158,
+        504.661842213478,
+        0,
+        0,
+        0,
+        343.591750000836,
+        0,
+        0,
+        0,
+        15.0000004009344
+      ]
+    },
+    "children": [
+      {
+        "boundingVolume": {
+          "box": [
+            0.00362347415648401,
+            0.00671292445622385,
+            16.0183202857152,
+            504.646976310061,
+            0,
+            0,
+            0,
+            343.591108802939,
+            0,
+            0,
+            0,
+            15.0106778508052
+          ]
+        },
+        "content": {
+          "uri": "NoLod_0.b3dm"
+        },
+        "geometricError": 0.0,
+        "refine": "REPLACE"
+      }
+    ],
+    "geometricError": 1009.32368442696,
+    "transform": [
+      -0.970353951149448,
+      -0.24168824855308,
+      0.0,
+      0.0,
+      0.122972062180094,
+      -0.493720431720715,
+      0.860882109945773,
+      0.0,
+      -0.208065089363474,
+      0.835360356859754,
+      0.508804474012674,
+      0.0,
+      -1328218.86743239,
+      5332664.84291316,
+      3226296.23974825,
+      1.0
+    ]
+  }
+}

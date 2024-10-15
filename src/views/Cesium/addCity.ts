@@ -1,54 +1,15 @@
 // 城市 白膜建筑
 import Cesium from "@/utils/importCesium"
-import CesiumVideo3d from './CesiumVideo3d'
-import waterImg from '../../assets/waterNormals.jpg'
-import userImg from '../../assets/user.png'
-import WaterMirrorMaterialsProperty from './waterMaterial'
-const waterMaterial = new WaterMirrorMaterialsProperty({ normalMap:waterImg })
 let primitive: any
 let tilesetPrimitive: any
-let view2: any
 let handler: typeof Cesium.ScreenSpaceEventHandler
+let cartesian: null
+const activeShapePoints: any = []
+let num = 0
+let activeEntity: any
+let localTile: any
 export const addCity = (viewer: any, active: boolean) => {
   if (active) {
-    view2 = new CesiumVideo3d(Cesium, viewer,{
-      far: 300,
-      url: '/src/views/Cesium/video.mp4',
-      type: 3,
-      position: {x:121.5061830727844, y:31.22923471021075, z: 50},
-      rotation: {x: 0,y: 0} //x垂直方向偏转，y水平方向偏转
-    })
-    // let y = 0.00001
-    // setInterval(() => {
-    //   y += 0.00001
-    //   view2._changePosition({x:121.5061830727844+y, y:31.22923471021075, z: 50})//改变位置
-    //   // view2._changeRotation({x:30 , y:0})//改变偏转角度
-    // },100)
-    // const vew = new ViewShed(viewer)
-    // 流动水面效果
-    // viewer.scene.primitives.add(
-    //   new Cesium.Primitive({
-    //       geometryInstances: new Cesium.GeometryInstance({
-    //           geometry: new Cesium.RectangleGeometry({
-    //               rectangle: Cesium.Rectangle.fromDegrees(
-    //                   121.5061830727844, 31.22923471021075,
-    //                   121.5461830727844, 31.25923471021075,
-    //               ),
-    //               height: 10,
-    //               vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT,
-    //           }),
-    //       }),
-    //       appearance: new Cesium.MaterialAppearance({
-    //         material: waterMaterial.getMaterial(), faceForward: !1, closed: !0
-    //       }),
-    //   })
-    // );
-    // setTimeout(() => {
-    //   viewer.camera.flyTo({
-    //     destination: Cesium.Cartesian3.fromDegrees(121.5061830727844, 31.22923471021075, 3000),
-    //     duration: 1.6,
-    //   });
-    // },100)
     if (primitive) {
       viewer.zoomTo(
         tilesetPrimitive,
@@ -60,16 +21,14 @@ export const addCity = (viewer: any, active: boolean) => {
       );
       return
     }
-    // const inspectorViewModel = new Cesium.Cesium3DTilesInspector('cesiumContainer',viewer.scene).viewModel
     primitive = viewer.scene.primitives.add(new Cesium.PrimitiveCollection());
     new Cesium.Cesium3DTileset({
-      url: "/chengdu/tileset.json",
+      url: "/cdu2/tileset.json",
     }).readyPromise
       .then((data: any) => {
         tilesetPrimitive = data
-        primitive.add(tilesetPrimitive)
         loadTilesShader(tilesetPrimitive)
-        // inspectorViewModel.tileset = tilesetPrimitive
+        primitive.add(tilesetPrimitive)
         viewer.zoomTo(
           tilesetPrimitive,
           new Cesium.HeadingPitchRange(
@@ -106,9 +65,35 @@ export const addCity = (viewer: any, active: boolean) => {
         originalColor: new Cesium.Color(),
       };
       handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+      const ellipsoid = scene.globe.ellipsoid;
+      activeEntity = viewer.entities.add({
+        polygon: {
+          hierarchy: new Cesium.PolygonHierarchy(activeShapePoints),
+          material: new Cesium.ColorMaterialProperty(
+            Cesium.Color.WHITE.withAlpha(0.5)
+          ),
+        },
+      })
       handler.setInputAction((event: any) => {
-          // const feature = inspectorViewModel.feature;
-          // console.log(feature);
+          cartesian = viewer.camera.pickEllipsoid(event.position, ellipsoid);
+          if (cartesian && num < 3) {
+            const cartographic = ellipsoid.cartesianToCartographic(cartesian);
+            const longitude = Cesium.Math.toDegrees(cartographic.longitude);
+            const latitude = Cesium.Math.toDegrees(cartographic.latitude);
+            activeShapePoints.push(cartesian)
+            console.log(activeShapePoints);
+            console.log(longitude,latitude);
+            num++
+            addPoint(viewer, longitude, latitude)
+            if (num == 1) {
+              activeEntity.polygon.hierarchy = new Cesium.CallbackProperty(() => {
+                return new Cesium.PolygonHierarchy(activeShapePoints)
+              }, false)
+            }
+            if (num ==3 ){
+              updateShader();
+            }
+          }
           silhouetteBlue.selected = [];
           // const pickedFeature = viewer.scene.pick(event.position);//pick返回具有' primitive'属性的对象，该对象包含场景中的第一个（顶部）基本体在特定的窗口坐标处
           const pickedFeatures = viewer.scene.drillPick(event.position);//drillPick返回所有对象的对象列表，每个对象包含一个' primitive'属性。特定的窗口坐标位置。
@@ -131,59 +116,170 @@ export const addCity = (viewer: any, active: boolean) => {
     if (primitive) {
       primitive.removeAll()
       primitive = null
-      view2.destroy()
+      // view2.destroy()
       handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)//移除事件
     }
   }
 }
-const loadTilesShader = (tileset: any) => {
-  tileset.style = new Cesium.Cesium3DTileStyle({
-    color: {
-      conditions: [
-        ['true', 'rgba(0, 127.5, 255 ,1)']
-      ]
+
+const updateShader = () => {
+  const tileset = tilesetPrimitive;
+  const center = tileset.boundingSphere.center.clone();
+  const matrix = Cesium.Transforms.eastNorthUpToFixedFrame(center.clone());
+  const localMatrix = Cesium.Matrix4.inverse(matrix, new Cesium.Matrix4());
+  const points = cartesiansToLocal(activeShapePoints, localMatrix);
+  
+  let instr = ``;
+  points.forEach((item,index) => {
+    instr += `mypoints[${index}] = vec2(${item[0]},${item[1]});`
+  })
+  
+  let localMatrixStr = `mat4(`;
+  for(let i = 0; i < 16; i=i+4){
+    localMatrixStr += `vec4(${localMatrix[i]},${localMatrix[i+1]},${localMatrix[i+2]},${localMatrix[i+3]})`
+    if ((i+4)<16) {
+      localMatrixStr += ','
     }
-  });
-  //实现渐变效果
-  tileset.tileVisible.addEventListener(function (tile: any) {
-    const content = tile.content;
-    const featuresLength = content.featuresLength;
-    for (let i = 0; i < featuresLength; i += 2) {
-      const feature = content.getFeature(i)
-      const model = feature.content._model
+  }
+  localMatrixStr += ')';
+  const tile = localTile
+  const content = tile.content;
+  const model = content._model;
+  if (model && model._sourcePrograms && model._rendererResources) {
+    Object.keys(model._sourcePrograms).forEach(key => {
+      const program = model._sourcePrograms[key]
+      model._rendererResources.sourceShaders[program.vertexShader] =
+        `
+          precision highp float;\n
+          uniform mat4 u_modelViewMatrix;\n//模型视图矩阵
+          uniform mat4 u_projectionMatrix;\n//投影矩阵
+          uniform mat3 u_normalMatrix;\n//正规矩阵
+          attribute vec3 a_position;\n
+          varying vec3 v_positionEC;\n
+          attribute vec3 a_normal;\n //法线
+          varying vec3 v_normal;\n
+          attribute float a_batchId;\n
+          varying mat4 u_tileset_worldToLocalMatrix;
+          varying vec2 mypoints[${points.length}];
+          bool isPointInPolygon(vec2 point){
+            int nCross = 0; // 交点数
+            const int n = ${points.length};
+            for(int i = 0; i < n; i++){
+                vec2 p1 = mypoints[i];
+                vec2 p2 = mypoints[int(mod(float(i+1),float(n)))];
+                if(p1[1] == p2[1]){
+                    continue;
+                }
+                if(point[1] < min(p1[1], p2[1])){
+                    continue;
+                }
+                if(point[1] >= max(p1[1], p2[1])){
+                    continue;
+                }
+                float x = p1[0] + ((point[1] - p1[1]) * (p2[0] - p1[0])) / (p2[1] - p1[1]);
+                if(x > point[0]){
+                  nCross++;
+                }
+            }
+            return int(mod(float(nCross), float(2))) == 1;
+          }
+          void main(void) \n
+          {\n
+            ${instr}
+            u_tileset_worldToLocalMatrix = ${localMatrixStr};
+            vec3 weightedPosition = a_position;\n //a_position模型坐标, y表示高度,x表示纬度方向,z表示经度方向,单位米,x,z的0,0点在模型中央,与相机观察位置无关
+            vec3 weightedNormal = a_normal;\n
+            float time = czm_frameNumber / 5.0;\n
+            vec4 model_local_position = vec4(a_position.xyz, 1.0);
+            vec4 tileset_local_position = u_tileset_worldToLocalMatrix * czm_model * model_local_position;
+            vec2 position2D = vec2(tileset_local_position.x,tileset_local_position.y);
+            if ( isPointInPolygon(position2D) ){ //判断顶点是否在范围内
+              weightedPosition.x += sin(time) * a_position.y / 8.0;//可控制摇晃方向和距离
+            }
+            vec4 position = u_modelViewMatrix * vec4(weightedPosition, 1.0);\n
+            v_positionEC = position.xyz;\n
+            gl_Position = u_projectionMatrix * position;\n
+            v_normal = u_normalMatrix * weightedNormal;\n
+          }\n
+        `
+    })
+    model._shouldRegenerateShaders = true
+  }
+}
+
+const loadTilesShader = (tileset: any) => {
+    tileset.style = new Cesium.Cesium3DTileStyle({
+      color: {
+        conditions: [
+          ['true', 'rgba(0, 127.5, 255 ,1)']
+        ]
+      }
+    });
+    tileset.tileLoad.addEventListener(function (tile: any) {
+      localTile = tile;
+      const content = tile.content;
+      const model = content._model;
       if (model && model._sourcePrograms && model._rendererResources) {
         Object.keys(model._sourcePrograms).forEach(key => {
           const program = model._sourcePrograms[key]
-          const fragmentShader = model._rendererResources.sourceShaders[program.fragmentShader];
-          let v_position = "";
-          if (fragmentShader.indexOf(" v_positionEC;") != -1) {
-            v_position = "v_positionEC";
-          } else if (fragmentShader.indexOf(" v_pos;") != -1) {
-            v_position = "v_pos";
-          }
-          const color = `vec4(${feature.color.toString()})`;
-
-          model._rendererResources.sourceShaders[program.fragmentShader] =
+          //console.log(model._rendererResources.sourceShaders);
+          //debugger
+          //在这里打断点可以查看原本的着色器代码
+          //在原有的着色器代码上添加修改顶点坐标的代码
+          model._rendererResources.sourceShaders[program.vertexShader] =
             `
-            varying vec3 ${v_position};
-            void main(void){
-              vec4 position = czm_inverseModelView * vec4(${v_position},1); // 位置
-              gl_FragColor = ${color}; // 颜色
-              gl_FragColor *= vec4(vec3(position.y / 50.0), 1.0); // 渐变
-              // 动态光环
-              float time = fract(czm_frameNumber / 180.0);
-              time = abs(time - 0.5) * 2.0;
-              float glowRange = 180.0; // 光环的移动范围(高度)
-              float diff = step(0.005, abs( clamp(position.y / glowRange, 0.0, 1.0) - time));
-              gl_FragColor.rgb += gl_FragColor.rgb * (1.0 - diff);
-              // gl_FragColor = ${color};
-              // gl_FragColor.rgb = vec3(position.xyz);
-            }
-          `
+              precision highp float;\n
+              uniform mat4 u_modelViewMatrix;\n
+              uniform mat4 u_projectionMatrix;\n
+              uniform mat3 u_normalMatrix;\n
+              attribute vec3 a_position;\n
+              varying vec3 v_positionEC;\n
+              attribute vec3 a_normal;\n
+              varying vec3 v_normal;\n
+              attribute float a_batchId;\n
+              void main(void) \n
+              {\n
+                vec3 weightedPosition = a_position;\n
+                vec3 weightedNormal = a_normal;\n
+                float time = czm_frameNumber / 5.0;\n
+                if ( a_position.y > 0.0 ){ //判断顶点高度
+                  weightedPosition.x += sin(time) * a_position.y / 8.0;//可控制摇晃方向和距离
+                }
+                vec4 position = u_modelViewMatrix * vec4(weightedPosition, 1.0);\n //转屏幕坐标(x,y的0,0在屏幕中央,水平是x,垂直是y)
+                v_positionEC = position.xyz;\n
+                gl_Position = u_projectionMatrix * position;\n //u_projectionMatrix 投影矩阵， 屏幕坐标position转投影坐标
+                v_normal = u_normalMatrix * weightedNormal;\n
+              }\n
+            `
         })
-        debugger
         model._shouldRegenerateShaders = true
       }
-    }
+    });
+}
+
+const addPoint = (viewer: any, longitude: number, latitude: number) => {
+  viewer.entities.add({
+    position: Cesium.Cartesian3.fromDegrees(longitude, latitude),
+    point: {
+      show: true, // default
+      color: Cesium.Color.SKYBLUE, // default: WHITE
+      pixelSize: 5, // default: 1
+      outlineColor: Cesium.Color.YELLOW, // default: BLACK
+      outlineWidth: 2, // default: 0
+    },
   });
+}
+// 世界坐标转数组局部坐标
+const cartesiansToLocal = (positions: any[], localMatrix:any) => {
+  const arr = [];
+  for (let i = 0; i < positions.length; i++) {
+      const position = positions[i];
+      const localp = Cesium.Matrix4.multiplyByPoint(
+          localMatrix,
+          position.clone(),
+          new Cesium.Cartesian3()
+      )
+      arr.push([localp.x, localp.y]);
+  }
+  return arr
 }
