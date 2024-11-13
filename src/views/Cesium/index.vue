@@ -641,8 +641,75 @@ const initCesium = () => {
     positions: earthPositionList,
   });
   // addContourLine(viewer, true);
+  // test()
 };
+const test = () => {
+  const start = Cesium.JulianDate.fromDate(new Date(2015, 2, 25, 16));
+  const stop = Cesium.JulianDate.addSeconds(start, 10000, new Cesium.JulianDate());
 
+  viewer.clock.startTime = start.clone();
+  viewer.clock.stopTime = stop.clone();
+  viewer.clock.currentTime = start.clone();
+  viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
+  viewer.clock.multiplier = 10;
+
+  viewer.timeline.zoomTo(start, stop);
+  const getDistance = (start, end) => {
+    const geodesic = new Cesium.EllipsoidGeodesic();
+    geodesic.setEndPoints(Cesium.Cartographic.fromDegrees(start.lon, start.lat, start.height), Cesium.Cartographic.fromDegrees(end.lon, end.lat, end.height)); //设置测地线起点终点
+    return geodesic.surfaceDistance //返回距离
+  }
+  function computeCirclularFlight (points) {
+    const property = new Cesium.SampledPositionProperty();
+    points.forEach((point, index) => {
+      let position = Cesium.Cartesian3.fromDegrees(point.lon, point.lat, point.height)
+      if (index > 0) {
+        const dis = getDistance(points[index - 1], point)
+        const time = Cesium.JulianDate.addSeconds(start, dis / 100, new Cesium.JulianDate());
+        property.addSample(time, position);
+      } else {
+        const time = Cesium.JulianDate.addSeconds(start, 0, new Cesium.JulianDate());
+        property.addSample(time, position);
+      }
+      viewer.entities.add({
+        position: position,
+        point: {
+          pixelSize: 8,
+          color: Cesium.Color.TRANSPARENT,
+          outlineColor: Cesium.Color.YELLOW,
+          outlineWidth: 3,
+        },
+      });
+    })
+    return property;
+  }
+  const points = [
+    { lon: 104.07735550699856, lat: 30.681381755749552, height: 3000 },
+    { lon: 104.05360325836732, lat: 30.66708857602095, height: 2000 },
+    { lon: 103.97245225169141, lat: 30.64964550586335, height: 3000 },
+  ]
+  const position = computeCirclularFlight(points);
+  const entity = viewer.entities.add({
+    availability: new Cesium.TimeIntervalCollection([
+      new Cesium.TimeInterval({
+        start: start,
+        stop: stop,
+      }),
+    ]),
+    position: position,
+    path: {
+      resolution: 1,
+      material: Cesium.Color.YELLOW,
+      width: 6,
+    },
+  });
+  entity.position.setInterpolationOptions({
+    // interpolationDegree: 2, //二次多项式插值
+    // interpolationAlgorithm: Cesium.HermitePolynomialApproximation, //埃尔米特多项式插值算法
+    interpolationDegree: 5, //五次拉格朗日多项式插值
+    interpolationAlgorithm: Cesium.LagrangePolynomialApproximation, //拉格朗日多项式插值算法
+  });
+}
 const TimeFormatter = (time: any, viewModel: any) => {
   return DateTimeFormatter(time, viewModel, true);
 };
